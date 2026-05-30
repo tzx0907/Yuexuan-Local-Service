@@ -20,4 +20,6 @@ public interface EmployeeMapper {
     Employee getByUsername(String username);
 
     Page<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
+
+    void update(Employee employee);
 }
