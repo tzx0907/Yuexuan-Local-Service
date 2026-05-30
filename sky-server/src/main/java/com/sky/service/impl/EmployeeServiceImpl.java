@@ -147,37 +147,49 @@ public class EmployeeServiceImpl implements EmployeeService {
      */
     @Override
     public void editPassword(EmployeeEditPasswordDTO employeeEditPasswordDTO) {
-        Long empId = employeeEditPasswordDTO.getEmpId();
         String oldPassword = employeeEditPasswordDTO.getOldPassword();
         String newPassword = employeeEditPasswordDTO.getNewPassword();
 
-        // 1. 获取当前登录员工的 ID
-        Long currentEmpId = BaseContext.getCurrentId();
-
-        // 2. 权限验证：只有员工本人或管理员可以修改密码
-        // 这里假设管理员的 ID 为 1（根据实际情况调整）
-        if (!currentEmpId.equals(empId) && !currentEmpId.equals(1L)) {
-            throw new AccountNotFoundException("无权修改该员工密码");
+        // 0. 参数验证
+        if (oldPassword == null || oldPassword.trim().isEmpty()) {
+            throw new PasswordErrorException("旧密码不能为空");
+        }
+        if (newPassword == null || newPassword.trim().isEmpty()) {
+            throw new PasswordErrorException("新密码不能为空");
         }
 
-        // 3. 根据 ID 查询员工信息
+        // 1. 从 JWT Token 中获取当前登录员工的 ID
+        Long empId = BaseContext.getCurrentId();
+
+        // 2. 根据 ID 查询员工信息
         Employee employee = employeeMapper.getById(empId);
         if (employee == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
 
-        // 4. 验证旧密码是否正确
+        // 3. 验证旧密码是否正确
         String oldPasswordMd5 = DigestUtils.md5DigestAsHex(oldPassword.getBytes(StandardCharsets.UTF_8));
         if (!oldPasswordMd5.equals(employee.getPassword())) {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
-        // 5. 更新新密码
+        // 4. 检查新密码是否与旧密码相同
+        String newPasswordMd5 = DigestUtils.md5DigestAsHex(newPassword.getBytes(StandardCharsets.UTF_8));
+        if (newPasswordMd5.equals(employee.getPassword())) {
+            throw new PasswordErrorException("新密码不能与旧密码相同");
+        }
+
+        // 5. 新密码长度验证（6-20位）
+        if (newPassword.length() < 6 || newPassword.length() > 20) {
+            throw new PasswordErrorException("新密码长度必须在6-20位之间");
+        }
+
+        // 6. 更新新密码
         Employee updateEmployee = Employee.builder()
                 .id(empId)
-                .password(DigestUtils.md5DigestAsHex(newPassword.getBytes(StandardCharsets.UTF_8)))
+                .password(newPasswordMd5)
                 .updateTime(LocalDateTime.now())
-                .updateUser(currentEmpId)
+                .updateUser(empId)
                 .build();
         
         employeeMapper.update(updateEmployee);
