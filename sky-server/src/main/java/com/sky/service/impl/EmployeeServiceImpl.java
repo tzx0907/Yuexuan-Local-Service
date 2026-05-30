@@ -7,6 +7,7 @@ import com.sky.constant.PasswordConstant;
 import com.sky.constant.StatusConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.EmployeeDTO;
+import com.sky.dto.EmployeeEditPasswordDTO;
 import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
@@ -137,5 +138,48 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeMapper.getById(id);
         employee.setPassword("****");
         return employee;
+    }
+    /**
+     *根据id修改密码
+     *
+     * @param employeeEditPasswordDTO
+     * @return
+     */
+    @Override
+    public void editPassword(EmployeeEditPasswordDTO employeeEditPasswordDTO) {
+        Long empId = employeeEditPasswordDTO.getEmpId();
+        String oldPassword = employeeEditPasswordDTO.getOldPassword();
+        String newPassword = employeeEditPasswordDTO.getNewPassword();
+
+        // 1. 获取当前登录员工的 ID
+        Long currentEmpId = BaseContext.getCurrentId();
+
+        // 2. 权限验证：只有员工本人或管理员可以修改密码
+        // 这里假设管理员的 ID 为 1（根据实际情况调整）
+        if (!currentEmpId.equals(empId) && !currentEmpId.equals(1L)) {
+            throw new AccountNotFoundException("无权修改该员工密码");
+        }
+
+        // 3. 根据 ID 查询员工信息
+        Employee employee = employeeMapper.getById(empId);
+        if (employee == null) {
+            throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+
+        // 4. 验证旧密码是否正确
+        String oldPasswordMd5 = DigestUtils.md5DigestAsHex(oldPassword.getBytes(StandardCharsets.UTF_8));
+        if (!oldPasswordMd5.equals(employee.getPassword())) {
+            throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
+        }
+
+        // 5. 更新新密码
+        Employee updateEmployee = Employee.builder()
+                .id(empId)
+                .password(DigestUtils.md5DigestAsHex(newPassword.getBytes(StandardCharsets.UTF_8)))
+                .updateTime(LocalDateTime.now())
+                .updateUser(currentEmpId)
+                .build();
+        
+        employeeMapper.update(updateEmployee);
     }
 }
