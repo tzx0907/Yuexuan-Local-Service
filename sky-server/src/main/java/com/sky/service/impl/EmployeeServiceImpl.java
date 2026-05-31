@@ -77,10 +77,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         BeanUtils.copyProperties(employeeDTO, employee);
         employee.setStatus(StatusConstant.ENABLE);
         employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes(StandardCharsets.UTF_8)));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setCreateUser(BaseContext.getCurrentId());
-        employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.insert(employee);
     }
     /**
@@ -106,8 +102,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = Employee.builder()
                 .status(status)
                 .id(id)
-                .updateTime(LocalDateTime.now())
-                .updateUser(BaseContext.getCurrentId())
                 .build();
         employeeMapper.update(employee);
     }
@@ -120,11 +114,6 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void update(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeDTO, employee);
-        employee.setStatus(StatusConstant.ENABLE);
-        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes(StandardCharsets.UTF_8)));
-        employee.setCreateTime(LocalDateTime.now());
-        employee.setUpdateTime(LocalDateTime.now());
-        employee.setUpdateUser(BaseContext.getCurrentId());
         employeeMapper.update(employee);
     }
     /**
@@ -150,7 +139,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         String oldPassword = employeeEditPasswordDTO.getOldPassword();
         String newPassword = employeeEditPasswordDTO.getNewPassword();
 
-        // 0. 参数验证
         if (oldPassword == null || oldPassword.trim().isEmpty()) {
             throw new PasswordErrorException("旧密码不能为空");
         }
@@ -158,38 +146,30 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new PasswordErrorException("新密码不能为空");
         }
 
-        // 1. 从 JWT Token 中获取当前登录员工的 ID
         Long empId = BaseContext.getCurrentId();
 
-        // 2. 根据 ID 查询员工信息
         Employee employee = employeeMapper.getById(empId);
         if (employee == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
 
-        // 3. 验证旧密码是否正确
         String oldPasswordMd5 = DigestUtils.md5DigestAsHex(oldPassword.getBytes(StandardCharsets.UTF_8));
         if (!oldPasswordMd5.equals(employee.getPassword())) {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
-        // 4. 检查新密码是否与旧密码相同
         String newPasswordMd5 = DigestUtils.md5DigestAsHex(newPassword.getBytes(StandardCharsets.UTF_8));
         if (newPasswordMd5.equals(employee.getPassword())) {
             throw new PasswordErrorException("新密码不能与旧密码相同");
         }
 
-        // 5. 新密码长度验证（6-20位）
         if (newPassword.length() < 6 || newPassword.length() > 20) {
             throw new PasswordErrorException("新密码长度必须在6-20位之间");
         }
 
-        // 6. 更新新密码
         Employee updateEmployee = Employee.builder()
                 .id(empId)
                 .password(newPasswordMd5)
-                .updateTime(LocalDateTime.now())
-                .updateUser(empId)
                 .build();
         
         employeeMapper.update(updateEmployee);
