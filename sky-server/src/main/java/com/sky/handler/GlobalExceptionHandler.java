@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 /**
  * 全局异常处理器，处理项目中抛出的业务异常
@@ -39,6 +40,12 @@ public class GlobalExceptionHandler {
         }
         // 其他数据完整性异常或解析失败，返回通用错误
         return Result.error(MessageConstant.UNKNOWN_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public Result handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        log.error("参数类型不匹配：{}", ex.getMessage());
+        return Result.error("参数格式错误：" + ex.getName());
     }
 
 }
