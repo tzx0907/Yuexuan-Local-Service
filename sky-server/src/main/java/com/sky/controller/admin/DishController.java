@@ -11,9 +11,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/admin/dish")
@@ -22,9 +24,11 @@ import java.util.List;
 public class DishController {
     @Autowired
     DishService dishService;
+    @Autowired
+    RedisTemplate<String, Object> redisTemplate;
     @ApiOperation("新增菜品")
     @PostMapping
-    public Result save(@RequestBody DishDTO dishDTO){
+    public Result<?> save(@RequestBody DishDTO dishDTO){
         log.info("新增菜品:{}", dishDTO);
         dishService.saveWithFlavor(dishDTO);
         return Result.success();
@@ -45,16 +49,18 @@ public class DishController {
     }
     @ApiOperation("菜品起售停售")
     @PostMapping("/status/{status}")
-    public Result startOrStop(@PathVariable Integer status, Long id){
+    public Result<?> startOrStop(@PathVariable Integer status, Long id){
         log.info("菜品起售停售:{},{}", status, id);
         dishService.startOrStop(status, id);
+        cleanCache("dish_*");
         return Result.success();
     }
     @ApiOperation("修改菜品")
     @PutMapping
-    public Result update(@RequestBody DishDTO dishDTO){
+    public Result<?> update(@RequestBody DishDTO dishDTO){
         log.info("修改菜品:{}", dishDTO);
         dishService.update(dishDTO);
+        cleanCache("dish_*");
         return Result.success();
     }
     @ApiOperation("根据分类id查询菜品")
@@ -66,7 +72,7 @@ public class DishController {
     }
     @ApiOperation("批量删除菜品")
     @DeleteMapping
-    public Result delete(@RequestParam(required = false) List<Long> ids){
+    public Result<?> delete(@RequestParam(required = false) List<Long> ids){
         if(ids == null || ids.isEmpty()){
             log.error("批量删除菜品失败：参数ids为空");
             return Result.error("删除参数不能为空");
@@ -74,5 +80,10 @@ public class DishController {
         log.info("批量删除菜品:{}", ids);
         dishService.delete(ids);
         return Result.success();
+    }
+    private void cleanCache(String pattern){
+        log.info("根据pattern删除缓存：{}", pattern);
+        Set<String> keys = redisTemplate.keys(pattern);
+        redisTemplate.delete(keys);
     }
 }

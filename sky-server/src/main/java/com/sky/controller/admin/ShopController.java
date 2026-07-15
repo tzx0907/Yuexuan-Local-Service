@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "admin店铺相关接口")
 public class ShopController {
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     @PutMapping("/{status}")
     @ApiOperation("设置营业状态")
     public Result setStatus(@PathVariable Integer status){

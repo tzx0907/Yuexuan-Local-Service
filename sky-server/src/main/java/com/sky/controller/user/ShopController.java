@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Api(tags = "user店铺相关接口")
 public class ShopController {
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<String, Object> redisTemplate;
     @GetMapping("/status")
     @ApiOperation("获取营业状态")
     public Result<Integer> getStatus(){
