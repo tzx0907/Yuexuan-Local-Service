@@ -24,7 +24,7 @@
             <if test="updateUser != null">update_User = #{updateUser},</if>
             <if test="status != null">status = #{status},</if>
         </set>
-        where id = #{id}@AutoFill(OperationType.UPDATE)
+        where id = #{id}
 
     </update>
 </mapper>
