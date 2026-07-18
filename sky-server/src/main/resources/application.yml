@@ -51,6 +51,13 @@ sky:
   wechat:
     appid: ${sky.wechat.appid}
     secret: ${sky.wechat.secret}
+    mchid: ${sky.wechat.mchid}
+    mchSerialNo: ${sky.wechat.mch-serial-no}
+    privateKeyFilePath: ${sky.wechat.private-key-file-path}
+    ApiV3Key: ${sky.wechat.api-v3-key}
+    weChatPayCertFilePath: ${sky.wechat.wechat-pay-cert-file-path}
+    notifyUrl: ${sky.wechat.notify-url}
+    refundNotifyUrl: ${sky.wechat.refund-notify-url}
   alioss:
     endpoint: ${sky.alioss.endpoint}
     access-key-id: ${sky.alioss.access-key-id}
