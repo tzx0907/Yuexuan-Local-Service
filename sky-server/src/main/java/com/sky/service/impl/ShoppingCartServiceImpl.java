@@ -71,6 +71,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
+        if(shoppingCartList == null || shoppingCartList.isEmpty()){
+            return;
+        }
         ShoppingCart cart = shoppingCartList.get(0);
         cart.setNumber(cart.getNumber() - 1);
         if(cart.getNumber() != 0){
@@ -86,7 +89,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     @Override
     public List<ShoppingCart> listAll() {
-        return shoppingCartMapper.list(new ShoppingCart());
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+        return shoppingCartMapper.list(shoppingCart);
     }
     /**
      * 清空购物车
