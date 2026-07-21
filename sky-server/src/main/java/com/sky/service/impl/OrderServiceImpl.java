@@ -13,6 +13,8 @@ import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.websocket.WebSocketServer;
+import io.swagger.util.Json;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -37,7 +41,8 @@ public class OrderServiceImpl implements OrderService {
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
-
+    @Autowired
+    private WebSocketServer webSocketServer;
     /**
      * 提交订单
      * @param ordersSubmitDTO
@@ -87,35 +92,20 @@ public class OrderServiceImpl implements OrderService {
                 .orderAmount(orders.getAmount())
                 .orderTime(orders.getOrderTime())
                 .build();
+        Map<String, Object> map = new HashMap<>();
         return orderSubmitVO;
     }
     /**
-     * 订单支付
+     * 订单支付（模拟支付，跳过微信支付）
      *
      * @param ordersPaymentDTO
      * @return
      */
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
-        // 当前登录用户id
-        Long userId = BaseContext.getCurrentId();
-        User user = userMapper.getById(userId);
+        // 直接调用支付成功逻辑，跳过微信支付
+        paySuccess(ordersPaymentDTO.getOrderNumber());
 
-        //调用微信支付接口，生成预支付交易单
-        JSONObject jsonObject = weChatPayUtil.pay(
-                ordersPaymentDTO.getOrderNumber(), //商户订单号
-                new BigDecimal(0.01), //支付金额，单位 元
-                "苍穹外卖订单", //商品描述
-                user.getOpenid() //微信用户的openid
-        );
-
-        if (jsonObject.getString("code") != null && jsonObject.getString("code").equals("ORDERPAID")) {
-            throw new OrderBusinessException("该订单已支付");
-        }
-
-        OrderPaymentVO vo = jsonObject.toJavaObject(OrderPaymentVO.class);
-        vo.setPackageStr(jsonObject.getString("package"));
-
-        return vo;
+        return OrderPaymentVO.builder().build();
     }
 
     /**
@@ -140,5 +130,12 @@ public class OrderServiceImpl implements OrderService {
 
         // 支付成功后清空购物车
         shoppingCartMapper.cleanByUserId(ordersDB.getUserId());
+        //给管理端发来单提醒，使用WebSocket
+        Map<String, Object> map = new HashMap<>();
+        map.put("type",1);//1表示来单，2表示催单
+        map.put("orderId", ordersDB.getId());
+        map.put("content","订单号"+outTradeNo);
+        String json = com.alibaba.fastjson.JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
     }
 }
