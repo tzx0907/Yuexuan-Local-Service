@@ -13,6 +13,7 @@ import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import com.sky.websocket.WebSocketServer;
 import io.swagger.util.Json;
 import org.springframework.beans.BeanUtils;
@@ -137,5 +138,21 @@ public class OrderServiceImpl implements OrderService {
         map.put("content","订单号"+outTradeNo);
         String json = com.alibaba.fastjson.JSON.toJSONString(map);
         webSocketServer.sendToAllClient(json);
+    }
+    public void reminder(Long orderId){
+        Map<String, Object> map = new HashMap<>();
+        map.put("type",2);//1表示来单，2表示催单
+        map.put("orderId", orderId);
+        map.put("content","订单号"+orderId);
+        String json = com.alibaba.fastjson.JSON.toJSONString(map);
+        webSocketServer.sendToAllClient(json);
+    }
+    public OrderVO getOrderDetail(Long id){
+        OrderVO orderVO = new OrderVO();
+        List<OrderDetail> orderDetailList = orderDetailMapper.getOrderDetailByOrderId(id);
+        orderVO.setOrderDetailList(orderDetailList);
+        Orders orders = orderMapper.getById(id);
+        BeanUtils.copyProperties(orders, orderVO);
+        return orderVO;
     }
 }

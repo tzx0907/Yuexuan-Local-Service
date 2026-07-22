@@ -43,4 +43,8 @@
         where id = #{id}
     </update>
 
+    <select id="cancelOrderByStatusAndTime" resultType="com.sky.entity.Orders">
+        select * from orders where status = #{pendingPayment} and order_time &lt; #{time}
+    </select>
+
 </mapper>

@@ -27,6 +27,8 @@ public interface OrderMapper {
      * @param pendingPayment
      * @param time
      */
-    @Select("select * from orders where status = #{status} and order_time < #{time}")
     List<Orders> cancelOrderByStatusAndTime(Integer pendingPayment, LocalDateTime time);
+
+    @Select("select * from orders where id = #{id}")
+    Orders getById(Long id);
 }

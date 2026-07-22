@@ -6,11 +6,14 @@ import com.sky.result.Result;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController("UserOrderController")
@@ -39,5 +42,31 @@ public class OrderController {
         OrderPaymentVO orderPaymentVO = orderService.payment(ordersPaymentDTO);
         log.info("生成预支付交易单：{}", orderPaymentVO);
         return Result.success(orderPaymentVO);
+    }
+    /**
+     * 催单提醒
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/reminder/{id}")
+    @ApiOperation("催单提醒")
+    public Result<?> reminder(@PathVariable Long id){
+        log.info("催单提醒：{}", id);
+        orderService.reminder(id);
+        return Result.success();
+    }
+    /**
+     * 查询订单详情
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("orderDetail/{id}")
+    @ApiOperation("查询订单详情")
+    public Result<OrderVO> detail(@PathVariable Long id){
+        log.info("查询订单详情：{}", id);
+        OrderVO orderVO = orderService.getOrderDetail(id);
+        return Result.success(orderVO);
     }
 }

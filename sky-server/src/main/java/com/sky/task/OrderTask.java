@@ -17,11 +17,12 @@ public class OrderTask {
     private OrderMapper orderMapper;
     @Scheduled(cron="0 * * * * ?")
     public void orderCancelTask() {
-        log.info("订单取消任务开始执行");
+        log.info("user订单取消任务开始执行");
         LocalDateTime time = LocalDateTime.now().plusMinutes(-15);
         List<Orders> list=orderMapper.cancelOrderByStatusAndTime(Orders.PENDING_PAYMENT,time);
         for(Orders orders:list){
             orders.setStatus(Orders.CANCELLED);
+            orders.setPayStatus(Orders.REFUND);
             orders.setCancelTime(LocalDateTime.now());
             orders.setCancelReason("订单超时未支付，系统自动取消");
             orderMapper.update(orders);
@@ -29,7 +30,7 @@ public class OrderTask {
     }
     @Scheduled(cron="0 0 1 * * ?")
     public void deliveryCancleTask() {
-        log.info("订单取消任务开始执行");
+        log.info("admin订单完成任务开始执行");
         LocalDateTime time = LocalDateTime.now().plusHours(-1);
         List<Orders> list=orderMapper.cancelOrderByStatusAndTime(Orders.DELIVERY_IN_PROGRESS,time);
         for(Orders orders:list){
