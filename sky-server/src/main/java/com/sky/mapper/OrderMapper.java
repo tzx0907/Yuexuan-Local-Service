@@ -35,4 +35,7 @@ public interface OrderMapper {
 
     @Update("update orders set status = 6, cancel_time = #{time} where id = #{id}")
     void cancel(Long id, LocalDateTime time);
+
+    @Select("select * from orders where user_id = #{userId} order by order_time desc")
+    List<Orders> getByUserId(Long userId);
 }

@@ -1,14 +1,19 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.DishPageQueryDTO;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
@@ -102,6 +107,7 @@ public class OrderServiceImpl implements OrderService {
      * @param ordersPaymentDTO
      * @return
      */
+    @Override
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 直接调用支付成功逻辑，跳过微信支付
         paySuccess(ordersPaymentDTO.getOrderNumber());
@@ -114,6 +120,7 @@ public class OrderServiceImpl implements OrderService {
      *
      * @param outTradeNo
      */
+    @Override
     public void paySuccess(String outTradeNo) {
 
         // 根据订单号查询订单
@@ -158,5 +165,40 @@ public class OrderServiceImpl implements OrderService {
     public void cancel(Long id){
         orderMapper.cancel(id, LocalDateTime.now());
         webSocketServer.sendToAllClient("订单号"+id+"已取消");
+    }
+    @Override
+    @Transactional
+    public void repetition(Long id) {
+        Long userId = BaseContext.getCurrentId();
+        List<OrderDetail> orderDetailList = orderDetailMapper.getOrderDetailByOrderId(id);
+        for (OrderDetail orderDetail : orderDetailList) {
+            ShoppingCart shoppingCart = ShoppingCart.builder()
+                    .userId(userId)
+                    .dishId(orderDetail.getDishId())
+                    .setmealId(orderDetail.getSetmealId())
+                    .name(orderDetail.getName())
+                    .amount(orderDetail.getAmount())
+                    .image(orderDetail.getImage())
+                    .number(orderDetail.getNumber())
+                    .createTime(LocalDateTime.now())
+                    .build();
+            shoppingCartMapper.insert(shoppingCart);
+        }
+    }
+    @Override
+    public PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO){
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Long userId = BaseContext.getCurrentId();
+        List<Orders> ordersList = orderMapper.getByUserId(userId);
+        Page<OrderVO> page = new Page<>();
+        for (Orders orders : ordersList){
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+            Long orderId = orders.getId();
+            List <OrderDetail> orderDetailList = orderDetailMapper.getOrderDetailByOrderId(orderId);
+            orderVO.setOrderDetailList(orderDetailList);
+            page.add(orderVO);
+        }
+        return new PageResult(page.getTotal(), page.getResult());
     }
 }
