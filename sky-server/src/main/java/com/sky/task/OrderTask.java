@@ -22,19 +22,19 @@ public class OrderTask {
         List<Orders> list=orderMapper.cancelOrderByStatusAndTime(Orders.PENDING_PAYMENT,time);
         for(Orders orders:list){
             orders.setStatus(Orders.CANCELLED);
-            orders.setPayStatus(Orders.REFUND);
             orders.setCancelTime(LocalDateTime.now());
             orders.setCancelReason("订单超时未支付，系统自动取消");
             orderMapper.update(orders);
         }
     }
     @Scheduled(cron="0 0 1 * * ?")
-    public void deliveryCancleTask() {
-        log.info("admin订单完成任务开始执行");
+    public void deliveryCancelTask() {
+        log.info("派送中订单自动完成任务开始执行");
         LocalDateTime time = LocalDateTime.now().plusHours(-1);
         List<Orders> list=orderMapper.cancelOrderByStatusAndTime(Orders.DELIVERY_IN_PROGRESS,time);
         for(Orders orders:list){
             orders.setStatus(Orders.COMPLETED);
+            orders.setDeliveryTime(LocalDateTime.now());
             orderMapper.update(orders);
         }
     }

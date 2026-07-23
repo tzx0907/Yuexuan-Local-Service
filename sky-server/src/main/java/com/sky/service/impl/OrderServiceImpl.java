@@ -155,4 +155,8 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(orders, orderVO);
         return orderVO;
     }
+    public void cancel(Long id){
+        orderMapper.cancel(id, LocalDateTime.now());
+        webSocketServer.sendToAllClient("订单号"+id+"已取消");
+    }
 }

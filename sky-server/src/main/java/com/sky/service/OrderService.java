@@ -24,4 +24,6 @@ public interface OrderService {
     void reminder(Long id);
 
     OrderVO getOrderDetail(Long id);
+
+    void cancel(Long id);
 }
