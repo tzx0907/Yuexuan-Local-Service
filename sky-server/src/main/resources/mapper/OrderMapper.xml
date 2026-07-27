@@ -47,4 +47,38 @@
         select * from orders where status = #{pendingPayment} and order_time &lt; #{time}
     </select>
 
+    <select id="pageQuery" resultType="com.sky.entity.Orders">
+        select * from orders
+        <where>
+            <if test="number != null and number != ''">
+                and number = #{number}
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone like concat('%', #{phone}, '%')
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="beginTime != null">
+                and order_time &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                and order_time &lt;= #{endTime}
+            </if>
+            <if test="userId != null">
+                and user_id = #{userId}
+            </if>
+        </where>
+        order by order_time desc
+    </select>
+
+    <select id="getStatistics" resultType="com.sky.vo.OrderStatisticsVO">
+        select
+            sum(status = 2) as toBeConfirmed,
+            sum(status = 3) as confirmed,
+            sum(status = 4) as deliveryInProgress
+        from orders
+        where status in (2, 3, 4)
+    </select>
+
 </mapper>
