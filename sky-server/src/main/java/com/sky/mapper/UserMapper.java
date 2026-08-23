@@ -4,7 +4,11 @@ import com.sky.entity.User;
 
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Mapper
 public interface UserMapper {
@@ -23,4 +27,9 @@ public interface UserMapper {
 
     @Select("select * from user where id = #{Id}")
     User getById(Long Id);
+
+    Long getUser(
+                 @Param("beginTime") LocalDateTime beginTime,
+                 @Param("endTime") LocalDateTime endTime);
+
 }
