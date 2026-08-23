@@ -45,4 +45,8 @@ public interface OrderMapper {
     List<Orders> pageQuery(OrdersPageQueryDTO ordersPageQueryDTO);
 
     OrderStatisticsVO getStatistics();
+
+    Double getSumValue(@Param("begin") LocalDateTime begin,
+                    @Param("end") LocalDateTime end,
+                    @Param("status") Integer status);
 }
