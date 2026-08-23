@@ -110,5 +110,16 @@
         </where>
     </select>
 
+    <select id="getSalesTop10" resultType="com.sky.dto.GoodsSalesDTO">
+        select od.name, sum(od.number) as number
+        from order_detail od, orders o
+        where o.id = od.order_id
+          and o.status = 5
+          and o.order_time &gt;= #{begin}
+          and o.order_time &lt; #{end}
+        group by od.name
+        order by number desc
+        limit 10
+    </select>
 
 </mapper>

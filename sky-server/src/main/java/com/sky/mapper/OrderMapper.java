@@ -1,5 +1,6 @@
 package com.sky.mapper;
 
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.entity.Orders;
 import com.sky.vo.OrderStatisticsVO;
@@ -53,4 +54,7 @@ public interface OrderMapper {
     Integer getOrderCount(@Param("begin") LocalDateTime begin,
                           @Param("end") LocalDateTime end,
                           @Param("status") Integer status);
+
+    List<GoodsSalesDTO> getSalesTop10(@Param("begin") LocalDateTime begin,
+                                      @Param("end") LocalDateTime end);
 }

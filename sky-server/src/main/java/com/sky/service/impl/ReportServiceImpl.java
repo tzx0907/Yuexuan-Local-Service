@@ -1,14 +1,17 @@
 package com.sky.service.impl;
 
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -126,7 +129,7 @@ public class ReportServiceImpl implements ReportService {
                 .collect(Collectors.joining(","));
         Integer totalOrderCount = orderCountList.stream().mapToInt(Integer::intValue).sum();
         Integer validOrderCount = validOrderCountList.stream().mapToInt(Integer::intValue).sum();
-        Double orderCompletionRate = (double) validOrderCount / totalOrderCount * 100;
+        Double orderCompletionRate = (double) validOrderCount / totalOrderCount;
         return OrderReportVO.builder()
                 .dateList(dateStr)
                 .orderCountList(orderCountStr)
@@ -134,6 +137,25 @@ public class ReportServiceImpl implements ReportService {
                 .totalOrderCount(totalOrderCount)
                 .validOrderCount(validOrderCount)
                 .orderCompletionRate(orderCompletionRate)
+                .build();
+    }
+    @Override
+    public SalesTop10ReportVO getSalesTop10(LocalDate begin, LocalDate end) {
+        LocalDateTime beginTime = begin.atStartOfDay();
+        LocalDateTime endTime = end.plusDays(1).atStartOfDay();
+        List<GoodsSalesDTO> goodsSalesList = orderMapper.getSalesTop10(beginTime, endTime);
+
+        String nameList = goodsSalesList.stream()
+                .map(GoodsSalesDTO::getName)
+                .collect(Collectors.joining(","));
+        String numberList = goodsSalesList.stream()
+                .map(GoodsSalesDTO::getNumber)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+        return SalesTop10ReportVO.builder()
+                .nameList(nameList)
+                .numberList(numberList)
                 .build();
     }
 }
