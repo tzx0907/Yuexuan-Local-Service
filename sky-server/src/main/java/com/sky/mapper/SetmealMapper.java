@@ -9,6 +9,7 @@ import com.sky.enumeration.OperationType;
 import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -39,6 +40,13 @@ public interface SetmealMapper {
     void update(Setmeal setmeal);
 
     void delete(List<Long> ids);
-
+    /**
+     * 根据条件统计套餐数量
+     * @param status
+     * @param categoryId
+     * @return
+     */
+    Integer countByMap(@Param("status") Integer status,
+                       @Param("categoryId") Integer categoryId);
 }
 

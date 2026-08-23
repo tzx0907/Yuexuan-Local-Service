@@ -10,6 +10,7 @@ import com.sky.enumeration.OperationType;
 import com.sky.vo.DishVO;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -67,4 +68,12 @@ public interface DishMapper {
      */
     @Delete("delete from dish where id = #{id}")
     void delete(Dish dish);
+    /**
+     * 根据条件统计菜品数量
+     * @param status
+     * @param categoryId
+     * @return
+     */
+    Integer countByMap(@Param("status") Integer status,
+                       @Param("categoryId") Integer categoryId);
 }
