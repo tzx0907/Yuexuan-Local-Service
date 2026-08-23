@@ -49,4 +49,8 @@ public interface OrderMapper {
     Double getSumValue(@Param("begin") LocalDateTime begin,
                     @Param("end") LocalDateTime end,
                     @Param("status") Integer status);
+
+    Integer getOrderCount(@Param("begin") LocalDateTime begin,
+                          @Param("end") LocalDateTime end,
+                          @Param("status") Integer status);
 }

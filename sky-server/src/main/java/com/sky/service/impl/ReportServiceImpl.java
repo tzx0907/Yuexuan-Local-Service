@@ -1,8 +1,10 @@
 package com.sky.service.impl;
 
+import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +96,44 @@ public class ReportServiceImpl implements ReportService {
                 .dateList(dateStr)
                 .totalUserList(totalUser)
                 .newUserList(newUser)
+                .build();
+    }
+    @Override
+    public OrderReportVO getOrdersStatistics(LocalDate begin, LocalDate end) {
+        List<LocalDate> dateList = new ArrayList<>();
+        while (!begin.isAfter(end)) {
+            dateList.add(begin);
+            begin = begin.plusDays(1);
+        }
+        List<Integer> orderCountList = new ArrayList<>();
+        List<Integer> validOrderCountList = new ArrayList<>();
+        for (LocalDate date : dateList) {
+            LocalDateTime beginTime = date.atStartOfDay();
+            LocalDateTime endTime = date.plusDays(1).atStartOfDay();
+            Integer orderCount = orderMapper.getOrderCount(beginTime, endTime,null);
+            Integer validOrderCount = orderMapper.getOrderCount(beginTime, endTime, Orders.COMPLETED);
+            orderCountList.add(orderCount);
+            validOrderCountList.add(validOrderCount);
+        }
+        String dateStr = dateList.stream()
+                .map(LocalDate::toString)
+                .collect(Collectors.joining(","));
+        String orderCountStr = orderCountList.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        String validOrderCountStr = validOrderCountList.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+        Integer totalOrderCount = orderCountList.stream().mapToInt(Integer::intValue).sum();
+        Integer validOrderCount = validOrderCountList.stream().mapToInt(Integer::intValue).sum();
+        Double orderCompletionRate = (double) validOrderCount / totalOrderCount * 100;
+        return OrderReportVO.builder()
+                .dateList(dateStr)
+                .orderCountList(orderCountStr)
+                .validOrderCountList(validOrderCountStr)
+                .totalOrderCount(totalOrderCount)
+                .validOrderCount(validOrderCount)
+                .orderCompletionRate(orderCompletionRate)
                 .build();
     }
 }
