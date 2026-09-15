@@ -1,0 +1,30 @@
+# Copy this file to application-dev.yml and replace every placeholder before starting the application.
+# Do not commit application-dev.yml or any real credentials.
+sky:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: sky_take_out
+    username: root
+    password: CHANGE_ME
+  redis:
+    host: localhost
+    port: 6379
+    password: ''
+    database: 0
+  alioss:
+    endpoint: https://your-oss-endpoint
+    access-key-id: CHANGE_ME
+    access-key-secret: CHANGE_ME
+    bucket-name: CHANGE_ME
+  wechat:
+    appid: CHANGE_ME
+    secret: CHANGE_ME
+    mchid: CHANGE_ME
+    mch-serial-no: CHANGE_ME
+    private-key-file-path: /absolute/path/to/apiclient_key.pem
+    api-v3-key: CHANGE_ME
+    wechat-pay-cert-file-path: /absolute/path/to/wechatpay_cert.pem
+    notify-url: https://your-domain.example.com/notify/paySuccess
+    refund-notify-url: https://your-domain.example.com/notify/refundSuccess

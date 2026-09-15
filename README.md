@@ -61,15 +61,31 @@ sky-take-out/
 
 ## 快速开始
 
-### 1. 初始化数据库
+### 1. 启动本地依赖
 
-创建业务数据库并执行与当前版本匹配的建表及初始化脚本。仓库当前未固定提交数据库脚本，请根据实体与 Mapper 定义准备 `sky_take_out` 数据库及相关表结构。
+项目提供 Docker Compose，用于启动 MySQL 8.0 和 Redis 7。复制环境变量模板并填写一个仅用于本地开发的 MySQL root 密码：
 
-确保 MySQL 字符集使用 `utf8mb4`，并记录数据库名称、账号和密码。
+```bash
+cp .env.example .env
+docker compose up -d
+docker compose ps
+```
 
-### 2. 配置开发环境
+首次启动时，MySQL 会自动执行 `sql/sky_take_out_schema.sql` 创建数据库和表结构。MySQL 与 Redis 分别映射到本机 `3306` 和 `6379` 端口；若本机端口已被占用，请先停止冲突服务或调整 `docker-compose.yml` 中的端口映射。
 
-项目默认激活 `dev` 配置。请在 `sky-server/src/main/resources` 下准备对应的开发配置文件，并填写以下配置项：
+### 2. 初始化数据库
+
+项目提供 `sql/sky_take_out_schema.sql`，用于创建空的 `sky_take_out` 数据库及其表结构：
+
+```bash
+mysql -u root -p < sql/sky_take_out_schema.sql
+```
+
+使用 Docker Compose 首次启动时无需手动执行该命令。脚本仅包含数据库和表结构，不包含用户、订单或其他业务数据。脚本会删除同名表，因此只应在新建的本地开发数据库中执行。确保 MySQL 字符集使用 `utf8mb4`，并记录数据库名称、账号和密码。
+
+### 3. 配置开发环境
+
+项目默认激活 `dev` 配置。先复制 `sky-server/src/main/resources/application-dev.yml.example` 为 `application-dev.yml`，再填写本地服务和第三方服务的真实配置：
 
 ```yaml
 sky:
@@ -94,9 +110,9 @@ sky:
     secret: your-secret
 ```
 
-不要将真实密码、AccessKey、微信私钥或证书提交到 Git。生产环境建议使用环境变量或外部配置中心注入敏感信息。
+不要将真实密码、AccessKey、微信私钥或证书提交到 Git。`application-dev.yml` 已被 Git 忽略；生产环境建议使用环境变量或外部配置中心注入敏感信息。
 
-### 3. 编译并启动
+### 4. 编译并启动
 
 在项目根目录执行：
 
@@ -107,7 +123,7 @@ mvn -pl sky-server -am spring-boot:run
 
 服务默认监听 `http://localhost:8080`。也可以运行 `sky-server` 模块中的 `com.sky.SkyApplication` 启动类。
 
-### 4. 查看接口文档
+### 5. 查看接口文档
 
 启动成功后访问：
 
@@ -133,6 +149,7 @@ Knife4j 页面可用于查看接口、参数和在线调试。管理员端接口
 ## 开发建议
 
 - 统一使用 UTF-8 编码，提交前执行 `mvn test` 或 `mvn package` 检查编译结果。
+- `src/test` 中的 OSS、HTTP 和 Redis 数据结构练习需要真实外部环境，已标记为手动检查，不会在默认构建中执行。后续新增测试应避免依赖真实云资源或开发数据库。
 - 数据库、Redis、OSS 和微信配置按环境隔离，避免开发配置覆盖生产配置。
 - 新增接口时同步补充 Swagger/Knife4j 注解及必要的参数校验。
 - 订单状态变更应通过 Service 层完成，避免 Controller 直接操作数据库。
