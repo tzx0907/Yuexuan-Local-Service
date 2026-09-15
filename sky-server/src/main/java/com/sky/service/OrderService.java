@@ -32,11 +32,19 @@ public interface OrderService {
 
     void cancel(Long id);
 
+    void confirm(Long id);
+
+    void reject(Long id, String rejectionReason);
+
+    void cancelByAdmin(Long id, String cancelReason);
+
+    void delivery(Long id);
+
+    void complete(Long id);
+
     void repetition(Long id);
 
     PageResult pageQuery(OrdersPageQueryDTO ordersPageQueryDTO);
-
-    void update(Orders orders);
 
     OrderStatisticsVO getStatistics();
 }

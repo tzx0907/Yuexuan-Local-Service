@@ -24,7 +24,7 @@ public class OrderTask {
             orders.setStatus(Orders.CANCELLED);
             orders.setCancelTime(LocalDateTime.now());
             orders.setCancelReason("订单超时未支付，系统自动取消");
-            orderMapper.update(orders);
+            orderMapper.updateIfStatus(orders, Orders.PENDING_PAYMENT);
         }
     }
     @Scheduled(cron="0 0 1 * * ?")
@@ -35,7 +35,7 @@ public class OrderTask {
         for(Orders orders:list){
             orders.setStatus(Orders.COMPLETED);
             orders.setDeliveryTime(LocalDateTime.now());
-            orderMapper.update(orders);
+            orderMapper.updateIfStatus(orders, Orders.DELIVERY_IN_PROGRESS);
         }
     }
 }

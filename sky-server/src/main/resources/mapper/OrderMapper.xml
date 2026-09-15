@@ -12,35 +12,36 @@
                 #{estimatedDeliveryTime}, #{deliveryStatus}, #{packAmount}, #{tablewareNumber}, #{tablewareStatus})
     </insert>
 
-    <update id="update" parameterType="com.sky.entity.Orders">
+    <update id="updateIfStatus">
         update orders
         <set>
-            <if test="cancelReason != null and cancelReason!='' ">
-                cancel_reason=#{cancelReason},
+            <if test="orders.cancelReason != null and orders.cancelReason != ''">
+                cancel_reason = #{orders.cancelReason},
             </if>
-            <if test="rejectionReason != null and rejectionReason!='' ">
-                rejection_reason=#{rejectionReason},
+            <if test="orders.rejectionReason != null and orders.rejectionReason != ''">
+                rejection_reason = #{orders.rejectionReason},
             </if>
-            <if test="cancelTime != null">
-                cancel_time=#{cancelTime},
+            <if test="orders.cancelTime != null">
+                cancel_time = #{orders.cancelTime},
             </if>
-            <if test="payStatus != null">
-                pay_status=#{payStatus},
+            <if test="orders.payStatus != null">
+                pay_status = #{orders.payStatus},
             </if>
-            <if test="payMethod != null">
-                pay_method=#{payMethod},
+            <if test="orders.payMethod != null">
+                pay_method = #{orders.payMethod},
             </if>
-            <if test="checkoutTime != null">
-                checkout_time=#{checkoutTime},
+            <if test="orders.checkoutTime != null">
+                checkout_time = #{orders.checkoutTime},
             </if>
-            <if test="status != null">
-                status = #{status},
+            <if test="orders.status != null">
+                status = #{orders.status},
             </if>
-            <if test="deliveryTime != null">
-                delivery_time = #{deliveryTime}
+            <if test="orders.deliveryTime != null">
+                delivery_time = #{orders.deliveryTime},
             </if>
         </set>
-        where id = #{id}
+        where id = #{orders.id}
+          and status = #{expectedStatus}
     </update>
 
     <select id="cancelOrderByStatusAndTime" resultType="com.sky.entity.Orders">

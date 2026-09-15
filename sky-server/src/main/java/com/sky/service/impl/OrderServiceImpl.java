@@ -8,8 +8,10 @@ import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
+import com.sky.service.OrderStateMachine;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
@@ -116,20 +118,20 @@ public class OrderServiceImpl implements OrderService {
      * @param outTradeNo
      */
     @Override
+    @Transactional
     public void paySuccess(String outTradeNo) {
-
-        // 根据订单号查询订单
         Orders ordersDB = orderMapper.getByNumber(outTradeNo);
+        if (ordersDB == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
 
-        // 根据订单id更新订单的状态、支付方式、支付状态、结账时间
         Orders orders = Orders.builder()
                 .id(ordersDB.getId())
                 .status(Orders.TO_BE_CONFIRMED)
                 .payStatus(Orders.PAID)
                 .checkoutTime(LocalDateTime.now())
                 .build();
-
-        orderMapper.update(orders);
+        transition(orders, Orders.PENDING_PAYMENT);
 
         // 支付成功后清空购物车
         shoppingCartMapper.cleanByUserId(ordersDB.getUserId());
@@ -158,8 +160,54 @@ public class OrderServiceImpl implements OrderService {
         return orderVO;
     }
     public void cancel(Long id){
-        orderMapper.cancel(id, LocalDateTime.now());
+        Orders order = getOrder(id);
+        Long userId = BaseContext.getCurrentId();
+        if (!order.getUserId().equals(userId)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if (order.getStatus().equals(Orders.PENDING_PAYMENT)) {
+            transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
+                    .cancelReason("用户取消订单").build(), Orders.PENDING_PAYMENT);
+        } else if (order.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
+                    .cancelReason("用户取消订单").build(), Orders.TO_BE_CONFIRMED);
+        } else {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
         webSocketServer.sendToAllClient("订单号"+id+"已取消");
+    }
+
+    @Override
+    public void confirm(Long id) {
+        transition(Orders.builder().id(id).status(Orders.CONFIRMED).build(), Orders.TO_BE_CONFIRMED);
+    }
+
+    @Override
+    public void reject(Long id, String rejectionReason) {
+        transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
+                .rejectionReason(rejectionReason).build(), Orders.TO_BE_CONFIRMED);
+    }
+
+    @Override
+    public void cancelByAdmin(Long id, String cancelReason) {
+        Orders order = getOrder(id);
+        if (order.getStatus().equals(Orders.TO_BE_CONFIRMED) || order.getStatus().equals(Orders.CONFIRMED)) {
+            transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
+                    .cancelReason(cancelReason).build(), order.getStatus());
+            return;
+        }
+        throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+    }
+
+    @Override
+    public void delivery(Long id) {
+        transition(Orders.builder().id(id).status(Orders.DELIVERY_IN_PROGRESS).build(), Orders.CONFIRMED);
+    }
+
+    @Override
+    public void complete(Long id) {
+        transition(Orders.builder().id(id).status(Orders.COMPLETED).deliveryTime(LocalDateTime.now()).build(),
+                Orders.DELIVERY_IN_PROGRESS);
     }
     @Override
     @Transactional
@@ -196,9 +244,25 @@ public class OrderServiceImpl implements OrderService {
         }
         return new PageResult(ordersPage.getTotal(), page.getResult());
     }
-    @Override
-    public void update(Orders orders) {
-        orderMapper.update(orders);
+    private Orders getOrder(Long id) {
+        Orders order = orderMapper.getById(id);
+        if (order == null) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        return order;
+    }
+
+    private void transition(Orders orders, Integer expectedStatus) {
+        if (!OrderStateMachine.canTransition(expectedStatus, orders.getStatus())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        if (orderMapper.updateIfStatus(orders, expectedStatus) == 0) {
+            Orders currentOrder = orderMapper.getById(orders.getId());
+            if (currentOrder == null) {
+                throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+            }
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
     @Override
     public OrderStatisticsVO getStatistics() {

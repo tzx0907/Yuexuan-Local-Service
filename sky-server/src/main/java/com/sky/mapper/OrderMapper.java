@@ -23,10 +23,11 @@ public interface OrderMapper {
     Orders getByNumber(String orderNumber);
 
     /**
-     * 修改订单信息
-     * @param orders
+     * Updates an order only when it is still in the expected state.
+     *
+     * @return the number of updated rows
      */
-    void update(Orders orders);
+    int updateIfStatus(@Param("orders") Orders orders, @Param("expectedStatus") Integer expectedStatus);
     /**
      * 根据状态和时间取消订单
      * @param pendingPayment
