@@ -125,13 +125,23 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
         }
 
+        if (Orders.PAID.equals(ordersDB.getPayStatus())) {
+            return;
+        }
+
         Orders orders = Orders.builder()
                 .id(ordersDB.getId())
                 .status(Orders.TO_BE_CONFIRMED)
                 .payStatus(Orders.PAID)
                 .checkoutTime(LocalDateTime.now())
                 .build();
-        transition(orders, Orders.PENDING_PAYMENT);
+        if (!markPaid(orders)) {
+            Orders currentOrder = getOrder(ordersDB.getId());
+            if (Orders.PAID.equals(currentOrder.getPayStatus())) {
+                return;
+            }
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
 
         // 支付成功后清空购物车
         shoppingCartMapper.cleanByUserId(ordersDB.getUserId());
@@ -263,6 +273,13 @@ public class OrderServiceImpl implements OrderService {
             }
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
+    }
+
+    private boolean markPaid(Orders orders) {
+        if (!OrderStateMachine.canTransition(Orders.PENDING_PAYMENT, orders.getStatus())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        return orderMapper.updateIfStatus(orders, Orders.PENDING_PAYMENT) == 1;
     }
     @Override
     public OrderStatisticsVO getStatistics() {
