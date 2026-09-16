@@ -6,10 +6,10 @@
         insert into orders
         (number, status, user_id, address_book_id, order_time, checkout_time, pay_method, pay_status, amount, remark,
          phone, address, consignee, estimated_delivery_time, delivery_status, pack_amount, tableware_number,
-         tableware_status)
+         tableware_status,submit_request_id)
         values (#{number}, #{status}, #{userId}, #{addressBookId}, #{orderTime}, #{checkoutTime}, #{payMethod},
                 #{payStatus}, #{amount}, #{remark}, #{phone}, #{address}, #{consignee},
-                #{estimatedDeliveryTime}, #{deliveryStatus}, #{packAmount}, #{tablewareNumber}, #{tablewareStatus})
+                #{estimatedDeliveryTime}, #{deliveryStatus}, #{packAmount}, #{tablewareNumber}, #{tablewareStatus}, #{submitRequestId})
     </insert>
 
     <update id="updateIfStatus">

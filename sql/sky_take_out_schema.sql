@@ -145,7 +145,9 @@ CREATE TABLE `orders` (
   `pack_amount` int DEFAULT NULL COMMENT '打包费',
   `tableware_number` int DEFAULT NULL COMMENT '餐具数量',
   `tableware_status` tinyint(1) NOT NULL DEFAULT '1' COMMENT '餐具数量状态  1按餐量提供  0选择具体数量',
-  PRIMARY KEY (`id`)
+  `submit_request_id` varchar(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '客户端下单幂等请求号',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_orders_user_submit_request` (`user_id`,`submit_request_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='订单表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `setmeal`;

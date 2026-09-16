@@ -22,13 +22,18 @@ import com.sky.websocket.WebSocketServer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -46,6 +51,9 @@ public class OrderServiceImpl implements OrderService {
     private WeChatPayUtil weChatPayUtil;
     @Autowired
     private WebSocketServer webSocketServer;
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     /**
      * 提交订单
      * @param ordersSubmitDTO
@@ -53,50 +61,84 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
-    public OrderSubmitVO submit(OrdersSubmitDTO ordersSubmitDTO) {
-        Long addressId = ordersSubmitDTO.getAddressBookId();
-        AddressBook addressBook = addressBookMapper.getById(addressId);
-        Long userId= BaseContext.getCurrentId();
-        List<ShoppingCart> list = shoppingCartMapper.list(ShoppingCart.builder().userId(userId).build());
-        //1.处理异常（地址为空 购物车为空）
-        if (addressBook == null) {
-            throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
+    public OrderSubmitVO submit(OrdersSubmitDTO ordersSubmitDTO,String idempotencyKey) {
+        Long userId = BaseContext.getCurrentId();
+        validateIdempotencyKey(idempotencyKey);
+        String redisKey = "order:submit:" + userId + ":" + idempotencyKey;
+        Boolean acquired = redisTemplate.opsForValue().setIfAbsent(
+                redisKey,
+                "PROCESSING",
+                5,
+                TimeUnit.MINUTES
+        );
+        if (!Boolean.TRUE.equals(acquired)) {
+            return getRepeatedSubmitResult(userId, idempotencyKey, redisKey);
         }
-        if (list == null||list.isEmpty()) {
-            throw new AddressBookBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+
+        try {
+            Orders existingOrder = orderMapper.getByUserIdAndSubmitRequestId(userId, idempotencyKey);
+            if (existingOrder != null) {
+                markSubmitSuccessAfterCommit(redisKey, existingOrder.getId());
+                return buildSubmitVO(existingOrder);
+            }
+
+            Long addressId = ordersSubmitDTO.getAddressBookId();
+            AddressBook addressBook = addressBookMapper.getById(addressId);
+            List<ShoppingCart> list = shoppingCartMapper.list(ShoppingCart.builder().userId(userId).build());
+            //1.处理异常（地址为空 购物车为空）
+            if (addressBook == null) {
+                throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
+            }
+            if (list == null||list.isEmpty()) {
+                throw new AddressBookBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+            }
+            //2.向订单表中插入一条数据
+            Orders orders = new Orders();
+            BeanUtils.copyProperties(ordersSubmitDTO, orders);
+            //填充其他字段
+            orders.setSubmitRequestId(idempotencyKey);
+            orders.setUserId(userId);
+            orders.setNumber(String.valueOf(System.currentTimeMillis()));
+            orders.setOrderTime(LocalDateTime.now());
+            orders.setPayStatus(Orders.UN_PAID);
+            orders.setStatus(Orders.PENDING_PAYMENT);
+            orders.setAddressBookId(addressId);
+            orders.setPhone(addressBook.getPhone());
+            orders.setConsignee(addressBook.getConsignee());
+            orders.setAddress(addressBook.getAddress());
+            orderMapper.insert(orders); // Insert order into the database
+            //3.向订单明细表中插入多条数据
+            List<OrderDetail> orderDetails = new ArrayList<>();
+            for (ShoppingCart shoppingCart : list){
+                OrderDetail orderDetail = new OrderDetail();
+                BeanUtils.copyProperties(shoppingCart, orderDetail);
+                orderDetail.setOrderId(orders.getId());
+                orderDetails.add(orderDetail);
+            }
+            orderDetailMapper.batchInsert(orderDetails);
+            //5.返回订单确认页面需要的VO
+            OrderSubmitVO orderSubmitVO = OrderSubmitVO.builder()
+                    .id(orders.getId())
+                    .orderNumber(orders.getNumber())
+                    .orderAmount(orders.getAmount())
+                    .orderTime(orders.getOrderTime())
+                    .build();
+            //提交订单后清空购物车
+            shoppingCartMapper.cleanByUserId(userId);
+            markSubmitSuccessAfterCommit(redisKey, orders.getId());
+            return orderSubmitVO;
+        } catch (DuplicateKeyException e) {
+            Orders existingOrder = orderMapper.getByUserIdAndSubmitRequestId(userId, idempotencyKey);
+            if (existingOrder != null) {
+                markSubmitSuccessAfterCommit(redisKey, existingOrder.getId());
+                return buildSubmitVO(existingOrder);
+            }
+            redisTemplate.delete(redisKey);
+            throw e;
+        } catch (RuntimeException e) {
+            redisTemplate.delete(redisKey);
+            throw e;
         }
-        //2.向订单表中插入一条数据
-        Orders orders = new Orders();
-        BeanUtils.copyProperties(ordersSubmitDTO, orders);
-        //填充其他字段
-        orders.setUserId(userId);
-        orders.setNumber(String.valueOf(System.currentTimeMillis()));
-        orders.setOrderTime(LocalDateTime.now());
-        orders.setPayStatus(Orders.UN_PAID);
-        orders.setStatus(Orders.PENDING_PAYMENT);
-        orders.setAddressBookId(addressId);
-        orders.setPhone(addressBook.getPhone());
-        orders.setConsignee(addressBook.getConsignee());
-        orders.setAddress(addressBook.getAddress());
-        orderMapper.insert(orders); // Insert order into the database
-        //3.向订单明细表中插入多条数据
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (ShoppingCart shoppingCart : list){
-            OrderDetail orderDetail = new OrderDetail();
-            BeanUtils.copyProperties(shoppingCart, orderDetail);
-            orderDetail.setOrderId(orders.getId());
-            orderDetails.add(orderDetail);
-        }
-        orderDetailMapper.batchInsert(orderDetails);
-        //5.返回订单确认页面需要的VO
-        OrderSubmitVO orderSubmitVO = OrderSubmitVO.builder()
-                .id(orders.getId())
-                .orderNumber(orders.getNumber())
-                .orderAmount(orders.getAmount())
-                .orderTime(orders.getOrderTime())
-                .build();
-        Map<String, Object> map = new HashMap<>();
-        return orderSubmitVO;
     }
     /**
      * 订单支付（模拟支付，跳过微信支付）
@@ -143,8 +185,6 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
 
-        // 支付成功后清空购物车
-        shoppingCartMapper.cleanByUserId(ordersDB.getUserId());
         //给管理端发来单提醒，使用WebSocket
         Map<String, Object> map = new HashMap<>();
         map.put("type",1);//1表示来单，2表示催单
@@ -280,6 +320,55 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
         return orderMapper.updateIfStatus(orders, Orders.PENDING_PAYMENT) == 1;
+    }
+
+    private void validateIdempotencyKey(String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.trim().isEmpty() || idempotencyKey.length() > 64) {
+            throw new OrderBusinessException("幂等请求号不能为空且长度不能超过64位");
+        }
+    }
+
+    private OrderSubmitVO getRepeatedSubmitResult(Long userId, String idempotencyKey, String redisKey) {
+        Object cachedValue = redisTemplate.opsForValue().get(redisKey);
+        if (cachedValue instanceof String && ((String) cachedValue).startsWith("SUCCESS:")) {
+            Long orderId = Long.valueOf(((String) cachedValue).substring("SUCCESS:".length()));
+            Orders order = getOrder(orderId);
+            if (userId.equals(order.getUserId())) {
+                return buildSubmitVO(order);
+            }
+        }
+
+        Orders existingOrder = orderMapper.getByUserIdAndSubmitRequestId(userId, idempotencyKey);
+        if (existingOrder != null) {
+            markSubmitSuccessAfterCommit(redisKey, existingOrder.getId());
+            return buildSubmitVO(existingOrder);
+        }
+        throw new OrderBusinessException("订单正在提交，请勿重复操作");
+    }
+
+    private OrderSubmitVO buildSubmitVO(Orders order) {
+        return OrderSubmitVO.builder()
+                .id(order.getId())
+                .orderNumber(order.getNumber())
+                .orderAmount(order.getAmount())
+                .orderTime(order.getOrderTime())
+                .build();
+    }
+
+    private void markSubmitSuccessAfterCommit(String redisKey, Long orderId) {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                redisTemplate.opsForValue().set(redisKey, "SUCCESS:" + orderId, 5, TimeUnit.MINUTES);
+            }
+
+            @Override
+            public void afterCompletion(int status) {
+                if (status != STATUS_COMMITTED) {
+                    redisTemplate.delete(redisKey);
+                }
+            }
+        });
     }
     @Override
     public OrderStatisticsVO getStatistics() {

@@ -22,6 +22,10 @@ public interface OrderMapper {
     @Select("select * from orders where number = #{orderNumber}")
     Orders getByNumber(String orderNumber);
 
+    @Select("select * from orders where user_id = #{userId} and submit_request_id = #{submitRequestId}")
+    Orders getByUserIdAndSubmitRequestId(@Param("userId") Long userId,
+                                         @Param("submitRequestId") String submitRequestId);
+
     /**
      * Updates an order only when it is still in the expected state.
      *
