@@ -59,7 +59,7 @@ public class WorkSpaceController {
      * @return
      */
     @GetMapping("/overviewDishes")
-    @ApiOperation("查询菜品总览")
+    @ApiOperation("查询商品总览")
     public Result<DishOverViewVO> dishOverView(){
         return Result.success(workspaceService.getDishOverView());
     }
@@ -69,7 +69,7 @@ public class WorkSpaceController {
      * @return
      */
     @GetMapping("/overviewSetmeals")
-    @ApiOperation("查询套餐总览")
+    @ApiOperation("查询商品组合总览")
     public Result<SetmealOverViewVO> setmealOverView(){
         return Result.success(workspaceService.getSetmealOverView());
     }

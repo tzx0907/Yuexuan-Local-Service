@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 @RestController("UserShopController")
 @RequestMapping("/user/shop")
 @Slf4j
-@Api(tags = "user店铺相关接口")
+@Api(tags = "用户端-门店状态接口")
 public class ShopController {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @GetMapping("/status")
-    @ApiOperation("获取营业状态")
+    @ApiOperation("获取门店营业状态")
     public Result<Integer> getStatus(){
         Integer status = (Integer) redisTemplate.opsForValue().get("SHOP_STATUS");
         log.info("获取营业状态：{}",status == 1 ? "营业中" : "打烊中");

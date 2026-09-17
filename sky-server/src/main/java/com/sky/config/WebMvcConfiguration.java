@@ -48,9 +48,9 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     public Docket docket() {
         log.info("开始创建knife4j接口文档...");
         ApiInfo apiInfo = new ApiInfoBuilder()
-                .title("苍穹外卖项目接口文档")
-                .version("2.0")
-                .description("苍穹外卖项目接口文档")
+                .title("悦选本地到家服务平台接口文档")
+                .version("0.1.0")
+                .description("悦选本地到家服务平台：面向社区即时零售与到家服务的后端接口")
                 .build();
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo)

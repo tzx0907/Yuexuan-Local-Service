@@ -19,37 +19,37 @@ import java.util.List;
 @RestController("userDishController")
 @RequestMapping("/user/dish")
 @Slf4j
-@Api(tags = "C端-菜品浏览接口")
+@Api(tags = "用户端-商品浏览接口")
 public class DishController {
     @Autowired
     private DishService dishService;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     /**
-     * 根据分类id查询菜品
+     * 根据分类 ID 查询商品
      *
      * @param categoryId
      * @return
      */
     @GetMapping("/list")
-    @ApiOperation("根据分类id查询菜品")
+    @ApiOperation("根据分类 ID 查询商品")
     public Result<List<DishVO>> list(Long categoryId) {
-        log.info("根据分类id查询菜品，分类id：{}", categoryId);
+        log.info("根据分类 ID 查询商品，分类 ID：{}", categoryId);
         //动态设置查询条件
         String key = "dish_" + categoryId;
         //从缓存中查询
         //如果存在，直接返回
         List<DishVO> list = (List<DishVO>) redisTemplate.opsForValue().get(key);
         if (list != null) {
-            log.info("从缓存中查询菜品数据");
+            log.info("从缓存中查询商品数据");
             return Result.success(list);
         }
         Dish dish = new Dish();
         dish.setCategoryId(categoryId);
         dish.setStatus(StatusConstant.ENABLE);
-        //查询起售中的菜品
+        // 查询上架中的商品
          list = dishService.listWithFlavor(dish);
-        log.info("从数据库中查询菜品数据");
+        log.info("从数据库中查询商品数据");
         //将查询结果写入缓存
         redisTemplate.opsForValue().set(key, list);
         return Result.success(list);
