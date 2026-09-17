@@ -1,4 +1,5 @@
 **/target/
+**/target-maven/
 .idea
 *.iml
 *.class

@@ -2,6 +2,7 @@ package com.sky.controller.admin;
 
 import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
+import com.sky.constant.ProductCacheKey;
 import com.sky.entity.Dish;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
@@ -15,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 @RestController
@@ -31,6 +33,7 @@ public class DishController {
     public Result<?> save(@RequestBody DishDTO dishDTO){
         log.info("新增商品:{}", dishDTO);
         dishService.saveWithFlavor(dishDTO);
+        evictProductListCache(dishDTO.getCategoryId());
         return Result.success();
     }
     @ApiOperation("商品分页查询")
@@ -51,16 +54,23 @@ public class DishController {
     @PostMapping("/status/{status}")
     public Result<?> startOrStop(@PathVariable Integer status, Long id){
         log.info("商品上架下架:{},{}", status, id);
+        DishVO dish = dishService.getByIdWithFlavor(id);
         dishService.startOrStop(status, id);
-        cleanCache("dish_*");
+        if (dish != null) {
+            evictProductListCache(dish.getCategoryId());
+        }
         return Result.success();
     }
     @ApiOperation("修改商品")
     @PutMapping
     public Result<?> update(@RequestBody DishDTO dishDTO){
         log.info("修改商品:{}", dishDTO);
+        DishVO previousDish = dishService.getByIdWithFlavor(dishDTO.getId());
         dishService.update(dishDTO);
-        cleanCache("dish_*");
+        evictProductListCache(dishDTO.getCategoryId());
+        if (previousDish != null && !previousDish.getCategoryId().equals(dishDTO.getCategoryId())) {
+            evictProductListCache(previousDish.getCategoryId());
+        }
         return Result.success();
     }
     @ApiOperation("根据分类 ID 查询商品")
@@ -78,12 +88,24 @@ public class DishController {
             return Result.error("删除参数不能为空");
         }
         log.info("批量删除商品:{}", ids);
+        Set<Long> affectedCategoryIds = new HashSet<>();
+        for (Long id : ids) {
+            DishVO dish = dishService.getByIdWithFlavor(id);
+            if (dish != null) {
+                affectedCategoryIds.add(dish.getCategoryId());
+            }
+        }
         dishService.delete(ids);
+        affectedCategoryIds.forEach(this::evictProductListCache);
         return Result.success();
     }
-    private void cleanCache(String pattern){
-        log.info("根据pattern删除缓存：{}", pattern);
-        Set<String> keys = redisTemplate.keys(pattern);
-        redisTemplate.delete(keys);
+
+    private void evictProductListCache(Long categoryId) {
+        if (categoryId == null) {
+            return;
+        }
+        String key = ProductCacheKey.productListByCategory(categoryId);
+        log.info("删除商品列表缓存：{}", key);
+        redisTemplate.delete(key);
     }
 }

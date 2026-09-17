@@ -17,6 +17,13 @@
         <module>sky-pojo</module>
         <module>sky-server</module>
     </modules>
+    <build>
+        <!--
+            项目移动后，旧 target 目录中残留的构建产物可能被其他进程占用。
+            统一使用独立输出目录，避免源码与历史构建文件相互影响。
+        -->
+        <directory>${project.basedir}/target-maven</directory>
+    </build>
     <properties>
         <mybatis.spring>2.2.0</mybatis.spring>
         <lombok>1.18.20</lombok>

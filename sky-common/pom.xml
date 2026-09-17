@@ -30,7 +30,7 @@
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
         </dependency>
-        <!--支持配置属性类，yml文件中可以提示配置项-->
+        <!-- 支持配置属性类，在 yml 文件中提供 IDE 配置提示 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
