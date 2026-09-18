@@ -29,6 +29,8 @@ mybatis:
     map-underscore-to-camel-case: true
 
 logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [traceId=%X{traceId:-}] %logger{36} - %msg%n"
   level:
     com:
       sky:
