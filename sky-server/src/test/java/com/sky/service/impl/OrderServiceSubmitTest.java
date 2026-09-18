@@ -10,6 +10,8 @@ import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
+import com.sky.mapper.DishMapper;
+import com.sky.exception.OrderBusinessException;
 import com.sky.vo.OrderSubmitVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,11 +33,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +56,9 @@ class OrderServiceSubmitTest {
 
     @Mock
     private ShoppingCartMapper shoppingCartMapper;
+
+    @Mock
+    private DishMapper dishMapper;
 
     @Mock
     private AddressBookMapper addressBookMapper;
@@ -123,6 +130,7 @@ class OrderServiceSubmitTest {
 
         when(shoppingCartMapper.list(any(ShoppingCart.class)))
                 .thenReturn(Arrays.asList(dishCart, setmealCart));
+        when(dishMapper.decrementStock(11L, 1)).thenReturn(1);
 
         // 4. 模拟 MyBatis 插入订单后回填数据库主键
         doAnswer(invocation -> {
@@ -173,5 +181,31 @@ class OrderServiceSubmitTest {
 
         // 10. 检查下单成功后是否清空购物车
         verify(shoppingCartMapper).cleanByUserId(1L);
+        verify(dishMapper).decrementStock(11L, 1);
+    }
+
+    @Test
+    void shouldRejectSubmissionWhenProductStockIsInsufficient() {
+        when(valueOperations.setIfAbsent(anyString(), eq("PROCESSING"), eq(5L), eq(TimeUnit.MINUTES)))
+                .thenReturn(true);
+        when(addressBookMapper.getById(1L)).thenReturn(AddressBook.builder()
+                .id(1L).userId(1L).consignee("测试用户").phone("13800000000")
+                .provinceName("四川省").cityName("成都市").districtName("郫都区").detail("测试地址").build());
+        ShoppingCart cart = ShoppingCart.builder()
+                .dishId(11L).name("悦选纸巾").number(2).amount(new BigDecimal("19.90")).build();
+        when(shoppingCartMapper.list(any(ShoppingCart.class))).thenReturn(List.of(cart));
+        when(dishMapper.decrementStock(11L, 2)).thenReturn(0);
+
+        OrdersSubmitDTO submitDTO = new OrdersSubmitDTO();
+        submitDTO.setAddressBookId(1L);
+        submitDTO.setAmount(new BigDecimal("19.90"));
+
+        OrderBusinessException exception = assertThrows(OrderBusinessException.class,
+                () -> orderService.submit(submitDTO, "test-insufficient-stock-001"));
+
+        assertEquals("商品库存不足或已下架", exception.getMessage());
+        verify(orderMapper, never()).insert(any(Orders.class));
+        verify(orderDetailMapper, never()).batchInsert(any());
+        verify(shoppingCartMapper, never()).cleanByUserId(1L);
     }
 }

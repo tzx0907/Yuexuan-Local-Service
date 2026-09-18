@@ -4,9 +4,9 @@
 <mapper namespace="com.sky.mapper.DishMapper">
 
     <insert id="insert" parameterType="Dish" useGeneratedKeys="true" keyProperty="id">
-        insert into dish (name, category_id, price, image, description, status,
+        insert into dish (name, category_id, price, image, description, status, stock,
         create_time, update_time, create_user, update_user)
-        values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status},
+        values (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status}, #{stock},
         #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
     <select id="pageQuery" resultType="com.sky.vo.DishVO">
@@ -36,10 +36,19 @@
             <if test="image != null">image = #{image},</if>
             <if test="description != null">description = #{description},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="stock != null">stock = #{stock},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="updateUser != null">update_user = #{updateUser},</if>
         </set>
         where id = #{id}
+    </update>
+
+    <update id="decrementStock">
+        update dish
+        set stock = stock - #{quantity}
+        where id = #{dishId}
+          and status = 1
+          and stock >= #{quantity}
     </update>
 
     <select id="list" parameterType="Dish" resultType="Dish">

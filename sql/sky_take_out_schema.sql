@@ -62,6 +62,7 @@ CREATE TABLE `dish` (
   `image` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '图片',
   `description` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '描述信息',
   `status` int DEFAULT '1' COMMENT '0 停售 1 起售',
+  `stock` int NOT NULL DEFAULT '0' COMMENT '可售库存',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `create_user` bigint DEFAULT NULL COMMENT '创建人',

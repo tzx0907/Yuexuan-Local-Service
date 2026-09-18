@@ -57,6 +57,11 @@ public interface DishMapper {
     void update(Dish dish);
 
     /**
+     * 仅在商品仍上架且库存充足时扣减库存，返回受影响行数。
+     */
+    int decrementStock(@Param("dishId") Long dishId, @Param("quantity") Integer quantity);
+
+    /**
      * 根据条件查询菜品列表
      * @param dish
      * @return

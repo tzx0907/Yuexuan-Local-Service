@@ -46,6 +46,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private AddressBookMapper addressBookMapper;
     @Autowired
+    private DishMapper dishMapper;
+    @Autowired
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
@@ -91,6 +93,14 @@ public class OrderServiceImpl implements OrderService {
             }
             if (list == null||list.isEmpty()) {
                 throw new AddressBookBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+            }
+            // 普通商品采用条件更新原子扣减库存；返回 0 表示商品已下架或库存不足。
+            // 商品组合库存将在 SKU/组合物料清单改造后统一处理。
+            for (ShoppingCart shoppingCart : list) {
+                if (shoppingCart.getDishId() != null
+                        && dishMapper.decrementStock(shoppingCart.getDishId(), shoppingCart.getNumber()) != 1) {
+                    throw new OrderBusinessException("商品库存不足或已下架");
+                }
             }
             //2.向订单表中插入一条数据
             Orders orders = new Orders();
