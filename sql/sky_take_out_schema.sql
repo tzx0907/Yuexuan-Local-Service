@@ -82,6 +82,21 @@ CREATE TABLE `dish_flavor` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='菜品口味关系表';
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `product_sku`;
+CREATE TABLE `product_sku` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `dish_id` bigint NOT NULL COMMENT '商品 ID',
+  `spec_name` varchar(64) NOT NULL COMMENT '规格名称',
+  `spec_value` varchar(128) NOT NULL COMMENT '规格值',
+  `price` decimal(10,2) NOT NULL COMMENT 'SKU 售价',
+  `stock` int NOT NULL DEFAULT '0' COMMENT '可售库存',
+  `status` int NOT NULL DEFAULT '1' COMMENT '0 下架 1 上架',
+  `create_time` datetime DEFAULT NULL,
+  `update_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_product_sku_spec` (`dish_id`,`spec_name`,`spec_value`),
+  KEY `idx_product_sku_dish_id` (`dish_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='商品 SKU';
 DROP TABLE IF EXISTS `employee`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -111,6 +126,8 @@ CREATE TABLE `order_detail` (
   `image` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '图片',
   `order_id` bigint NOT NULL COMMENT '订单id',
   `dish_id` bigint DEFAULT NULL COMMENT '菜品id',
+  `sku_id` bigint DEFAULT NULL COMMENT '商品 SKU id',
+  `sku_snapshot` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '下单时 SKU 规格快照',
   `setmeal_id` bigint DEFAULT NULL COMMENT '套餐id',
   `dish_flavor` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '口味',
   `number` int NOT NULL DEFAULT '1' COMMENT '数量',
@@ -177,6 +194,7 @@ CREATE TABLE `setmeal_dish` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
   `setmeal_id` bigint DEFAULT NULL COMMENT '套餐id',
   `dish_id` bigint DEFAULT NULL COMMENT '菜品id',
+  `sku_id` bigint DEFAULT NULL COMMENT '商品 SKU id',
   `name` varchar(32) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '菜品名称 （冗余字段）',
   `price` decimal(10,2) DEFAULT NULL COMMENT '菜品单价（冗余字段）',
   `copies` int DEFAULT NULL COMMENT '菜品份数',

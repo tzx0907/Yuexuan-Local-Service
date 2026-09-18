@@ -48,6 +48,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private DishMapper dishMapper;
     @Autowired
+    private ProductSkuMapper productSkuMapper;
+    @Autowired
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
@@ -97,7 +99,11 @@ public class OrderServiceImpl implements OrderService {
             // 普通商品采用条件更新原子扣减库存；返回 0 表示商品已下架或库存不足。
             // 商品组合库存将在 SKU/组合物料清单改造后统一处理。
             for (ShoppingCart shoppingCart : list) {
-                if (shoppingCart.getDishId() != null
+                if (shoppingCart.getSkuId() != null
+                        && productSkuMapper.decrementStock(shoppingCart.getSkuId(), shoppingCart.getNumber()) != 1) {
+                    throw new OrderBusinessException("商品规格库存不足或已下架");
+                }
+                if (shoppingCart.getSkuId() == null && shoppingCart.getDishId() != null
                         && dishMapper.decrementStock(shoppingCart.getDishId(), shoppingCart.getNumber()) != 1) {
                     throw new OrderBusinessException("商品库存不足或已下架");
                 }
@@ -123,6 +129,9 @@ public class OrderServiceImpl implements OrderService {
                 OrderDetail orderDetail = new OrderDetail();
                 BeanUtils.copyProperties(shoppingCart, orderDetail);
                 orderDetail.setOrderId(orders.getId());
+                if (shoppingCart.getSkuId() != null) {
+                    orderDetail.setSkuSnapshot(shoppingCart.getDishFlavor());
+                }
                 orderDetails.add(orderDetail);
             }
             orderDetailMapper.batchInsert(orderDetails);

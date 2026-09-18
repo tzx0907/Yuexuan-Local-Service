@@ -11,6 +11,7 @@ import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.DishMapper;
+import com.sky.mapper.ProductSkuMapper;
 import com.sky.exception.OrderBusinessException;
 import com.sky.vo.OrderSubmitVO;
 import org.junit.jupiter.api.AfterEach;
@@ -59,6 +60,9 @@ class OrderServiceSubmitTest {
 
     @Mock
     private DishMapper dishMapper;
+
+    @Mock
+    private ProductSkuMapper productSkuMapper;
 
     @Mock
     private AddressBookMapper addressBookMapper;
@@ -207,5 +211,40 @@ class OrderServiceSubmitTest {
         verify(orderMapper, never()).insert(any(Orders.class));
         verify(orderDetailMapper, never()).batchInsert(any());
         verify(shoppingCartMapper, never()).cleanByUserId(1L);
+    }
+
+    @Test
+    void shouldDecrementSkuStockInsteadOfProductStock() {
+        when(valueOperations.setIfAbsent(anyString(), eq("PROCESSING"), eq(5L), eq(TimeUnit.MINUTES)))
+                .thenReturn(true);
+        when(addressBookMapper.getById(1L)).thenReturn(AddressBook.builder()
+                .id(1L).userId(1L).consignee("测试用户").phone("13800000000")
+                .provinceName("四川省").cityName("成都市").districtName("郫都区").detail("测试地址").build());
+        ShoppingCart cart = ShoppingCart.builder().dishId(11L).skuId(101L)
+                .dishFlavor("规格:家庭装").name("悦选纸巾").number(1).amount(new BigDecimal("29.90")).build();
+        when(shoppingCartMapper.list(any(ShoppingCart.class))).thenReturn(List.of(cart));
+        when(productSkuMapper.decrementStock(101L, 1)).thenReturn(1);
+        doAnswer(invocation -> {
+            invocation.<Orders>getArgument(0).setId(1002L);
+            return null;
+        }).when(orderMapper).insert(any(Orders.class));
+
+        OrdersSubmitDTO submitDTO = new OrdersSubmitDTO();
+        submitDTO.setAddressBookId(1L);
+        submitDTO.setAmount(new BigDecimal("29.90"));
+        submitDTO.setPayMethod(1);
+        submitDTO.setDeliveryStatus(1);
+        submitDTO.setTablewareNumber(1);
+        submitDTO.setTablewareStatus(1);
+        submitDTO.setPackAmount(0);
+
+        orderService.submit(submitDTO, "test-sku-submit-001");
+
+        verify(productSkuMapper).decrementStock(101L, 1);
+        verify(dishMapper, never()).decrementStock(any(), any());
+        ArgumentCaptor<List<OrderDetail>> detailsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(orderDetailMapper).batchInsert(detailsCaptor.capture());
+        assertEquals(101L, detailsCaptor.getValue().get(0).getSkuId());
+        assertEquals("规格:家庭装", detailsCaptor.getValue().get(0).getSkuSnapshot());
     }
 }

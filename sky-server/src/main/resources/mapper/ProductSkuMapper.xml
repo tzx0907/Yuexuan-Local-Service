@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.ProductSkuMapper">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into product_sku (dish_id, spec_name, spec_value, price, stock, status, create_time, update_time)
+        values (#{dishId}, #{specName}, #{specValue}, #{price}, #{stock}, #{status}, now(), now())
+    </insert>
+    <update id="update">
+        update product_sku
+        <set>
+            <if test="specName != null">spec_name = #{specName},</if>
+            <if test="specValue != null">spec_value = #{specValue},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = now()
+        </set>
+        where id = #{id}
+    </update>
+    <select id="getById" resultType="com.sky.entity.ProductSku">select * from product_sku where id = #{id}</select>
+    <select id="listByDishId" resultType="com.sky.entity.ProductSku">select * from product_sku where dish_id = #{dishId} order by id</select>
+    <update id="decrementStock">
+        update product_sku set stock = stock - #{quantity}
+        where id = #{skuId} and status = 1 and stock >= #{quantity}
+    </update>
+</mapper>

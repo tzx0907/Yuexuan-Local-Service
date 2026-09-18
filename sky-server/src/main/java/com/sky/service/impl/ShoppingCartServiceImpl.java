@@ -4,9 +4,11 @@ import com.sky.context.BaseContext;
 import com.sky.dto.ShoppingCartDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
+import com.sky.entity.ProductSku;
 import com.sky.entity.ShoppingCart;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealMapper;
+import com.sky.mapper.ProductSkuMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     DishMapper dishMapper;
     @Autowired
     SetmealMapper setmealMapper;
+    @Autowired
+    ProductSkuMapper productSkuMapper;
     /**
      * 添加购物车
      * @param shoppingCartDTO
@@ -47,9 +51,20 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             Long dishId = shoppingCartDTO.getDishId();
             if(dishId!=null){
                 Dish dish = dishMapper.getById(dishId);
+                if (shoppingCartDTO.getSkuId() != null) {
+                    ProductSku sku = productSkuMapper.getById(shoppingCartDTO.getSkuId());
+                    if (sku == null || !dishId.equals(sku.getDishId()) || !Integer.valueOf(1).equals(sku.getStatus())) {
+                        throw new IllegalArgumentException("商品规格不可售");
+                    }
+                    shoppingCart.setSkuId(sku.getId());
+                    shoppingCart.setDishFlavor(sku.getSpecName() + ":" + sku.getSpecValue());
+                    shoppingCart.setAmount(sku.getPrice());
+                }
                 shoppingCart.setImage(dish.getImage());
                 shoppingCart.setName(dish.getName());
-                shoppingCart.setAmount(dish.getPrice());
+                if (shoppingCart.getAmount() == null) {
+                    shoppingCart.setAmount(dish.getPrice());
+                }
             }else{
                 Setmeal setmeal = setmealMapper.getById(shoppingCartDTO.getSetmealId());
                 shoppingCart.setImage(setmeal.getImage());

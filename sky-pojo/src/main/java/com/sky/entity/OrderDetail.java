@@ -30,6 +30,12 @@ public class OrderDetail implements Serializable {
     //菜品id
     private Long dishId;
 
+    //商品 SKU id
+    private Long skuId;
+
+    //下单时的 SKU 规格快照
+    private String skuSnapshot;
+
     //套餐id
     private Long setmealId;
 
