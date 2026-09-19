@@ -3,12 +3,15 @@ package com.sky.service.impl;
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
+import com.sky.messaging.OrderPaidEventPublisher;
 import com.sky.websocket.WebSocketServer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -32,6 +35,9 @@ class OrderServicePaymentTest {
     @Mock
     private WebSocketServer webSocketServer;
 
+    @Mock
+    private OrderPaidEventPublisher orderPaidEventPublisher;
+
     @Test
     void shouldIgnoreARepeatedPaymentNotificationForAnAlreadyPaidOrder() {
         Orders paidOrder = Orders.builder()
@@ -48,6 +54,7 @@ class OrderServicePaymentTest {
         verify(orderMapper, never()).updateIfStatus(any(Orders.class), eq(Orders.PENDING_PAYMENT));
         verify(shoppingCartMapper, never()).cleanByUserId(any());
         verify(webSocketServer, never()).sendToAllClient(any());
+        verify(orderPaidEventPublisher, never()).publish(any());
     }
 
     @Test
@@ -65,7 +72,8 @@ class OrderServicePaymentTest {
         orderService.paySuccess(unpaidOrder.getNumber());
 
         verify(shoppingCartMapper, never()).cleanByUserId(any());
-        verify(webSocketServer).sendToAllClient(any());
+        verify(webSocketServer, never()).sendToAllClient(any());
+        verify(orderPaidEventPublisher).publish(any());
     }
 
     @Test
@@ -90,5 +98,33 @@ class OrderServicePaymentTest {
 
         verify(shoppingCartMapper, never()).cleanByUserId(any());
         verify(webSocketServer, never()).sendToAllClient(any());
+        verify(orderPaidEventPublisher, never()).publish(any());
+    }
+
+    @Test
+    void shouldPublishOrderEventOnlyAfterTransactionCommits() {
+        Orders unpaidOrder = Orders.builder()
+                .id(1004L)
+                .number("202609150004")
+                .userId(12L)
+                .amount(new java.math.BigDecimal("18.80"))
+                .status(Orders.PENDING_PAYMENT)
+                .payStatus(Orders.UN_PAID)
+                .build();
+        when(orderMapper.getByNumber(unpaidOrder.getNumber())).thenReturn(unpaidOrder);
+        when(orderMapper.updateIfStatus(any(Orders.class), eq(Orders.PENDING_PAYMENT))).thenReturn(1);
+
+        TransactionSynchronizationManager.initSynchronization();
+        try {
+            orderService.paySuccess(unpaidOrder.getNumber());
+            verify(orderPaidEventPublisher, never()).publish(any());
+
+            for (TransactionSynchronization synchronization : TransactionSynchronizationManager.getSynchronizations()) {
+                synchronization.afterCommit();
+            }
+            verify(orderPaidEventPublisher).publish(any());
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
+        }
     }
 }

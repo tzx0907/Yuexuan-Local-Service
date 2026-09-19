@@ -168,6 +168,15 @@ CREATE TABLE `orders` (
   UNIQUE KEY `uk_orders_user_submit_request` (`user_id`,`submit_request_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=45 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='订单表';
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `processed_message`;
+CREATE TABLE `processed_message` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `event_id` varchar(64) NOT NULL COMMENT '领域事件唯一标识',
+  `consumer_name` varchar(64) NOT NULL COMMENT '消费者名称',
+  `processed_at` datetime NOT NULL COMMENT '首次处理时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_processed_message_event_consumer` (`event_id`,`consumer_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='消息消费幂等记录';
 DROP TABLE IF EXISTS `setmeal`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;

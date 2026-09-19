@@ -1,0 +1,719 @@
+
+D:\develop\Yuexuan Local Service>set JAVA_HOME=D:\develop\JDK17 
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.sky:sky-server >-------------------------
+[INFO] Building sky-server 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:2.7.3:run (default-cli) > test-compile @ sky-server >>>
+[INFO] 
+[INFO] --- resources:3.2.0:resources (default-resources) @ sky-server ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Using 'UTF-8' encoding to copy filtered properties files.
+[INFO] Copying 2 resources
+[INFO] Copying 14 resources
+[INFO] 
+[INFO] --- compiler:3.10.1:compile (default-compile) @ sky-server ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 70 source files to D:\develop\Yuexuan Local Service\sky-server\target-maven\classes
+[INFO] /D:/develop/Yuexuan Local Service/sky-server/src/main/java/com/sky/service/impl/OrderServiceImpl.java: D:\develop\Yuexuan Local Service\sky-server\src\main\java\com\sky\service\impl\OrderServiceImpl.java使用或覆盖了已过时的 API。
+[INFO] /D:/develop/Yuexuan Local Service/sky-server/src/main/java/com/sky/service/impl/OrderServiceImpl.java: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+[INFO] /D:/develop/Yuexuan Local Service/sky-server/src/main/java/com/sky/controller/user/DishController.java: 某些输入文件使用了未经检查或不安全的操作。
+[INFO] /D:/develop/Yuexuan Local Service/sky-server/src/main/java/com/sky/controller/user/DishController.java: 有关详细信息, 请使用 -Xlint:unchecked 重新编译。
+[INFO] 
+[INFO] --- resources:3.2.0:testResources (default-testResources) @ sky-server ---
+[INFO] Not copying test resources
+[INFO] 
+[INFO] --- compiler:3.10.1:testCompile (default-testCompile) @ sky-server ---
+[INFO] Not compiling test sources
+[INFO] 
+[INFO] <<< spring-boot:2.7.3:run (default-cli) < test-compile @ sky-server <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:2.7.3:run (default-cli) @ sky-server ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v2.7.3)
+
+2026-09-18 21:16:18.458 INFO  [main] [traceId=] com.sky.SkyApplication - Starting SkyApplication using Java 17.0.18 on 见伊云喜 with PID 35916 (D:\develop\Yuexuan Local Service\sky-server\target-maven\classes started by 38246 in D:\develop\Yuexuan Local Service\sky-server)
+2026-09-18 21:16:18.461 INFO  [main] [traceId=] com.sky.SkyApplication - The following 1 profile is active: "dev"
+2026-09-18 21:16:19.139 INFO  [main] [traceId=] o.s.d.r.c.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2026-09-18 21:16:19.141 INFO  [main] [traceId=] o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-09-18 21:16:19.166 INFO  [main] [traceId=] o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 15 ms. Found 0 Redis repository interfaces.
+2026-09-18 21:16:20.045 INFO  [main] [traceId=] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port(s): 8080 (http)
+2026-09-18 21:16:20.056 INFO  [main] [traceId=] o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-09-18 21:16:20.056 INFO  [main] [traceId=] o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/9.0.65]
+2026-09-18 21:16:20.189 INFO  [main] [traceId=] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-09-18 21:16:20.189 INFO  [main] [traceId=] o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1686 ms
+2026-09-18 21:16:20.449 INFO  [main] [traceId=] com.sky.config.RedisConfiguration - 开始创建RedisTemplate对象...
+2026-09-18 21:16:20.507 INFO  [main] [traceId=] com.sky.config.RedisConfiguration - 创建RedisTemplate对象成功！
+2026-09-18 21:16:20.507 INFO  [main] [traceId=] com.sky.config.RedisConfiguration - 开始设置RedisTemplate的序列化器...
+2026-09-18 21:16:20.627 INFO  [main] [traceId=] c.a.d.s.b.a.DruidDataSourceAutoConfigure - Init DruidDataSource
+2026-09-18 21:16:20.903 INFO  [main] [traceId=] c.alibaba.druid.pool.DruidDataSource - {dataSource-1} inited
+2026-09-18 21:16:21.737 INFO  [main] [traceId=] com.sky.config.OssConfiguration - 开始创建阿里云文件上传工具类对象，Endpoint: oss-cn-chengdu.aliyuncs.com
+2026-09-18 21:16:22.512 INFO  [main] [traceId=] com.sky.config.WebMvcConfiguration - 开始注册自定义拦截器...
+2026-09-18 21:16:22.810 INFO  [main] [traceId=] com.sky.config.WebMvcConfiguration - 开始创建knife4j接口文档...
+2026-09-18 21:16:22.927 INFO  [main] [traceId=] com.sky.config.WebMvcConfiguration - 扩展消息转换器...
+2026-09-18 21:16:22.942 INFO  [main] [traceId=] com.sky.config.WebMvcConfiguration - 开始进行静态资源映射...
+2026-09-18 21:16:24.188 INFO  [main] [traceId=] o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port(s): 8080 (http) with context path ''
+2026-09-18 21:16:25.566 INFO  [main] [traceId=] com.sky.SkyApplication - Started SkyApplication in 7.45 seconds (JVM running for 7.865)
+2026-09-18 21:16:25.569 INFO  [main] [traceId=] com.sky.SkyApplication - server started
+2026-09-18 21:16:33.280 INFO  [http-nio-8080-exec-2] [traceId=] o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-09-18 21:16:33.280 INFO  [http-nio-8080-exec-2] [traceId=] o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-09-18 21:16:33.282 INFO  [http-nio-8080-exec-2] [traceId=] o.s.web.servlet.DispatcherServlet - Completed initialization in 2 ms
+2026-09-18 21:16:33.292 INFO  [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] com.sky.filter.TraceIdFilter - 请求开始 method=POST, uri=/user/user/login
+2026-09-18 21:16:33.396 INFO  [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] c.sky.controller.user.UserController - 用户登录：codex-local-smoke
+2026-09-18 21:16:33.396 INFO  [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] com.sky.service.impl.UserServiceImpl - 微信登录，参数：UserLoginDTO(code=codex-local-smoke)
+2026-09-18 21:16:33.397 INFO  [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] com.sky.service.impl.UserServiceImpl - 使用本地模拟微信登录，openid=dev_vg97gq
+2026-09-18 21:16:33.741 DEBUG [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] c.sky.mapper.UserMapper.getByOpenid - ==>  Preparing: select * from user where openid = ?
+2026-09-18 21:16:33.789 DEBUG [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] c.sky.mapper.UserMapper.getByOpenid - ==> Parameters: dev_vg97gq(String)
+2026-09-18 21:16:33.851 DEBUG [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] c.sky.mapper.UserMapper.getByOpenid - <==      Total: 0
+2026-09-18 21:16:33.856 DEBUG [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] com.sky.mapper.UserMapper.insert - ==>  Preparing: insert into user (openid, name, phone, sex, id_number, avatar, create_time) values (?, ?, ?, ?, ?, ?, ?)
+2026-09-18 21:16:33.858 DEBUG [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] com.sky.mapper.UserMapper.insert - ==> Parameters: dev_vg97gq(String), null, null, null, null, null, 2026-09-18T21:16:33.855368100(LocalDateTime)
+2026-09-18 21:16:33.890 DEBUG [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] com.sky.mapper.UserMapper.insert - <==    Updates: 1
+2026-09-18 21:16:34.019 INFO  [http-nio-8080-exec-2] [traceId=a05587aed93b421faaeb771c52221b99] com.sky.filter.TraceIdFilter - 请求结束 method=POST, uri=/user/user/login, status=200, elapsedMs=729
+2026-09-18 21:16:34.205 INFO  [http-nio-8080-exec-1] [traceId=02304960aae74575988ad378417e214c] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/category/list
+2026-09-18 21:16:34.206 INFO  [http-nio-8080-exec-1] [traceId=02304960aae74575988ad378417e214c] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ1OTMsInVzZXJJZCI6NX0.j_RH2DO3QRwEzCM1nqoQ_18LfMz3zpK4KAL7T_FS8uQ
+2026-09-18 21:16:34.240 INFO  [http-nio-8080-exec-1] [traceId=02304960aae74575988ad378417e214c] c.s.i.JwtTokenUserInterceptor - 当前用户id：5
+2026-09-18 21:16:34.286 DEBUG [http-nio-8080-exec-1] [traceId=02304960aae74575988ad378417e214c] com.sky.mapper.CategoryMapper.list - ==>  Preparing: select * from category where status = 1 order by sort asc,create_time desc
+2026-09-18 21:16:34.286 DEBUG [http-nio-8080-exec-1] [traceId=02304960aae74575988ad378417e214c] com.sky.mapper.CategoryMapper.list - ==> Parameters: 
+2026-09-18 21:16:34.302 DEBUG [http-nio-8080-exec-1] [traceId=02304960aae74575988ad378417e214c] com.sky.mapper.CategoryMapper.list - <==      Total: 11
+2026-09-18 21:16:34.312 INFO  [http-nio-8080-exec-1] [traceId=02304960aae74575988ad378417e214c] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/category/list, status=200, elapsedMs=107
+2026-09-18 21:16:34.338 INFO  [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:16:34.340 INFO  [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ1OTMsInVzZXJJZCI6NX0.j_RH2DO3QRwEzCM1nqoQ_18LfMz3zpK4KAL7T_FS8uQ
+2026-09-18 21:16:34.342 INFO  [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] c.s.i.JwtTokenUserInterceptor - 当前用户id：5
+2026-09-18 21:16:34.343 INFO  [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：26
+2026-09-18 21:16:35.316 DEBUG [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:16:35.326 DEBUG [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] com.sky.mapper.DishMapper.list - ==> Parameters: 26(Long), 1(Integer)
+2026-09-18 21:16:35.340 DEBUG [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] com.sky.mapper.DishMapper.list - <==      Total: 1
+2026-09-18 21:16:35.373 DEBUG [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:16:35.373 DEBUG [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 72(Long)
+2026-09-18 21:16:35.377 DEBUG [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:16:35.377 INFO  [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:16:35.397 INFO  [http-nio-8080-exec-4] [traceId=2f3e9027e930417f85f5910e99202427] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=1059
+2026-09-18 21:17:00.005 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:17:00.007 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:17:00.007 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:02:00.006434700(LocalDateTime)
+2026-09-18 21:17:00.011 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:17:11.757 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zggj9-byyqvgca] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shop/status
+2026-09-18 21:17:11.759 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zggj9-byyqvgca] c.sky.controller.user.ShopController - 获取营业状态：营业中
+2026-09-18 21:17:11.763 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zggj9-byyqvgca] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shop/status, status=200, elapsedMs=6
+2026-09-18 21:17:14.759 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] com.sky.filter.TraceIdFilter - 请求开始 method=POST, uri=/user/user/login
+2026-09-18 21:17:14.760 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] c.sky.controller.user.UserController - 用户登录：0e3ybUFa1xuKsM0R5uHa1bHS6E3ybUFa
+2026-09-18 21:17:14.760 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] com.sky.service.impl.UserServiceImpl - 微信登录，参数：UserLoginDTO(code=0e3ybUFa1xuKsM0R5uHa1bHS6E3ybUFa)
+2026-09-18 21:17:14.760 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] com.sky.service.impl.UserServiceImpl - 使用本地模拟微信登录，openid=dev_zkpic9
+2026-09-18 21:17:14.760 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] c.sky.mapper.UserMapper.getByOpenid - ==>  Preparing: select * from user where openid = ?
+2026-09-18 21:17:14.761 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] c.sky.mapper.UserMapper.getByOpenid - ==> Parameters: dev_zkpic9(String)
+2026-09-18 21:17:14.761 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] c.sky.mapper.UserMapper.getByOpenid - <==      Total: 0
+2026-09-18 21:17:14.762 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] com.sky.mapper.UserMapper.insert - ==>  Preparing: insert into user (openid, name, phone, sex, id_number, avatar, create_time) values (?, ?, ?, ?, ?, ?, ?)
+2026-09-18 21:17:14.762 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] com.sky.mapper.UserMapper.insert - ==> Parameters: dev_zkpic9(String), null, null, null, null, null, 2026-09-18T21:17:14.762520900(LocalDateTime)
+2026-09-18 21:17:14.768 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] com.sky.mapper.UserMapper.insert - <==    Updates: 1
+2026-09-18 21:17:14.770 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgiv7-s1r5hfuu] com.sky.filter.TraceIdFilter - 请求结束 method=POST, uri=/user/user/login, status=200, elapsedMs=11
+2026-09-18 21:17:14.783 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgivs-z02l1ub0] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/category/list
+2026-09-18 21:17:14.784 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgivs-z02l1ub0] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:14.785 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shoppingCart/list
+2026-09-18 21:17:14.786 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgivs-z02l1ub0] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:14.787 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgivs-z02l1ub0] com.sky.mapper.CategoryMapper.list - ==>  Preparing: select * from category where status = 1 order by sort asc,create_time desc
+2026-09-18 21:17:14.787 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgivs-z02l1ub0] com.sky.mapper.CategoryMapper.list - ==> Parameters: 
+2026-09-18 21:17:14.786 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:14.791 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:14.794 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] c.s.c.user.ShoppingCartController - 用户查看购物车
+2026-09-18 21:17:14.797 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgivs-z02l1ub0] com.sky.mapper.CategoryMapper.list - <==      Total: 11
+2026-09-18 21:17:14.799 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] c.sky.mapper.ShoppingCartMapper.list - ==>  Preparing: select * from shopping_cart WHERE user_id = ?
+2026-09-18 21:17:14.799 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] c.sky.mapper.ShoppingCartMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:17:14.802 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgivs-z02l1ub0] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/category/list, status=200, elapsedMs=19
+2026-09-18 21:17:14.803 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] c.sky.mapper.ShoppingCartMapper.list - <==      Total: 0
+2026-09-18 21:17:14.805 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgivv-5qj0j5gc] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shoppingCart/list, status=200, elapsedMs=20
+2026-09-18 21:17:14.812 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgiwn-sam0deme] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:14.813 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgiwn-sam0deme] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:14.816 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgiwn-sam0deme] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:14.817 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgiwn-sam0deme] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：26
+2026-09-18 21:17:14.819 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgiwn-sam0deme] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:14.826 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgiwn-sam0deme] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=14
+2026-09-18 21:17:14.846 INFO  [http-nio-8080-exec-3] [traceId=e35ea30932f2492f8ef5497b8162cfba] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/assets/yuexuan-product.svg
+2026-09-18 21:17:14.858 INFO  [http-nio-8080-exec-3] [traceId=e35ea30932f2492f8ef5497b8162cfba] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/assets/yuexuan-product.svg, status=200, elapsedMs=12
+2026-09-18 21:17:16.859 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:16.860 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:16.861 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:16.862 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：16
+2026-09-18 21:17:16.864 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:16.864 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] com.sky.mapper.DishMapper.list - ==> Parameters: 16(Long), 1(Integer)
+2026-09-18 21:17:16.867 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] com.sky.mapper.DishMapper.list - <==      Total: 3
+2026-09-18 21:17:16.868 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:16.868 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 67(Long)
+2026-09-18 21:17:16.870 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 1
+2026-09-18 21:17:16.870 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:16.871 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 66(Long)
+2026-09-18 21:17:16.872 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 1
+2026-09-18 21:17:16.872 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:16.872 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 65(Long)
+2026-09-18 21:17:16.873 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 1
+2026-09-18 21:17:16.874 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:16.878 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgkhi-kcngh4sa] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=19
+2026-09-18 21:17:18.614 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:18.614 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:18.616 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:18.617 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：17
+2026-09-18 21:17:18.620 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:18.621 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] com.sky.mapper.DishMapper.list - ==> Parameters: 17(Long), 1(Integer)
+2026-09-18 21:17:18.624 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] com.sky.mapper.DishMapper.list - <==      Total: 3
+2026-09-18 21:17:18.626 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:18.627 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 64(Long)
+2026-09-18 21:17:18.629 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:18.632 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:18.632 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 63(Long)
+2026-09-18 21:17:18.633 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:18.635 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:18.635 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 62(Long)
+2026-09-18 21:17:18.637 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:18.639 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:18.644 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zglu5-tsm1fwsk] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=31
+2026-09-18 21:17:19.842 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:19.842 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:19.844 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:19.845 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：18
+2026-09-18 21:17:19.847 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:19.848 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] com.sky.mapper.DishMapper.list - ==> Parameters: 18(Long), 1(Integer)
+2026-09-18 21:17:19.851 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] com.sky.mapper.DishMapper.list - <==      Total: 4
+2026-09-18 21:17:19.852 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:19.852 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 61(Long)
+2026-09-18 21:17:19.853 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:19.854 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:19.854 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 60(Long)
+2026-09-18 21:17:19.855 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 1
+2026-09-18 21:17:19.856 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:19.856 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 59(Long)
+2026-09-18 21:17:19.857 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:19.858 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:19.858 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 58(Long)
+2026-09-18 21:17:19.859 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:19.859 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:19.865 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgmsb-op6kg2pb] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=23
+2026-09-18 21:17:22.053 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:22.054 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:22.055 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:22.056 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：19
+2026-09-18 21:17:22.058 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:22.059 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] com.sky.mapper.DishMapper.list - ==> Parameters: 19(Long), 1(Integer)
+2026-09-18 21:17:22.062 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] com.sky.mapper.DishMapper.list - <==      Total: 4
+2026-09-18 21:17:22.062 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:22.063 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 57(Long)
+2026-09-18 21:17:22.064 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 1
+2026-09-18 21:17:22.064 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:22.065 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 56(Long)
+2026-09-18 21:17:22.066 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 1
+2026-09-18 21:17:22.067 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:22.067 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 55(Long)
+2026-09-18 21:17:22.068 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:22.069 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:22.069 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 54(Long)
+2026-09-18 21:17:22.070 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 1
+2026-09-18 21:17:22.071 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:22.074 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgohs-61afc9g4] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=21
+2026-09-18 21:17:24.034 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:24.035 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:24.036 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:24.037 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：20
+2026-09-18 21:17:24.041 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:24.042 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] com.sky.mapper.DishMapper.list - ==> Parameters: 20(Long), 1(Integer)
+2026-09-18 21:17:24.048 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] com.sky.mapper.DishMapper.list - <==      Total: 3
+2026-09-18 21:17:24.051 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:24.051 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 53(Long)
+2026-09-18 21:17:24.052 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 2
+2026-09-18 21:17:24.054 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:24.054 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 52(Long)
+2026-09-18 21:17:24.054 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 2
+2026-09-18 21:17:24.055 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:24.055 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 51(Long)
+2026-09-18 21:17:24.056 DEBUG [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 2
+2026-09-18 21:17:24.056 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:24.061 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgq0s-i1mu3fc3] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=27
+2026-09-18 21:17:25.322 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:25.322 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:25.325 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:25.325 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：12
+2026-09-18 21:17:25.328 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:25.329 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] com.sky.mapper.DishMapper.list - ==> Parameters: 12(Long), 1(Integer)
+2026-09-18 21:17:25.331 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] com.sky.mapper.DishMapper.list - <==      Total: 2
+2026-09-18 21:17:25.332 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:25.332 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 50(Long)
+2026-09-18 21:17:25.333 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:25.334 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:25.334 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 49(Long)
+2026-09-18 21:17:25.335 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:25.335 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:25.339 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgr0k-qepkuczg] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=17
+2026-09-18 21:17:26.134 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:26.135 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:26.136 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:26.137 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：11
+2026-09-18 21:17:26.139 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:26.140 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] com.sky.mapper.DishMapper.list - ==> Parameters: 11(Long), 1(Integer)
+2026-09-18 21:17:26.143 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] com.sky.mapper.DishMapper.list - <==      Total: 3
+2026-09-18 21:17:26.144 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:26.144 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 48(Long)
+2026-09-18 21:17:26.146 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:26.147 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:26.147 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 47(Long)
+2026-09-18 21:17:26.148 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:26.149 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:26.149 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 46(Long)
+2026-09-18 21:17:26.150 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:26.150 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:26.155 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgrn2-tqkkhb4y] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=21
+2026-09-18 21:17:27.241 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:27.242 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:27.243 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:27.244 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：21
+2026-09-18 21:17:27.247 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] com.sky.mapper.DishMapper.list - ==>  Preparing: select * from dish WHERE category_id = ? and status = ? order by create_time desc
+2026-09-18 21:17:27.248 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] com.sky.mapper.DishMapper.list - ==> Parameters: 21(Long), 1(Integer)
+2026-09-18 21:17:27.250 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] com.sky.mapper.DishMapper.list - <==      Total: 2
+2026-09-18 21:17:27.251 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:27.251 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 69(Long)
+2026-09-18 21:17:27.252 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:27.253 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.m.DishFlavorMapper.getByDishId - ==>  Preparing: select * from dish_flavor where dish_id = ?
+2026-09-18 21:17:27.254 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.m.DishFlavorMapper.getByDishId - ==> Parameters: 68(Long)
+2026-09-18 21:17:27.255 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.s.m.DishFlavorMapper.getByDishId - <==      Total: 0
+2026-09-18 21:17:27.255 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] c.sky.controller.user.DishController - 从数据库中查询商品数据
+2026-09-18 21:17:27.262 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zgsht-acvgb1ib] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=21
+2026-09-18 21:17:28.332 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgtc5-1u5jnmxg] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/setmeal/list
+2026-09-18 21:17:28.332 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgtc5-1u5jnmxg] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:28.334 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgtc5-1u5jnmxg] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:28.413 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zgtc5-1u5jnmxg] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/setmeal/list, status=200, elapsedMs=81
+2026-09-18 21:17:29.472 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zgu7s-uhy1yz4w] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/setmeal/list
+2026-09-18 21:17:29.474 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zgu7s-uhy1yz4w] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:29.476 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zgu7s-uhy1yz4w] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:29.482 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zgu7s-uhy1yz4w] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/setmeal/list, status=200, elapsedMs=10
+2026-09-18 21:17:31.120 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgvhm-x0bj47u7] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:31.120 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgvhm-x0bj47u7] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:31.121 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgvhm-x0bj47u7] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:31.121 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgvhm-x0bj47u7] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：18
+2026-09-18 21:17:31.124 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgvhm-x0bj47u7] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:31.125 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zgvhm-x0bj47u7] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=5
+2026-09-18 21:17:31.782 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zgvzz-78zw72af] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:31.783 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zgvzz-78zw72af] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:31.784 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zgvzz-78zw72af] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:31.784 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zgvzz-78zw72af] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：17
+2026-09-18 21:17:31.787 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zgvzz-78zw72af] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:31.789 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zgvzz-78zw72af] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=7
+2026-09-18 21:17:32.836 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgwt8-nh3xh1ut] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:32.836 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgwt8-nh3xh1ut] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:32.837 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgwt8-nh3xh1ut] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:32.838 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgwt8-nh3xh1ut] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：16
+2026-09-18 21:17:32.842 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgwt8-nh3xh1ut] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:32.844 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zgwt8-nh3xh1ut] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=8
+2026-09-18 21:17:33.188 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgx31-v69mtvpe] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:33.189 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgx31-v69mtvpe] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:33.190 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgx31-v69mtvpe] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:33.191 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgx31-v69mtvpe] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：26
+2026-09-18 21:17:33.193 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgx31-v69mtvpe] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:33.195 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zgx31-v69mtvpe] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=7
+2026-09-18 21:17:33.912 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgxn5-jeh37mum] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:33.912 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgxn5-jeh37mum] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:33.913 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgxn5-jeh37mum] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:33.913 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgxn5-jeh37mum] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：16
+2026-09-18 21:17:33.916 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgxn5-jeh37mum] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:33.917 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zgxn5-jeh37mum] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=5
+2026-09-18 21:17:34.362 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgxzn-6gt4rakh] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:34.363 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgxzn-6gt4rakh] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:34.364 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgxzn-6gt4rakh] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:34.365 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgxzn-6gt4rakh] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：18
+2026-09-18 21:17:34.370 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgxzn-6gt4rakh] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:34.372 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zgxzn-6gt4rakh] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=10
+2026-09-18 21:17:36.609 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgzq3-hm7b54oy] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:36.609 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgzq3-hm7b54oy] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:36.610 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgzq3-hm7b54oy] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:36.610 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgzq3-hm7b54oy] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：19
+2026-09-18 21:17:36.612 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgzq3-hm7b54oy] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:36.613 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zgzq3-hm7b54oy] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=4
+2026-09-18 21:17:37.577 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zh0gz-q3srqaul] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:37.578 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zh0gz-q3srqaul] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:37.579 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zh0gz-q3srqaul] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:37.579 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zh0gz-q3srqaul] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：20
+2026-09-18 21:17:37.581 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zh0gz-q3srqaul] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:37.584 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zh0gz-q3srqaul] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=7
+2026-09-18 21:17:39.217 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zh1qh-pf1twbyj] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:39.218 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zh1qh-pf1twbyj] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:39.219 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zh1qh-pf1twbyj] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:39.219 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zh1qh-pf1twbyj] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：12
+2026-09-18 21:17:39.221 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zh1qh-pf1twbyj] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:39.223 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zh1qh-pf1twbyj] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=6
+2026-09-18 21:17:56.935 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] com.sky.filter.TraceIdFilter - 请求开始 method=POST, uri=/user/shoppingCart/add
+2026-09-18 21:17:56.936 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:56.937 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:56.938 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.s.c.user.ShoppingCartController - 用户添加购物车，购物车数据：ShoppingCartDTO(dishId=50, skuId=null, setmealId=null, dishFlavor=null)
+2026-09-18 21:17:56.965 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.sky.mapper.ShoppingCartMapper.list - ==>  Preparing: select * from shopping_cart WHERE user_id = ? and dish_id = ?
+2026-09-18 21:17:56.966 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.sky.mapper.ShoppingCartMapper.list - ==> Parameters: 6(Long), 50(Long)
+2026-09-18 21:17:56.968 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.sky.mapper.ShoppingCartMapper.list - <==      Total: 0
+2026-09-18 21:17:56.969 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] com.sky.mapper.DishMapper.getById - ==>  Preparing: select * from dish where id = ?
+2026-09-18 21:17:56.970 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] com.sky.mapper.DishMapper.getById - ==> Parameters: 50(Long)
+2026-09-18 21:17:56.971 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] com.sky.mapper.DishMapper.getById - <==      Total: 1
+2026-09-18 21:17:56.972 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.s.mapper.ShoppingCartMapper.insert - ==>  Preparing: insert into shopping_cart (user_id, dish_id, sku_id, setmeal_id, dish_flavor, name, amount, image, number, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-09-18 21:17:56.973 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.s.mapper.ShoppingCartMapper.insert - ==> Parameters: 6(Long), 50(Long), null, null, null, 清新洗洁精(String), 1.00(BigDecimal), http://localhost:8080/assets/yuexuan-product.svg(String), 1(Integer), 2026-09-18T21:17:56.972238600(LocalDateTime)
+2026-09-18 21:17:56.978 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] c.s.mapper.ShoppingCartMapper.insert - <==    Updates: 1
+2026-09-18 21:17:56.979 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhfep-irub8c24] com.sky.filter.TraceIdFilter - 请求结束 method=POST, uri=/user/shoppingCart/add, status=200, elapsedMs=44
+2026-09-18 21:17:56.989 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shoppingCart/list
+2026-09-18 21:17:56.990 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:56.990 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:56.991 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] c.s.c.user.ShoppingCartController - 用户查看购物车
+2026-09-18 21:17:56.991 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhfgb-r25x7spn] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:56.991 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhfgb-r25x7spn] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:56.991 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] c.sky.mapper.ShoppingCartMapper.list - ==>  Preparing: select * from shopping_cart WHERE user_id = ?
+2026-09-18 21:17:56.992 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhfgb-r25x7spn] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:56.992 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] c.sky.mapper.ShoppingCartMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:17:56.992 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhfgb-r25x7spn] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：12
+2026-09-18 21:17:56.994 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhfgb-r25x7spn] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:56.994 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] c.sky.mapper.ShoppingCartMapper.list - <==      Total: 1
+2026-09-18 21:17:56.996 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhfgb-r25x7spn] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=5
+2026-09-18 21:17:56.997 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhfg9-dgty45pv] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shoppingCart/list, status=200, elapsedMs=8
+2026-09-18 21:17:59.976 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zhhr5-vomlpovx] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:17:59.977 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zhhr5-vomlpovx] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:17:59.978 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zhhr5-vomlpovx] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:17:59.978 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zhhr5-vomlpovx] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：20
+2026-09-18 21:17:59.980 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zhhr5-vomlpovx] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:17:59.982 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zhhr5-vomlpovx] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=6
+2026-09-18 21:18:00.004 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:18:00.005 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:18:00.005 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:03:00.004418300(LocalDateTime)
+2026-09-18 21:18:00.006 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:18:01.369 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zhitu-u8clg0er] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:18:01.369 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zhitu-u8clg0er] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:01.370 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zhitu-u8clg0er] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:01.371 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zhitu-u8clg0er] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：19
+2026-09-18 21:18:01.373 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zhitu-u8clg0er] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:18:01.374 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zhitu-u8clg0er] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=5
+2026-09-18 21:18:02.053 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zhjcy-9d0pubtn] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:18:02.055 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zhjcy-9d0pubtn] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:02.068 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zhjcy-9d0pubtn] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:02.069 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zhjcy-9d0pubtn] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：18
+2026-09-18 21:18:02.071 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zhjcy-9d0pubtn] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:18:02.072 INFO  [http-nio-8080-exec-6] [traceId=yx-mu6zhjcy-9d0pubtn] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=19
+2026-09-18 21:18:07.975 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zhnxe-eaxvlmi8] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:18:07.975 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zhnxe-eaxvlmi8] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:07.977 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zhnxe-eaxvlmi8] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:07.977 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zhnxe-eaxvlmi8] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：17
+2026-09-18 21:18:07.980 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zhnxe-eaxvlmi8] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:18:07.981 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zhnxe-eaxvlmi8] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=6
+2026-09-18 21:18:11.295 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zhqhm-6anm1zhq] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:18:11.295 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zhqhm-6anm1zhq] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:11.297 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zhqhm-6anm1zhq] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:11.297 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zhqhm-6anm1zhq] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：16
+2026-09-18 21:18:11.299 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zhqhm-6anm1zhq] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:18:11.300 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zhqhm-6anm1zhq] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=5
+2026-09-18 21:18:21.517 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zhydh-l8hu1jvc] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:18:21.517 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zhydh-l8hu1jvc] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:21.518 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zhydh-l8hu1jvc] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:21.518 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zhydh-l8hu1jvc] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：26
+2026-09-18 21:18:21.520 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zhydh-l8hu1jvc] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:18:21.522 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zhydh-l8hu1jvc] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=5
+2026-09-18 21:18:22.736 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] com.sky.filter.TraceIdFilter - 请求开始 method=POST, uri=/user/shoppingCart/add
+2026-09-18 21:18:22.737 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:22.738 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:22.739 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.s.c.user.ShoppingCartController - 用户添加购物车，购物车数据：ShoppingCartDTO(dishId=72, skuId=null, setmealId=null, dishFlavor=不辣)
+2026-09-18 21:18:22.740 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.sky.mapper.ShoppingCartMapper.list - ==>  Preparing: select * from shopping_cart WHERE user_id = ? and dish_id = ? and dish_flavor = ?
+2026-09-18 21:18:22.740 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.sky.mapper.ShoppingCartMapper.list - ==> Parameters: 6(Long), 72(Long), 不辣(String)
+2026-09-18 21:18:22.741 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.sky.mapper.ShoppingCartMapper.list - <==      Total: 0
+2026-09-18 21:18:22.742 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] com.sky.mapper.DishMapper.getById - ==>  Preparing: select * from dish where id = ?
+2026-09-18 21:18:22.742 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] com.sky.mapper.DishMapper.getById - ==> Parameters: 72(Long)
+2026-09-18 21:18:22.743 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] com.sky.mapper.DishMapper.getById - <==      Total: 1
+2026-09-18 21:18:22.744 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.s.mapper.ShoppingCartMapper.insert - ==>  Preparing: insert into shopping_cart (user_id, dish_id, sku_id, setmeal_id, dish_flavor, name, amount, image, number, create_time) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-09-18 21:18:22.744 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.s.mapper.ShoppingCartMapper.insert - ==> Parameters: 6(Long), 72(Long), null, null, 不辣(String), 上门家电清洗(String), 188.00(BigDecimal), http://localhost:8080/assets/yuexuan-product.svg(String), 1(Integer), 2026-09-18T21:18:22.744810200(LocalDateTime)
+2026-09-18 21:18:22.748 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] c.s.mapper.ShoppingCartMapper.insert - <==    Updates: 1
+2026-09-18 21:18:22.751 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zhzbe-q39kzdka] com.sky.filter.TraceIdFilter - 请求结束 method=POST, uri=/user/shoppingCart/add, status=200, elapsedMs=15
+2026-09-18 21:18:22.772 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shoppingCart/list
+2026-09-18 21:18:22.772 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:22.773 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:22.773 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] c.s.c.user.ShoppingCartController - 用户查看购物车
+2026-09-18 21:18:22.773 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhzci-t84qsfwe] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:18:22.773 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhzci-t84qsfwe] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:22.774 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] c.sky.mapper.ShoppingCartMapper.list - ==>  Preparing: select * from shopping_cart WHERE user_id = ?
+2026-09-18 21:18:22.774 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhzci-t84qsfwe] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:22.774 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] c.sky.mapper.ShoppingCartMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:18:22.774 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhzci-t84qsfwe] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：26
+2026-09-18 21:18:22.775 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhzci-t84qsfwe] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:18:22.776 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] c.sky.mapper.ShoppingCartMapper.list - <==      Total: 2
+2026-09-18 21:18:22.777 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zhzci-t84qsfwe] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=4
+2026-09-18 21:18:22.777 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zhzcg-i2bqu380] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shoppingCart/list, status=200, elapsedMs=5
+2026-09-18 21:18:24.393 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0lg-ag6k5ixl] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/list
+2026-09-18 21:18:24.394 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0lg-ag6k5ixl] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:24.395 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0lg-ag6k5ixl] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:24.399 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zi0lg-ag6k5ixl] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ?
+2026-09-18 21:18:24.399 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zi0lg-ag6k5ixl] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:18:24.403 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zi0lg-ag6k5ixl] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:18:24.404 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0lg-ag6k5ixl] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/list, status=200, elapsedMs=11
+2026-09-18 21:18:24.405 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0ls-r9ztl6ky] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/default
+2026-09-18 21:18:24.405 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0ls-r9ztl6ky] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:24.406 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0ls-r9ztl6ky] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:24.407 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zi0ls-r9ztl6ky] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ? and is_default = ?
+2026-09-18 21:18:24.408 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zi0ls-r9ztl6ky] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long), 1(Integer)
+2026-09-18 21:18:24.409 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zi0ls-r9ztl6ky] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:18:24.410 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zi0ls-r9ztl6ky] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/default, status=200, elapsedMs=5
+2026-09-18 21:18:24.446 INFO  [http-nio-8080-exec-6] [traceId=7275b4fb957244dcb7bb2c3c3b4f0cbe] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/assets/yuexuan-product.svg
+2026-09-18 21:18:24.449 INFO  [http-nio-8080-exec-6] [traceId=7275b4fb957244dcb7bb2c3c3b4f0cbe] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/assets/yuexuan-product.svg, status=304, elapsedMs=3
+2026-09-18 21:18:34.785 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zi8ls-sekklk2o] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/list
+2026-09-18 21:18:34.786 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zi8ls-sekklk2o] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:34.788 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zi8ls-sekklk2o] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:34.789 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zi8ls-sekklk2o] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ?
+2026-09-18 21:18:34.789 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zi8ls-sekklk2o] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:18:34.791 DEBUG [http-nio-8080-exec-8] [traceId=yx-mu6zi8ls-sekklk2o] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:18:34.794 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zi8ls-sekklk2o] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/list, status=200, elapsedMs=9
+2026-09-18 21:18:37.755 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6ziawm-fxuac5o7] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/list
+2026-09-18 21:18:37.755 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6ziawm-fxuac5o7] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:37.756 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6ziawm-fxuac5o7] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:37.756 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6ziawm-fxuac5o7] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ?
+2026-09-18 21:18:37.757 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6ziawm-fxuac5o7] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:18:37.758 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6ziawm-fxuac5o7] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:18:37.759 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6ziawm-fxuac5o7] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/list, status=200, elapsedMs=4
+2026-09-18 21:18:37.762 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6ziawu-n8blji9t] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/default
+2026-09-18 21:18:37.762 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6ziawu-n8blji9t] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:18:37.764 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6ziawu-n8blji9t] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:18:37.766 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6ziawu-n8blji9t] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ? and is_default = ?
+2026-09-18 21:18:37.766 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6ziawu-n8blji9t] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long), 1(Integer)
+2026-09-18 21:18:37.767 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6ziawu-n8blji9t] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:18:37.768 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6ziawu-n8blji9t] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/default, status=200, elapsedMs=6
+2026-09-18 21:19:00.009 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:19:00.009 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:19:00.010 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:04:00.009498100(LocalDateTime)
+2026-09-18 21:19:00.012 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:20:00.004 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:20:00.005 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:20:00.006 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:05:00.005122200(LocalDateTime)
+2026-09-18 21:20:00.007 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:21:00.009 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:21:00.030 ERROR [scheduling-1] [traceId=] c.a.d.pool.DruidAbstractDataSource - discard long time none received connection. , jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, lastPacketReceivedIdleMillis : 60007
+2026-09-18 21:21:00.040 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:21:00.040 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:06:00.009608600(LocalDateTime)
+2026-09-18 21:21:00.044 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:21:38.970 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zm6q7-wh2z7q4v] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/list
+2026-09-18 21:21:38.971 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zm6q7-wh2z7q4v] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:21:38.975 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zm6q7-wh2z7q4v] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:21:38.975 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zm6q7-wh2z7q4v] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ?
+2026-09-18 21:21:38.975 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zm6q7-wh2z7q4v] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:21:38.977 DEBUG [http-nio-8080-exec-5] [traceId=yx-mu6zm6q7-wh2z7q4v] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:21:38.978 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zm6q7-wh2z7q4v] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/list, status=200, elapsedMs=8
+2026-09-18 21:21:40.890 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zm87q-zhdf4eez] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/list
+2026-09-18 21:21:40.890 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zm87q-zhdf4eez] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:21:40.891 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zm87q-zhdf4eez] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:21:40.891 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zm87q-zhdf4eez] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ?
+2026-09-18 21:21:40.891 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zm87q-zhdf4eez] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:21:40.892 DEBUG [http-nio-8080-exec-7] [traceId=yx-mu6zm87q-zhdf4eez] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:21:40.893 INFO  [http-nio-8080-exec-7] [traceId=yx-mu6zm87q-zhdf4eez] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/list, status=200, elapsedMs=3
+2026-09-18 21:21:40.901 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zm880-owmiq4fl] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/addressBook/default
+2026-09-18 21:21:40.902 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zm880-owmiq4fl] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:21:40.903 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zm880-owmiq4fl] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:21:40.904 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zm880-owmiq4fl] c.sky.mapper.AddressBookMapper.list - ==>  Preparing: select * from address_book WHERE user_id = ? and is_default = ?
+2026-09-18 21:21:40.904 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zm880-owmiq4fl] c.sky.mapper.AddressBookMapper.list - ==> Parameters: 6(Long), 1(Integer)
+2026-09-18 21:21:40.905 DEBUG [http-nio-8080-exec-4] [traceId=yx-mu6zm880-owmiq4fl] c.sky.mapper.AddressBookMapper.list - <==      Total: 0
+2026-09-18 21:21:40.907 INFO  [http-nio-8080-exec-4] [traceId=yx-mu6zm880-owmiq4fl] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/addressBook/default, status=200, elapsedMs=6
+2026-09-18 21:21:40.924 INFO  [http-nio-8080-exec-6] [traceId=4ed930c2509f45cc963461f2420ffbdb] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/assets/yuexuan-product.svg
+2026-09-18 21:21:40.926 INFO  [http-nio-8080-exec-6] [traceId=4ed930c2509f45cc963461f2420ffbdb] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/assets/yuexuan-product.svg, status=304, elapsedMs=3
+2026-09-18 21:21:42.714 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zm9mc-5pyqeogi] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shop/status
+2026-09-18 21:21:42.715 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zm9mc-5pyqeogi] c.sky.controller.user.ShopController - 获取营业状态：营业中
+2026-09-18 21:21:42.716 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zm9mc-5pyqeogi] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shop/status, status=200, elapsedMs=2
+2026-09-18 21:21:42.718 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zm9mg-mgt12894] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/category/list
+2026-09-18 21:21:42.718 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zm9mg-mgt12894] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:21:42.718 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zm9mg-mgt12894] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:21:42.719 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zm9mg-mgt12894] com.sky.mapper.CategoryMapper.list - ==>  Preparing: select * from category where status = 1 order by sort asc,create_time desc
+2026-09-18 21:21:42.719 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zm9mg-mgt12894] com.sky.mapper.CategoryMapper.list - ==> Parameters: 
+2026-09-18 21:21:42.721 DEBUG [http-nio-8080-exec-9] [traceId=yx-mu6zm9mg-mgt12894] com.sky.mapper.CategoryMapper.list - <==      Total: 11
+2026-09-18 21:21:42.722 INFO  [http-nio-8080-exec-9] [traceId=yx-mu6zm9mg-mgt12894] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/category/list, status=200, elapsedMs=4
+2026-09-18 21:21:42.722 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shoppingCart/list
+2026-09-18 21:21:42.723 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:21:42.723 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:21:42.723 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] c.s.c.user.ShoppingCartController - 用户查看购物车
+2026-09-18 21:21:42.724 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] c.sky.mapper.ShoppingCartMapper.list - ==>  Preparing: select * from shopping_cart WHERE user_id = ?
+2026-09-18 21:21:42.724 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] c.sky.mapper.ShoppingCartMapper.list - ==> Parameters: 6(Long)
+2026-09-18 21:21:42.726 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] c.sky.mapper.ShoppingCartMapper.list - <==      Total: 2
+2026-09-18 21:21:42.727 INFO  [http-nio-8080-exec-10] [traceId=yx-mu6zm9mk-b0yz9c18] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shoppingCart/list, status=200, elapsedMs=5
+2026-09-18 21:21:42.736 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zm9my-fs87403e] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:21:42.737 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zm9my-fs87403e] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:21:42.738 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zm9my-fs87403e] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:21:42.738 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zm9my-fs87403e] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：26
+2026-09-18 21:21:42.739 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zm9my-fs87403e] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:21:42.740 INFO  [http-nio-8080-exec-3] [traceId=yx-mu6zm9my-fs87403e] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=4
+2026-09-18 21:21:44.580 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zmb27-fvoslz0t] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:21:44.581 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zmb27-fvoslz0t] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:21:44.581 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zmb27-fvoslz0t] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:21:44.581 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zmb27-fvoslz0t] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：16
+2026-09-18 21:21:44.583 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zmb27-fvoslz0t] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:21:44.584 INFO  [http-nio-8080-exec-1] [traceId=yx-mu6zmb27-fvoslz0t] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=4
+2026-09-18 21:22:00.001 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:22:00.001 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:22:00.001 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:07:00.001475900(LocalDateTime)
+2026-09-18 21:22:00.002 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:22:01.037 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zmnr9-vh6f5dyk] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:22:01.037 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zmnr9-vh6f5dyk] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:22:01.038 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zmnr9-vh6f5dyk] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:22:01.038 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zmnr9-vh6f5dyk] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：18
+2026-09-18 21:22:01.040 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zmnr9-vh6f5dyk] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:22:01.041 INFO  [http-nio-8080-exec-2] [traceId=yx-mu6zmnr9-vh6f5dyk] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=4
+2026-09-18 21:22:03.316 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zmpio-ep7nu35e] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:22:03.317 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zmpio-ep7nu35e] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDQ2MzQsInVzZXJJZCI6Nn0.sM95MDxlkAqSI5XSa9UGI6oM8R-gUrqziN8801_-cRg
+2026-09-18 21:22:03.317 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zmpio-ep7nu35e] c.s.i.JwtTokenUserInterceptor - 当前用户id：6
+2026-09-18 21:22:03.317 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zmpio-ep7nu35e] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：17
+2026-09-18 21:22:03.318 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zmpio-ep7nu35e] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:22:03.319 INFO  [http-nio-8080-exec-5] [traceId=yx-mu6zmpio-ep7nu35e] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=3
+2026-09-18 21:23:00.002 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:23:00.004 ERROR [scheduling-1] [traceId=] c.a.d.pool.DruidAbstractDataSource - discard long time none received connection. , jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, lastPacketReceivedIdleMillis : 60001
+2026-09-18 21:23:00.015 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:23:00.015 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:08:00.002768600(LocalDateTime)
+2026-09-18 21:23:00.019 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:24:00.013 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:24:00.013 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:24:00.014 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:09:00.013245300(LocalDateTime)
+2026-09-18 21:24:00.016 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:25:00.004 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:25:00.005 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:25:00.005 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:10:00.004733300(LocalDateTime)
+2026-09-18 21:25:00.007 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:26:00.002 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:26:00.002 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:26:00.003 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:11:00.002913400(LocalDateTime)
+2026-09-18 21:26:00.004 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:26:15.932 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zs4ff-caje6dhj] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shop/status
+2026-09-18 21:26:15.933 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zs4ff-caje6dhj] c.sky.controller.user.ShopController - 获取营业状态：营业中
+2026-09-18 21:26:15.934 INFO  [http-nio-8080-exec-8] [traceId=yx-mu6zs4ff-caje6dhj] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shop/status, status=200, elapsedMs=2
+2026-09-18 21:27:00.004 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:27:00.006 ERROR [scheduling-1] [traceId=] c.a.d.pool.DruidAbstractDataSource - discard long time none received connection. , jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, lastPacketReceivedIdleMillis : 60001
+2026-09-18 21:27:00.015 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:27:00.016 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:12:00.004165300(LocalDateTime)
+2026-09-18 21:27:00.020 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:28:00.015 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:28:00.016 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:28:00.016 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:13:00.015126200(LocalDateTime)
+2026-09-18 21:28:00.018 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:29:00.012 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:29:00.012 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:29:00.013 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:14:00.012319300(LocalDateTime)
+2026-09-18 21:29:00.015 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:30:00.009 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:30:00.010 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:30:00.010 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:15:00.009686800(LocalDateTime)
+2026-09-18 21:30:00.012 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:31:00.005 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:31:00.006 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:31:00.006 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:16:00.005287800(LocalDateTime)
+2026-09-18 21:31:00.008 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:32:00.014 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:32:00.015 ERROR [scheduling-1] [traceId=] c.a.d.pool.DruidAbstractDataSource - discard long time none received connection. , jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, jdbcUrl : jdbc:mysql://localhost:3306/sky_take_out?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true, lastPacketReceivedIdleMillis : 60008
+2026-09-18 21:32:00.022 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:32:00.023 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:17:00.014535900(LocalDateTime)
+2026-09-18 21:32:00.025 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:33:00.001 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:33:00.001 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:33:00.002 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:18:00.001122100(LocalDateTime)
+2026-09-18 21:33:00.004 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:33:03.618 INFO  [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] com.sky.filter.TraceIdFilter - 请求开始 method=POST, uri=/user/user/login
+2026-09-18 21:33:03.619 INFO  [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] c.sky.controller.user.UserController - 用户登录：0a3ONk000oXd7X1ly8300bJwvq3ONk0x
+2026-09-18 21:33:03.619 INFO  [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] com.sky.service.impl.UserServiceImpl - 微信登录，参数：UserLoginDTO(code=0a3ONk000oXd7X1ly8300bJwvq3ONk0x)
+2026-09-18 21:33:03.619 INFO  [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] com.sky.service.impl.UserServiceImpl - 使用本地模拟微信登录，openid=dev_4cbfif
+2026-09-18 21:33:03.619 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] c.sky.mapper.UserMapper.getByOpenid - ==>  Preparing: select * from user where openid = ?
+2026-09-18 21:33:03.620 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] c.sky.mapper.UserMapper.getByOpenid - ==> Parameters: dev_4cbfif(String)
+2026-09-18 21:33:03.621 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] c.sky.mapper.UserMapper.getByOpenid - <==      Total: 0
+2026-09-18 21:33:03.621 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] com.sky.mapper.UserMapper.insert - ==>  Preparing: insert into user (openid, name, phone, sex, id_number, avatar, create_time) values (?, ?, ?, ?, ?, ?, ?)
+2026-09-18 21:33:03.622 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] com.sky.mapper.UserMapper.insert - ==> Parameters: dev_4cbfif(String), null, null, null, null, null, 2026-09-18T21:33:03.621471100(LocalDateTime)
+2026-09-18 21:33:03.625 DEBUG [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] com.sky.mapper.UserMapper.insert - <==    Updates: 1
+2026-09-18 21:33:03.627 INFO  [http-nio-8080-exec-10] [traceId=yx-mu700v0a-a44mylmr] com.sky.filter.TraceIdFilter - 请求结束 method=POST, uri=/user/user/login, status=200, elapsedMs=9
+2026-09-18 21:33:03.638 INFO  [http-nio-8080-exec-3] [traceId=yx-mu700v0y-620r739k] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/category/list
+2026-09-18 21:33:03.639 INFO  [http-nio-8080-exec-3] [traceId=yx-mu700v0y-620r739k] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU1ODMsInVzZXJJZCI6N30.Ymvz7JTiw0PCSdrZPeEXEMQEmje0Cn1qdwxTi16QOek
+2026-09-18 21:33:03.640 INFO  [http-nio-8080-exec-3] [traceId=yx-mu700v0y-620r739k] c.s.i.JwtTokenUserInterceptor - 当前用户id：7
+2026-09-18 21:33:03.641 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu700v0y-620r739k] com.sky.mapper.CategoryMapper.list - ==>  Preparing: select * from category where status = 1 order by sort asc,create_time desc
+2026-09-18 21:33:03.641 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu700v0y-620r739k] com.sky.mapper.CategoryMapper.list - ==> Parameters: 
+2026-09-18 21:33:03.641 INFO  [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/shoppingCart/list
+2026-09-18 21:33:03.642 INFO  [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU1ODMsInVzZXJJZCI6N30.Ymvz7JTiw0PCSdrZPeEXEMQEmje0Cn1qdwxTi16QOek
+2026-09-18 21:33:03.642 INFO  [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] c.s.i.JwtTokenUserInterceptor - 当前用户id：7
+2026-09-18 21:33:03.642 INFO  [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] c.s.c.user.ShoppingCartController - 用户查看购物车
+2026-09-18 21:33:03.644 DEBUG [http-nio-8080-exec-3] [traceId=yx-mu700v0y-620r739k] com.sky.mapper.CategoryMapper.list - <==      Total: 11
+2026-09-18 21:33:03.644 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] c.sky.mapper.ShoppingCartMapper.list - ==>  Preparing: select * from shopping_cart WHERE user_id = ?
+2026-09-18 21:33:03.644 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] c.sky.mapper.ShoppingCartMapper.list - ==> Parameters: 7(Long)
+2026-09-18 21:33:03.645 INFO  [http-nio-8080-exec-3] [traceId=yx-mu700v0y-620r739k] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/category/list, status=200, elapsedMs=7
+2026-09-18 21:33:03.645 DEBUG [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] c.sky.mapper.ShoppingCartMapper.list - <==      Total: 0
+2026-09-18 21:33:03.646 INFO  [http-nio-8080-exec-1] [traceId=yx-mu700v11-li35anym] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/shoppingCart/list, status=200, elapsedMs=5
+2026-09-18 21:33:03.654 INFO  [http-nio-8080-exec-2] [traceId=yx-mu700v1e-c1mtd2yv] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:33:03.654 INFO  [http-nio-8080-exec-2] [traceId=yx-mu700v1e-c1mtd2yv] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU1ODMsInVzZXJJZCI6N30.Ymvz7JTiw0PCSdrZPeEXEMQEmje0Cn1qdwxTi16QOek
+2026-09-18 21:33:03.655 INFO  [http-nio-8080-exec-2] [traceId=yx-mu700v1e-c1mtd2yv] c.s.i.JwtTokenUserInterceptor - 当前用户id：7
+2026-09-18 21:33:03.656 INFO  [http-nio-8080-exec-2] [traceId=yx-mu700v1e-c1mtd2yv] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：26
+2026-09-18 21:33:03.657 INFO  [http-nio-8080-exec-2] [traceId=yx-mu700v1e-c1mtd2yv] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:33:03.658 INFO  [http-nio-8080-exec-2] [traceId=yx-mu700v1e-c1mtd2yv] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=4
+2026-09-18 21:33:03.692 INFO  [http-nio-8080-exec-5] [traceId=02d289be1bbc4ed0a2e013e993346ebe] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/assets/yuexuan-product.svg
+2026-09-18 21:33:03.694 INFO  [http-nio-8080-exec-5] [traceId=02d289be1bbc4ed0a2e013e993346ebe] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/assets/yuexuan-product.svg, status=304, elapsedMs=2
+2026-09-18 21:33:05.027 INFO  [http-nio-8080-exec-7] [traceId=yx-mu700w3h-1l47xja6] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:33:05.027 INFO  [http-nio-8080-exec-7] [traceId=yx-mu700w3h-1l47xja6] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU1ODMsInVzZXJJZCI6N30.Ymvz7JTiw0PCSdrZPeEXEMQEmje0Cn1qdwxTi16QOek
+2026-09-18 21:33:05.028 INFO  [http-nio-8080-exec-7] [traceId=yx-mu700w3h-1l47xja6] c.s.i.JwtTokenUserInterceptor - 当前用户id：7
+2026-09-18 21:33:05.028 INFO  [http-nio-8080-exec-7] [traceId=yx-mu700w3h-1l47xja6] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：19
+2026-09-18 21:33:05.030 INFO  [http-nio-8080-exec-7] [traceId=yx-mu700w3h-1l47xja6] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:33:05.031 INFO  [http-nio-8080-exec-7] [traceId=yx-mu700w3h-1l47xja6] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=4
+2026-09-18 21:34:00.009 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:34:00.010 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:34:00.010 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:19:00.009058300(LocalDateTime)
+2026-09-18 21:34:00.011 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:34:51.194 INFO  [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] com.sky.filter.TraceIdFilter - 请求开始 method=POST, uri=/user/user/login
+2026-09-18 21:34:51.194 INFO  [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] c.sky.controller.user.UserController - 用户登录：codex-catalog-check
+2026-09-18 21:34:51.194 INFO  [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] com.sky.service.impl.UserServiceImpl - 微信登录，参数：UserLoginDTO(code=codex-catalog-check)
+2026-09-18 21:34:51.195 INFO  [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] com.sky.service.impl.UserServiceImpl - 使用本地模拟微信登录，openid=dev_xjite9
+2026-09-18 21:34:51.195 DEBUG [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] c.sky.mapper.UserMapper.getByOpenid - ==>  Preparing: select * from user where openid = ?
+2026-09-18 21:34:51.195 DEBUG [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] c.sky.mapper.UserMapper.getByOpenid - ==> Parameters: dev_xjite9(String)
+2026-09-18 21:34:51.196 DEBUG [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] c.sky.mapper.UserMapper.getByOpenid - <==      Total: 0
+2026-09-18 21:34:51.196 DEBUG [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] com.sky.mapper.UserMapper.insert - ==>  Preparing: insert into user (openid, name, phone, sex, id_number, avatar, create_time) values (?, ?, ?, ?, ?, ?, ?)
+2026-09-18 21:34:51.196 DEBUG [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] com.sky.mapper.UserMapper.insert - ==> Parameters: dev_xjite9(String), null, null, null, null, null, 2026-09-18T21:34:51.196979800(LocalDateTime)
+2026-09-18 21:34:51.200 DEBUG [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] com.sky.mapper.UserMapper.insert - <==    Updates: 1
+2026-09-18 21:34:51.201 INFO  [http-nio-8080-exec-9] [traceId=3f003521bb624c3fb24b0be31046386b] com.sky.filter.TraceIdFilter - 请求结束 method=POST, uri=/user/user/login, status=200, elapsedMs=7
+2026-09-18 21:34:51.263 INFO  [http-nio-8080-exec-3] [traceId=5db25d1c9d044cd3afa570a5797aceeb] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/category/list
+2026-09-18 21:34:51.263 INFO  [http-nio-8080-exec-3] [traceId=5db25d1c9d044cd3afa570a5797aceeb] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU2OTEsInVzZXJJZCI6OH0.srcoHuPvtqHm_vFfNiibavka9-oTeJ0sW8kPa4abPO0
+2026-09-18 21:34:51.264 INFO  [http-nio-8080-exec-3] [traceId=5db25d1c9d044cd3afa570a5797aceeb] c.s.i.JwtTokenUserInterceptor - 当前用户id：8
+2026-09-18 21:34:51.264 DEBUG [http-nio-8080-exec-3] [traceId=5db25d1c9d044cd3afa570a5797aceeb] com.sky.mapper.CategoryMapper.list - ==>  Preparing: select * from category where status = 1 order by sort asc,create_time desc
+2026-09-18 21:34:51.264 DEBUG [http-nio-8080-exec-3] [traceId=5db25d1c9d044cd3afa570a5797aceeb] com.sky.mapper.CategoryMapper.list - ==> Parameters: 
+2026-09-18 21:34:51.266 DEBUG [http-nio-8080-exec-3] [traceId=5db25d1c9d044cd3afa570a5797aceeb] com.sky.mapper.CategoryMapper.list - <==      Total: 8
+2026-09-18 21:34:51.267 INFO  [http-nio-8080-exec-3] [traceId=5db25d1c9d044cd3afa570a5797aceeb] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/category/list, status=200, elapsedMs=4
+2026-09-18 21:34:51.271 INFO  [http-nio-8080-exec-2] [traceId=2a1c86a8801548fbbc5cfe994417d19d] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:34:51.272 INFO  [http-nio-8080-exec-2] [traceId=2a1c86a8801548fbbc5cfe994417d19d] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU2OTEsInVzZXJJZCI6OH0.srcoHuPvtqHm_vFfNiibavka9-oTeJ0sW8kPa4abPO0
+2026-09-18 21:34:51.272 INFO  [http-nio-8080-exec-2] [traceId=2a1c86a8801548fbbc5cfe994417d19d] c.s.i.JwtTokenUserInterceptor - 当前用户id：8
+2026-09-18 21:34:51.272 INFO  [http-nio-8080-exec-2] [traceId=2a1c86a8801548fbbc5cfe994417d19d] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：11
+2026-09-18 21:34:51.273 INFO  [http-nio-8080-exec-2] [traceId=2a1c86a8801548fbbc5cfe994417d19d] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:34:51.274 INFO  [http-nio-8080-exec-2] [traceId=2a1c86a8801548fbbc5cfe994417d19d] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=3
+2026-09-18 21:35:00.010 INFO  [scheduling-1] [traceId=] com.sky.task.OrderTask - user订单取消任务开始执行
+2026-09-18 21:35:00.011 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==>  Preparing: select * from orders where status = ? and order_time < ?
+2026-09-18 21:35:00.011 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - ==> Parameters: 1(Integer), 2026-09-18T21:20:00.010337900(LocalDateTime)
+2026-09-18 21:35:00.012 DEBUG [scheduling-1] [traceId=] c.s.m.O.cancelOrderByStatusAndTime - <==      Total: 0
+2026-09-18 21:35:11.054 INFO  [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] com.sky.filter.TraceIdFilter - 请求开始 method=POST, uri=/user/user/login
+2026-09-18 21:35:11.055 INFO  [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] c.sky.controller.user.UserController - 用户登录：codex-catalog-check
+2026-09-18 21:35:11.055 INFO  [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] com.sky.service.impl.UserServiceImpl - 微信登录，参数：UserLoginDTO(code=codex-catalog-check)
+2026-09-18 21:35:11.055 INFO  [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] com.sky.service.impl.UserServiceImpl - 使用本地模拟微信登录，openid=dev_xjite9
+2026-09-18 21:35:11.055 DEBUG [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] c.sky.mapper.UserMapper.getByOpenid - ==>  Preparing: select * from user where openid = ?
+2026-09-18 21:35:11.055 DEBUG [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] c.sky.mapper.UserMapper.getByOpenid - ==> Parameters: dev_xjite9(String)
+2026-09-18 21:35:11.056 DEBUG [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] c.sky.mapper.UserMapper.getByOpenid - <==      Total: 1
+2026-09-18 21:35:11.058 INFO  [http-nio-8080-exec-7] [traceId=a752f5ee171d4486811c1e824ab109b2] com.sky.filter.TraceIdFilter - 请求结束 method=POST, uri=/user/user/login, status=200, elapsedMs=4
+2026-09-18 21:35:11.113 INFO  [http-nio-8080-exec-4] [traceId=32973a5bc3c947a2960e0bfc905786f7] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/category/list
+2026-09-18 21:35:11.113 INFO  [http-nio-8080-exec-4] [traceId=32973a5bc3c947a2960e0bfc905786f7] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU3MTEsInVzZXJJZCI6OH0.hWgex04xBFSCzipHUQPUhX02AaYdTH7SD5NwEzCtyig
+2026-09-18 21:35:11.113 INFO  [http-nio-8080-exec-4] [traceId=32973a5bc3c947a2960e0bfc905786f7] c.s.i.JwtTokenUserInterceptor - 当前用户id：8
+2026-09-18 21:35:11.114 DEBUG [http-nio-8080-exec-4] [traceId=32973a5bc3c947a2960e0bfc905786f7] com.sky.mapper.CategoryMapper.list - ==>  Preparing: select * from category where status = 1 order by sort asc,create_time desc
+2026-09-18 21:35:11.114 DEBUG [http-nio-8080-exec-4] [traceId=32973a5bc3c947a2960e0bfc905786f7] com.sky.mapper.CategoryMapper.list - ==> Parameters: 
+2026-09-18 21:35:11.115 DEBUG [http-nio-8080-exec-4] [traceId=32973a5bc3c947a2960e0bfc905786f7] com.sky.mapper.CategoryMapper.list - <==      Total: 8
+2026-09-18 21:35:11.116 INFO  [http-nio-8080-exec-4] [traceId=32973a5bc3c947a2960e0bfc905786f7] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/category/list, status=200, elapsedMs=3
+2026-09-18 21:35:11.120 INFO  [http-nio-8080-exec-9] [traceId=0c18108c478649d3a3972a62412e5dd5] com.sky.filter.TraceIdFilter - 请求开始 method=GET, uri=/user/dish/list
+2026-09-18 21:35:11.120 INFO  [http-nio-8080-exec-9] [traceId=0c18108c478649d3a3972a62412e5dd5] c.s.i.JwtTokenUserInterceptor - jwt校验:eyJhbGciOiJIUzI1NiJ9.eyJleHAiOjE3ODk3NDU3MTEsInVzZXJJZCI6OH0.hWgex04xBFSCzipHUQPUhX02AaYdTH7SD5NwEzCtyig
+2026-09-18 21:35:11.121 INFO  [http-nio-8080-exec-9] [traceId=0c18108c478649d3a3972a62412e5dd5] c.s.i.JwtTokenUserInterceptor - 当前用户id：8
+2026-09-18 21:35:11.121 INFO  [http-nio-8080-exec-9] [traceId=0c18108c478649d3a3972a62412e5dd5] c.sky.controller.user.DishController - 根据分类 ID 查询商品，分类 ID：11
+2026-09-18 21:35:11.122 INFO  [http-nio-8080-exec-9] [traceId=0c18108c478649d3a3972a62412e5dd5] c.sky.controller.user.DishController - 从缓存中查询商品数据
+2026-09-18 21:35:11.122 INFO  [http-nio-8080-exec-9] [traceId=0c18108c478649d3a3972a62412e5dd5] com.sky.filter.TraceIdFilter - 请求结束 method=GET, uri=/user/dish/list, status=200, elapsedMs=2
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  19:31 min
+[INFO] Finished at: 2026-09-18T21:35:32+08:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.springframework.boot:spring-boot-maven-plugin:2.7.3:run (default-cli) on project sky-server: Application finished with exit code: -1 -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

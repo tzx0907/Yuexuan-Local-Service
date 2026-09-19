@@ -7,9 +7,11 @@ import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
+import com.sky.event.OrderPaidEvent;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
+import com.sky.messaging.OrderPaidEventPublisher;
 import com.sky.result.PageResult;
 import com.sky.service.OrderStateMachine;
 import com.sky.service.OrderService;
@@ -34,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -60,6 +63,8 @@ public class OrderServiceImpl implements OrderService {
     private WebSocketServer webSocketServer;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private OrderPaidEventPublisher orderPaidEventPublisher;
 
     /**
      * 提交订单
@@ -203,6 +208,7 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
+    @Transactional
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 直接调用支付成功逻辑，跳过微信支付
         paySuccess(ordersPaymentDTO.getOrderNumber());
@@ -241,13 +247,16 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
 
-        //给管理端发来单提醒，使用WebSocket
-        Map<String, Object> map = new HashMap<>();
-        map.put("type",1);//1表示来单，2表示催单
-        map.put("orderId", ordersDB.getId());
-        map.put("content","订单号"+outTradeNo);
-        String json = com.alibaba.fastjson.JSON.toJSONString(map);
-        webSocketServer.sendToAllClient(json);
+        // 订单状态是支付的同步核心结果；运营提醒改由事务提交后异步消费。
+        // 这样 MQ 或 WebSocket 短暂故障不会影响用户本次支付结果。
+        publishOrderPaidAfterCommit(OrderPaidEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .orderId(ordersDB.getId())
+                .orderNumber(ordersDB.getNumber())
+                .userId(ordersDB.getUserId())
+                .amount(ordersDB.getAmount())
+                .paidAt(orders.getCheckoutTime())
+                .build());
     }
     public void reminder(Long orderId){
         Map<String, Object> map = new HashMap<>();
@@ -423,6 +432,24 @@ public class OrderServiceImpl implements OrderService {
                 if (status != STATUS_COMMITTED) {
                     redisTemplate.delete(redisKey);
                 }
+            }
+        });
+    }
+
+    /**
+     * 事务未提交时不能让消费者看到“已支付”事件，否则回滚会出现幽灵提醒。
+     * 单元测试或没有事务的调用路径则立即发布，便于独立验证业务逻辑。
+     * 阶段 C 会由 Outbox 取代这一步的直接发送，补齐提交后进程崩溃的窗口。
+     */
+    private void publishOrderPaidAfterCommit(OrderPaidEvent event) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            orderPaidEventPublisher.publish(event);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                orderPaidEventPublisher.publish(event);
             }
         });
     }
