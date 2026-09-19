@@ -210,12 +210,14 @@ CREATE TABLE `shopping_cart` (
   `image` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '图片',
   `user_id` bigint NOT NULL COMMENT '主键',
   `dish_id` bigint DEFAULT NULL COMMENT '菜品id',
+  `sku_id` bigint DEFAULT NULL COMMENT '商品 SKU id',
   `setmeal_id` bigint DEFAULT NULL COMMENT '套餐id',
   `dish_flavor` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '口味',
   `number` int NOT NULL DEFAULT '1' COMMENT '数量',
   `amount` decimal(10,2) NOT NULL COMMENT '金额',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_cart_user_product_sku` (`user_id`,`dish_id`,`sku_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin COMMENT='购物车';
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `user`;

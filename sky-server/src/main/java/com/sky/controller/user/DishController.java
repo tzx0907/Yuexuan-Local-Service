@@ -5,6 +5,7 @@ import com.sky.constant.StatusConstant;
 import com.sky.entity.Dish;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.mapper.ProductSkuMapper;
 import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,6 +30,8 @@ public class DishController {
     private DishService dishService;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private ProductSkuMapper productSkuMapper;
     /**
      * 根据分类 ID 查询商品
      *
@@ -39,7 +42,9 @@ public class DishController {
     @ApiOperation("根据分类 ID 查询商品")
     public Result<List<DishVO>> list(Long categoryId) {
         log.info("根据分类 ID 查询商品，分类 ID：{}", categoryId);
-        String key = ProductCacheKey.productListByCategory(categoryId);
+        // v2 includes SKU price and stock.  Use a new key so pre-upgrade
+        // cached product objects cannot hide those fields from the client.
+        String key = ProductCacheKey.productListByCategory(categoryId) + ":v2";
         // Cache Aside：先查缓存，命中后不再访问数据库。
         List<DishVO> list = (List<DishVO>) redisTemplate.opsForValue().get(key);
         if (list != null) {
@@ -51,6 +56,7 @@ public class DishController {
         dish.setStatus(StatusConstant.ENABLE);
         // 缓存未命中，回源数据库查询上架商品。
         list = dishService.listWithFlavor(dish);
+        list.forEach(product -> product.setSkus(productSkuMapper.listByDishId(product.getId())));
         log.info("从数据库中查询商品数据");
         // 加入随机抖动，避免同一批缓存 Key 在固定时间同时过期。
         long ttlMinutes = PRODUCT_CACHE_TTL_MINUTES

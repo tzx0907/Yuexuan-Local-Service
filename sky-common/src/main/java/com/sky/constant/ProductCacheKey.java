@@ -8,7 +8,11 @@ package com.sky.constant;
  */
 public final class ProductCacheKey {
 
-    private static final String PRODUCT_LIST_BY_CATEGORY_PREFIX = "yuexuan:product:list:";
+    /**
+     * v2 对应悦选商品目录。保留版本号以隔离旧餐饮演示数据缓存，
+     * 数据模型或商品目录批量迁移后无需执行危险的 Redis KEYS 清理。
+     */
+    private static final String PRODUCT_LIST_BY_CATEGORY_PREFIX = "yuexuan:v2:product:list:";
 
     private ProductCacheKey() {
     }

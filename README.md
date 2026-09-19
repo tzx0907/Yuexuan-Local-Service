@@ -4,6 +4,12 @@
 
 本仓库从餐饮点单练习项目持续演进而来。目前优先完成了通用交易链路的工程化改造：可复现的本地开发环境、订单状态机、支付回调幂等与下单幂等。后续所有业务迭代均以“悦选本地到家服务平台”为产品主题。
 
+用户端前端统一位于 [`frontend/`](frontend/README.md)。当前已迁入可运行的小程序基线 `frontend/legacy-mp-weixin`；课程资料未包含其原始 uni-app 源码，因此后续会在 `frontend/yuexuan-miniprogram` 中重建可维护的源码，并逐页完成接口与产品主题迁移。
+
+已有数据库升级请执行 [`sql/migrations/V2__yuexuan_product_domain.sql`](sql/migrations/V2__yuexuan_product_domain.sql)。该迁移不会删除旧表或历史订单；它补齐 SKU 购物车字段、查询索引，并提供以“商品/服务组合”命名的兼容视图。
+
+课程库中的餐饮演示分类、商品文案和图片可使用 [`sql/migrations/V3__yuexuan_demo_catalog.sql`](sql/migrations/V3__yuexuan_demo_catalog.sql) 替换为悦选社区商品与到家服务演示数据。执行后需清理 Redis 商品缓存或重启 Redis，才能立即看到更新。
+
 ## 产品定位
 
 悦选服务周边社区，提供日用百货、轻食、生鲜等即时零售商品，以及可预约的本地到家服务。平台围绕“商品/服务选择 → 购物车 → 下单支付 → 门店接单 → 配送履约 → 售后评价”构建交易闭环。
@@ -62,7 +68,7 @@
 - 支付成功处理具有幂等性：重复支付请求或回调只会首次更新订单并发送来单提醒。
 - 下单接口要求请求头 `Idempotency-Key`：Redis 用 `SETNX` 拦截短时重复请求；订单表用 `(user_id, submit_request_id)` 联合唯一索引提供最终兜底。重复请求会返回第一次创建的订单。
 - 下单接口使用 Redis Lua 脚本做按用户固定窗口限流：同一用户 60 秒内最多提交 5 次。Lua 将计数与设置过期时间原子执行；触发限流时返回“操作过于频繁，请稍后再试”。限流是流量保护，幂等是重复请求保护，二者互补。
-- 商品浏览缓存使用 `yuexuan:product:list:{categoryId}` 规范 Key；运营端商品新增、编辑、上下架和删除时精确删除受影响分类缓存，不使用 Redis `KEYS` 通配符扫描。
+- 商品浏览缓存使用 `yuexuan:v2:product:list:{categoryId}` 规范 Key；运营端商品新增、编辑、上下架和删除时精确删除受影响分类缓存，不使用 Redis `KEYS` 通配符扫描。`v2` 用于隔离旧餐饮演示数据缓存。
 - 普通商品库存使用 `UPDATE ... SET stock = stock - ? WHERE stock >= ? AND status = 1` 条件更新，避免并发下单超卖；库存扣减与创建订单位于同一事务中。
 - 选择 SKU 的商品下单时优先扣减 SKU 库存；订单明细保存 `skuId` 与规格快照，避免后续规格变更影响历史订单展示。
 - 每个 HTTP 请求会携带或生成 `X-Trace-Id`，该值写入日志 MDC 并原样返回响应头。可按 `traceId` 串联“请求开始、鉴权、限流、订单、支付、异常”等同一次请求的日志；非法请求头不会直接写日志，避免日志污染。

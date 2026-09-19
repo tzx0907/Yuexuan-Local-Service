@@ -11,6 +11,7 @@ public interface ProductSkuMapper {
     void insert(ProductSku productSku);
     void update(ProductSku productSku);
     ProductSku getById(Long id);
+    ProductSku getByDishIdAndSpecValue(@Param("dishId") Long dishId, @Param("specValue") String specValue);
     List<ProductSku> listByDishId(Long dishId);
     int decrementStock(@Param("skuId") Long skuId, @Param("quantity") Integer quantity);
 }

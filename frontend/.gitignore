@@ -1,0 +1,9 @@
+# uni-app / Node.js 构建产物与本地依赖
+**/node_modules/
+**/unpackage/
+**/.hbuilderx/
+**/.idea/
+**/*.log
+
+# 微信开发者工具的本地私有配置
+**/project.private.config.json

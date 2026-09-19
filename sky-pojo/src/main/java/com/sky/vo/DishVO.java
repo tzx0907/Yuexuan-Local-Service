@@ -1,6 +1,7 @@
 package com.sky.vo;
 
 import com.sky.entity.DishFlavor;
+import com.sky.entity.ProductSku;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,6 +39,8 @@ public class DishVO implements Serializable {
     private String categoryName;
     //菜品关联的口味
     private List<DishFlavor> flavors = new ArrayList<>();
+    // 可售规格及其真实售价、库存；用户端不能再只依赖 flavors 文本。
+    private List<ProductSku> skus = new ArrayList<>();
 
     //private Integer copies;
 }

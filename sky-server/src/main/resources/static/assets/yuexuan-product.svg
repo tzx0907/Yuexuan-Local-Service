@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-label="悦选商品">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#EAF3FF"/>
+      <stop offset="1" stop-color="#CFE4FF"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="240" rx="28" fill="url(#bg)"/>
+  <circle cx="262" cy="46" r="42" fill="#91CAFF" opacity=".45"/>
+  <circle cx="55" cy="207" r="52" fill="#69B1FF" opacity=".2"/>
+  <path d="M93 93h134l-11 100H104z" fill="#1677FF"/>
+  <path d="M121 95c0-29 17-47 39-47s39 18 39 47" fill="none" stroke="#1677FF" stroke-linecap="round" stroke-width="15"/>
+  <path d="M133 132h54M133 158h38" stroke="#fff" stroke-linecap="round" stroke-width="12"/>
+  <text x="160" y="216" fill="#0958D9" font-family="Arial, sans-serif" font-size="22" font-weight="700" text-anchor="middle">悦选到家</text>
+</svg>

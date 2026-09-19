@@ -59,6 +59,19 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                     shoppingCart.setSkuId(sku.getId());
                     shoppingCart.setDishFlavor(sku.getSpecName() + ":" + sku.getSpecValue());
                     shoppingCart.setAmount(sku.getPrice());
+                } else if (shoppingCartDTO.getDishFlavor() != null && !shoppingCartDTO.getDishFlavor().isBlank()) {
+                    String specValue = shoppingCartDTO.getDishFlavor();
+                    int separator = specValue.lastIndexOf(':');
+                    if (separator >= 0) {
+                        specValue = specValue.substring(separator + 1);
+                    }
+                    ProductSku sku = productSkuMapper.getByDishIdAndSpecValue(dishId, specValue);
+                    if (sku == null) {
+                        throw new IllegalArgumentException("商品规格不可售");
+                    }
+                    shoppingCart.setSkuId(sku.getId());
+                    shoppingCart.setDishFlavor(sku.getSpecName() + ":" + sku.getSpecValue());
+                    shoppingCart.setAmount(sku.getPrice());
                 }
                 shoppingCart.setImage(dish.getImage());
                 shoppingCart.setName(dish.getName());

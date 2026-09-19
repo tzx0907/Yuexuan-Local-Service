@@ -49,5 +49,10 @@ public class ShoppingCart implements Serializable {
     //图片
     private String image;
 
+    // 浏览/结算展示使用的商品分类信息；不落 shopping_cart 表，由查询关联返回。
+    private Long categoryId;
+
+    private String categoryName;
+
     private LocalDateTime createTime;
 }

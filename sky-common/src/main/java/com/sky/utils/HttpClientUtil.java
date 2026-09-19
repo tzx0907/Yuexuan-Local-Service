@@ -63,8 +63,12 @@ public class HttpClientUtil {
             e.printStackTrace();
         }finally {
             try {
-                response.close();
-                httpClient.close();
+                if (response != null) {
+                    response.close();
+                }
+                if (httpClient != null) {
+                    httpClient.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -111,7 +115,12 @@ public class HttpClientUtil {
             throw e;
         } finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
+                if (httpClient != null) {
+                    httpClient.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -161,7 +170,12 @@ public class HttpClientUtil {
             throw e;
         } finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
+                if (httpClient != null) {
+                    httpClient.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

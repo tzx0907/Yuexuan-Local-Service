@@ -19,5 +19,12 @@ public class WeChatProperties {
     private String weChatPayCertFilePath; //平台证书
     private String notifyUrl; //支付成功的回调地址
     private String refundNotifyUrl; //退款成功的回调地址
+    /**
+     * 仅用于本地开发的微信登录替身。启用后不会请求微信开放平台，
+     * 而是使用固定的本地测试身份，避免微信临时 code 每次变化导致
+     * 地址簿、购物车和订单历史被分散到不同用户。
+     */
+    private boolean mockLogin;
+    private String mockOpenid;
 
 }

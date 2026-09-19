@@ -19,6 +19,9 @@
         where id = #{id}
     </update>
     <select id="getById" resultType="com.sky.entity.ProductSku">select * from product_sku where id = #{id}</select>
+    <select id="getByDishIdAndSpecValue" resultType="com.sky.entity.ProductSku">
+        select * from product_sku where dish_id = #{dishId} and spec_value = #{specValue} and status = 1 limit 1
+    </select>
     <select id="listByDishId" resultType="com.sky.entity.ProductSku">select * from product_sku where dish_id = #{dishId} order by id</select>
     <update id="decrementStock">
         update product_sku set stock = stock - #{quantity}

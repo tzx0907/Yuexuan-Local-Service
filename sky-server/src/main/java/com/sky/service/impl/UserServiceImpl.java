@@ -54,6 +54,16 @@ public class UserServiceImpl implements UserService {
     }
 
     private String getOpenId(UserLoginDTO loginDTO) {
+        if (weChatProperties.isMockLogin()) {
+            String openid = weChatProperties.getMockOpenid();
+            if (openid == null || openid.isBlank()) {
+                log.error("本地模拟登录未配置 sky.wechat.mock-openid");
+                return null;
+            }
+            log.info("使用本地模拟微信登录，openid={}", openid);
+            return openid;
+        }
+
         //调用微信接口，获取openid
         Map<String, String> hashmap = new HashMap<>();
         hashmap.put("appid", weChatProperties.getAppid());
@@ -67,6 +77,10 @@ public class UserServiceImpl implements UserService {
         String json = HttpClientUtil.doGet(WX_LOGIN_URL, hashmap);
         log.info("微信接口返回：{}", json);
         
+        if (json == null || json.isBlank()) {
+            log.error("微信接口未返回有效响应");
+            return null;
+        }
         JSONObject jsonObject = JSONObject.parseObject(json);
         
         // 检查是否有错误信息

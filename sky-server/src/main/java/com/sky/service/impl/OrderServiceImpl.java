@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +48,8 @@ public class OrderServiceImpl implements OrderService {
     private AddressBookMapper addressBookMapper;
     @Autowired
     private DishMapper dishMapper;
+    @Autowired
+    private CategoryMapper categoryMapper;
     @Autowired
     private ProductSkuMapper productSkuMapper;
     @Autowired
@@ -87,14 +90,25 @@ public class OrderServiceImpl implements OrderService {
             }
 
             Long addressId = ordersSubmitDTO.getAddressBookId();
-            AddressBook addressBook = addressBookMapper.getById(addressId);
+            AddressBook addressBook = addressId == null ? null : addressBookMapper.getById(addressId);
             List<ShoppingCart> list = shoppingCartMapper.list(ShoppingCart.builder().userId(userId).build());
             //1.处理异常（地址为空 购物车为空）
-            if (addressBook == null) {
+            boolean selfPickup = Integer.valueOf(2).equals(ordersSubmitDTO.getDeliveryStatus());
+            if (!selfPickup && addressBook == null) {
                 throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
             }
             if (list == null||list.isEmpty()) {
                 throw new AddressBookBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
+            }
+            boolean containsOnsiteService = list.stream().anyMatch(cart -> {
+                if (cart.getDishId() == null) return false;
+                Dish cartDish = dishMapper.getById(cart.getDishId());
+                Category category = cartDish == null ? null : categoryMapper.getById(cartDish.getCategoryId());
+                return category != null && "上门服务".equals(category.getName());
+            });
+            // 上门服务需要服务人员到用户地址履约，不允许切换为到店自提。
+            if (containsOnsiteService && selfPickup) {
+                throw new OrderBusinessException("上门服务不支持到店自提，请选择预约上门时间");
             }
             // 普通商品采用条件更新原子扣减库存；返回 0 表示商品已下架或库存不足。
             // 商品组合库存将在 SKU/组合物料清单改造后统一处理。
@@ -118,10 +132,33 @@ public class OrderServiceImpl implements OrderService {
             orders.setOrderTime(LocalDateTime.now());
             orders.setPayStatus(Orders.UN_PAID);
             orders.setStatus(Orders.PENDING_PAYMENT);
-            orders.setAddressBookId(addressId);
-            orders.setPhone(addressBook.getPhone());
-            orders.setConsignee(addressBook.getConsignee());
-            orders.setAddress(addressBook.getAddress());
+            if (selfPickup) {
+                orders.setAddressBookId(null);
+                orders.setConsignee("悦选服务点自提");
+                orders.setAddress("悦选服务点");
+                orders.setPhone(null);
+            } else {
+                orders.setAddressBookId(addressId);
+                orders.setPhone(addressBook.getPhone());
+                orders.setConsignee(addressBook.getConsignee());
+                orders.setAddress(addressBook.getAddress());
+            }
+            // 订单金额只能以服务端购物车中已经确认的商品/SKU 单价计算，
+            // 不采信小程序传来的 amount，避免规格价或客户端金额被篡改。
+            BigDecimal goodsAmount = list.stream()
+                    .map(cart -> cart.getAmount().multiply(BigDecimal.valueOf(cart.getNumber())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            boolean containsPhysicalGoods = list.stream().anyMatch(cart -> {
+                if (cart.getDishId() == null) return true;
+                Dish cartDish = dishMapper.getById(cart.getDishId());
+                Category category = cartDish == null ? null : categoryMapper.getById(cartDish.getCategoryId());
+                return category == null || !"上门服务".equals(category.getName());
+            });
+            // 上门服务是预约履约，不属于商品打包或配送；任何服务订单均不收这两项费用。
+            BigDecimal packingFee = !containsOnsiteService && containsPhysicalGoods ? BigDecimal.ONE : BigDecimal.ZERO;
+            BigDecimal deliveryFee = !containsOnsiteService && !selfPickup ? BigDecimal.valueOf(4) : BigDecimal.ZERO;
+            orders.setPackAmount(packingFee.intValue());
+            orders.setAmount(goodsAmount.add(packingFee).add(deliveryFee));
             orderMapper.insert(orders); // Insert order into the database
             //3.向订单明细表中插入多条数据
             List<OrderDetail> orderDetails = new ArrayList<>();
