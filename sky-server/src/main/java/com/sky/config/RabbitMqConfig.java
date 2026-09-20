@@ -1,5 +1,6 @@
 package com.sky.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -28,6 +29,13 @@ public class RabbitMqConfig {
     public static final String ORDER_DLX = "yuexuan.order.dlx";// 死信交换机
     public static final String ORDER_PAID_DLQ = "yuexuan.order.paid.dlq";// 死信队列
     public static final String ORDER_PAID_DLQ_ROUTING_KEY = "order.paid.dead";// 死信路由键
+    public static final String ORDER_CLOSE_DELAY_QUEUE = "yuexuan.order.close.delay.queue";// 延迟队列
+    public static final String ORDER_CLOSE_QUEUE = "yuexuan.order.close.queue";// 关闭队列
+    public static final String ORDER_CLOSE_DELAY_ROUTING_KEY = "order.close.delay";// 延迟路由键
+    public static final String ORDER_CLOSE_ROUTING_KEY = "order.close";// 关闭路由键
+    public static final String ORDER_CLOSE_DLQ = "yuexuan.order.close.dlq";// 死信队列
+    public static final String ORDER_CLOSE_DLQ_ROUTING_KEY = "order.close.dead";// 死信路由键
+    public static final int ORDER_CLOSE_DELAY_MILLIS = 15 * 60 * 1000;
 
     //交换机
     @Bean
@@ -68,11 +76,53 @@ public class RabbitMqConfig {
         return BindingBuilder.bind(orderPaidDeadLetterQueue()).to(orderDeadLetterExchange())
                 .with(ORDER_PAID_DLQ_ROUTING_KEY);
     }
+
+    /** 延迟队列不设置消费者；消息存活 15 分钟后成为死信并转发到真正的关闭队列。 */
+    @Bean
+    public Queue orderCloseDelayQueue() {
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("x-message-ttl", ORDER_CLOSE_DELAY_MILLIS);
+        arguments.put("x-dead-letter-exchange", ORDER_EVENT_EXCHANGE);
+        arguments.put("x-dead-letter-routing-key", ORDER_CLOSE_ROUTING_KEY);
+        return new Queue(ORDER_CLOSE_DELAY_QUEUE, true, false, false, arguments);
+    }
+
+    @Bean
+    public Queue orderCloseQueue() {
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("x-dead-letter-exchange", ORDER_DLX);
+        arguments.put("x-dead-letter-routing-key", ORDER_CLOSE_DLQ_ROUTING_KEY);
+        return new Queue(ORDER_CLOSE_QUEUE, true, false, false, arguments);
+    }
+
+    @Bean
+    public Queue orderCloseDeadLetterQueue() {
+        return new Queue(ORDER_CLOSE_DLQ, true);
+    }
+
+    @Bean
+    public Binding orderCloseDelayBinding() {
+        return BindingBuilder.bind(orderCloseDelayQueue()).to(orderEventExchange())
+                .with(ORDER_CLOSE_DELAY_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding orderCloseBinding() {
+        return BindingBuilder.bind(orderCloseQueue()).to(orderEventExchange()).with(ORDER_CLOSE_ROUTING_KEY);
+    }
+
+    @Bean
+    public Binding orderCloseDeadLetterBinding() {
+        return BindingBuilder.bind(orderCloseDeadLetterQueue()).to(orderDeadLetterExchange())
+                .with(ORDER_CLOSE_DLQ_ROUTING_KEY);
+    }
     //消息转换器
 
     @Bean
     public MessageConverter rabbitMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
     //消费确认策略
 

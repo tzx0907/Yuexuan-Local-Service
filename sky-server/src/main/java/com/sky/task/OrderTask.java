@@ -2,6 +2,7 @@ package com.sky.task;
 
 import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
+import com.sky.service.OrderTimeoutService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,16 +16,16 @@ import java.util.List;
 public class OrderTask {
     @Autowired
     private OrderMapper orderMapper;
+    @Autowired
+    private OrderTimeoutService orderTimeoutService;
     @Scheduled(cron="0 * * * * ?")
     public void orderCancelTask() {
         log.info("user订单取消任务开始执行");
         LocalDateTime time = LocalDateTime.now().plusMinutes(-15);
         List<Orders> list=orderMapper.cancelOrderByStatusAndTime(Orders.PENDING_PAYMENT,time);
         for(Orders orders:list){
-            orders.setStatus(Orders.CANCELLED);
-            orders.setCancelTime(LocalDateTime.now());
-            orders.setCancelReason("订单超时未支付，系统自动取消");
-            orderMapper.updateIfStatus(orders, Orders.PENDING_PAYMENT);
+            // RabbitMQ 不可用或消息丢失时的兜底。与 MQ 消费者共用同一套条件更新和库存回补。
+            orderTimeoutService.closeIfUnpaid(orders.getId(), "scheduled-fallback");
         }
     }
     @Scheduled(cron="0 0 1 * * ?")

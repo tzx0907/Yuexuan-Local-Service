@@ -59,6 +59,9 @@ public interface DishMapper {
      */
     int decrementStock(@Param("dishId") Long dishId, @Param("quantity") Integer quantity);
 
+    /** 超时关闭或取消订单时原子回补商品库存。 */
+    int incrementStock(@Param("dishId") Long dishId, @Param("quantity") Integer quantity);
+
     /**
      * 根据条件查询菜品列表
      * @param dish

@@ -27,4 +27,8 @@
         update product_sku set stock = stock - #{quantity}
         where id = #{skuId} and status = 1 and stock >= #{quantity}
     </update>
+    <update id="incrementStock">
+        update product_sku set stock = stock + #{quantity}, update_time = now()
+        where id = #{skuId}
+    </update>
 </mapper>

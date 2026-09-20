@@ -1,12 +1,7 @@
 -- 悦选用户端浏览目录重建。
--- 安全策略：保留 dish ID、订单、订单明细和购物车；不删除历史交易数据。
--- dish_flavor 仅是旧模板的可选项元数据，先备份后替换为商品规格。
+-- 保留 dish ID、订单、订单明细和购物车；不删除历史交易数据。
+-- dish_flavor 仅是旧模板的可选项元数据，替换为商品规格。
 USE sky_take_out;
-
-CREATE TABLE IF NOT EXISTS backup_20260918_category AS SELECT * FROM category;
-CREATE TABLE IF NOT EXISTS backup_20260918_dish AS SELECT * FROM dish;
-CREATE TABLE IF NOT EXISTS backup_20260918_dish_flavor AS SELECT * FROM dish_flavor;
-CREATE TABLE IF NOT EXISTS backup_20260918_product_sku AS SELECT * FROM product_sku;
 
 START TRANSACTION;
 

@@ -50,6 +50,9 @@
           and status = 1
           and stock >= #{quantity}
     </update>
+    <update id="incrementStock">
+        update dish set stock = stock + #{quantity} where id = #{dishId}
+    </update>
 
     <select id="list" parameterType="Dish" resultType="Dish">
         select * from dish

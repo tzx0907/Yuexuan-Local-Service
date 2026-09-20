@@ -8,10 +8,12 @@ import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.event.OrderPaidEvent;
+import com.sky.event.OrderCloseEvent;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
 import com.sky.messaging.OrderPaidEventPublisher;
+import com.sky.messaging.OrderCloseEventPublisher;
 import com.sky.result.PageResult;
 import com.sky.service.OrderStateMachine;
 import com.sky.service.OrderService;
@@ -67,6 +69,8 @@ public class OrderServiceImpl implements OrderService {
     private RedisTemplate redisTemplate;
     @Autowired
     private OrderPaidEventPublisher orderPaidEventPublisher;
+    @Autowired
+    private OrderCloseEventPublisher orderCloseEventPublisher;
 
     /**
      * 提交订单
@@ -121,7 +125,7 @@ public class OrderServiceImpl implements OrderService {
                 throw new OrderBusinessException("上门服务不支持到店自提，请选择预约上门时间");
             }
             // 普通商品采用条件更新原子扣减库存；返回 0 表示商品已下架或库存不足。
-            // 商品组合库存将在 SKU/组合物料清单改造后统一处理。
+            // 组合商品保留独立领域模型，后续按组合物料清单统一扣减 SKU 库存。
             for (ShoppingCart shoppingCart : list) {
                 if (shoppingCart.getSkuId() != null
                         && productSkuMapper.decrementStock(shoppingCart.getSkuId(), shoppingCart.getNumber()) != 1) {
@@ -200,6 +204,7 @@ public class OrderServiceImpl implements OrderService {
             //提交订单后清空购物车
             shoppingCartMapper.cleanByUserId(userId);
             markSubmitSuccessAfterCommit(redisKey, orders.getId());
+            scheduleOrderCloseAfterCommit(orders);
             return orderSubmitVO;
         } catch (DuplicateKeyException e) {
             Orders existingOrder = orderMapper.getByUserIdAndSubmitRequestId(userId, idempotencyKey);
@@ -400,7 +405,7 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.updateIfStatus(orders, Orders.PENDING_PAYMENT) == 1;
     }
 
-    /** 课程遗留表仍命名为 dish；按分类名称识别悦选“上门服务”业务语义。 */
+    /** 按分类名称识别悦选“上门服务”业务语义。 */
     private boolean isOnsiteServiceCart(ShoppingCart cart) {
         if (cart == null || cart.getDishId() == null) {
             return false;
@@ -476,6 +481,36 @@ public class OrderServiceImpl implements OrderService {
             @Override
             public void afterCommit() {
                 publishOrderPaidWithoutAffectingPayment(event);
+            }
+        });
+    }
+
+    /** 订单创建事务提交后再投递延迟消息，避免回滚订单产生无效关闭事件。 */
+    private void scheduleOrderCloseAfterCommit(Orders order) {
+        OrderCloseEvent event = OrderCloseEvent.builder()
+                .eventId(UUID.randomUUID().toString())
+                .orderId(order.getId())
+                .orderNumber(order.getNumber())
+                .createdAt(order.getOrderTime())
+                .closeAt(order.getOrderTime().plusMinutes(15))
+                .build();
+        Runnable publishAction = () -> {
+            try {
+                orderCloseEventPublisher.publish(event);
+            } catch (RuntimeException ex) {
+                // RabbitMQ 不可用时不能回滚已创建订单；每分钟定时任务会继续兜底关闭。
+                log.error("订单已创建，但超时关闭事件投递失败，将由定时任务兜底 eventId={}, orderId={}",
+                        event.getEventId(), event.getOrderId(), ex);
+            }
+        };
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            publishAction.run();
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+            @Override
+            public void afterCommit() {
+                publishAction.run();
             }
         });
     }

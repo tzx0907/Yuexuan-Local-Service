@@ -22,4 +22,8 @@ public interface ShoppingCartMapper {
 
     @Delete("delete from shopping_cart where user_id = #{currentId}")
     void cleanByUserId(Long currentId);
+
+    /** 清除创建时间早于截止时间的长期遗留购物车。 */
+    @Delete("delete from shopping_cart where create_time < #{cutoff}")
+    int deleteExpired(java.time.LocalDateTime cutoff);
 }

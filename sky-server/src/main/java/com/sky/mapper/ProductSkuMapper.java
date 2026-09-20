@@ -14,4 +14,5 @@ public interface ProductSkuMapper {
     ProductSku getByDishIdAndSpecValue(@Param("dishId") Long dishId, @Param("specValue") String specValue);
     List<ProductSku> listByDishId(Long dishId);
     int decrementStock(@Param("skuId") Long skuId, @Param("quantity") Integer quantity);
+    int incrementStock(@Param("skuId") Long skuId, @Param("quantity") Integer quantity);
 }
