@@ -29,6 +29,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public Result handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
         String message = ex.getMostSpecificCause().getMessage();
+        log.error("数据库完整性约束异常", ex);
         // 匹配唯一键冲突，兼容中英文环境
         if (message != null && (message.contains("Duplicate entry") || message.contains("唯一键") || message.contains("重复键"))) {
             // 使用正则提取用户名，比按空格分割更可靠
@@ -38,14 +39,27 @@ public class GlobalExceptionHandler {
                 return Result.error(username + MessageConstant.ALREADY_EXISTS);
             }
         }
-        // 其他数据完整性异常或解析失败，返回通用错误
-        return Result.error(MessageConstant.UNKNOWN_ERROR);
+        if (message != null && message.contains("address_book_id") && message.contains("null")) {
+            return Result.error("到店自提订单地址字段不兼容，请执行 V10 数据库迁移并重启后端");
+        }
+        // 不向客户端暴露 SQL，但给出比“未知错误”更可操作的提示；具体原因保留在 traceId 日志中。
+        return Result.error("订单数据校验失败，请联系管理员按 traceId 查看后端日志");
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public Result handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
         log.error("参数类型不匹配：{}", ex.getMessage());
         return Result.error("参数格式错误：" + ex.getName());
+    }
+
+    /**
+     * 避免未处理异常只在小程序侧表现为“未知错误”。日志 MDC 已含 X-Trace-Id，
+     * 可将同一次请求的前端控制台与后端异常栈对应起来。
+     */
+    @ExceptionHandler(Exception.class)
+    public Result handleUnexpectedException(Exception ex) {
+        log.error("未处理请求异常，请按 traceId 排查", ex);
+        return Result.error("服务处理异常，请稍后重试或联系管理员查看 traceId");
     }
 
 }

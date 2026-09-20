@@ -21,6 +21,7 @@ import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import com.sky.websocket.WebSocketServer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -40,6 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
     @Autowired
     private OrderMapper orderMapper;
@@ -95,22 +97,25 @@ public class OrderServiceImpl implements OrderService {
             }
 
             Long addressId = ordersSubmitDTO.getAddressBookId();
-            AddressBook addressBook = addressId == null ? null : addressBookMapper.getById(addressId);
+            boolean selfPickup = Integer.valueOf(2).equals(ordersSubmitDTO.getDeliveryStatus());
+            // 自提不依赖收货地址内容；保留 addressId 仅用于兼容旧库 NOT NULL 约束。
+            AddressBook addressBook = selfPickup || addressId == null
+                    ? null : addressBookMapper.getById(addressId);
             List<ShoppingCart> list = shoppingCartMapper.list(ShoppingCart.builder().userId(userId).build());
             //1.处理异常（地址为空 购物车为空）
-            boolean selfPickup = Integer.valueOf(2).equals(ordersSubmitDTO.getDeliveryStatus());
             if (!selfPickup && addressBook == null) {
                 throw new AddressBookBusinessException(MessageConstant.ADDRESS_BOOK_IS_NULL);
             }
             if (list == null||list.isEmpty()) {
                 throw new AddressBookBusinessException(MessageConstant.SHOPPING_CART_IS_NULL);
             }
-            boolean containsOnsiteService = list.stream().anyMatch(cart -> {
-                if (cart.getDishId() == null) return false;
-                Dish cartDish = dishMapper.getById(cart.getDishId());
-                Category category = cartDish == null ? null : categoryMapper.getById(cartDish.getCategoryId());
-                return category != null && "上门服务".equals(category.getName());
-            });
+            boolean containsOnsiteService = list.stream().anyMatch(this::isOnsiteServiceCart);
+            boolean containsNonServiceItem = list.stream().anyMatch(cart -> !isOnsiteServiceCart(cart));
+            // 上门服务是预约履约，实物商品是配送/自提履约，二者不能共用同一张订单。
+            // 必须在库存扣减前拒绝，避免非法混单占用库存或产生费用规则冲突。
+            if (containsOnsiteService && containsNonServiceItem) {
+                throw new OrderBusinessException("上门服务和其他商品请分开下单");
+            }
             // 上门服务需要服务人员到用户地址履约，不允许切换为到店自提。
             if (containsOnsiteService && selfPickup) {
                 throw new OrderBusinessException("上门服务不支持到店自提，请选择预约上门时间");
@@ -129,7 +134,17 @@ public class OrderServiceImpl implements OrderService {
             }
             //2.向订单表中插入一条数据
             Orders orders = new Orders();
-            BeanUtils.copyProperties(ordersSubmitDTO, orders);
+            // 不整体复制 DTO：小程序的餐具等遗留字段允许为空，而 Orders 中对应字段是
+            // int。BeanUtils 把 null 复制给基本类型会直接抛异常，前端只能看到“未知错误”。
+            // 订单价格和服务费始终由下面的服务端逻辑计算，绝不采信客户端传入的 amount/packAmount。
+            orders.setPayMethod(ordersSubmitDTO.getPayMethod());
+            orders.setRemark(ordersSubmitDTO.getRemark());
+            orders.setEstimatedDeliveryTime(ordersSubmitDTO.getEstimatedDeliveryTime());
+            orders.setDeliveryStatus(ordersSubmitDTO.getDeliveryStatus());
+            orders.setTablewareNumber(ordersSubmitDTO.getTablewareNumber() == null
+                    ? 0 : ordersSubmitDTO.getTablewareNumber());
+            orders.setTablewareStatus(ordersSubmitDTO.getTablewareStatus() == null
+                    ? 1 : ordersSubmitDTO.getTablewareStatus());
             //填充其他字段
             orders.setSubmitRequestId(idempotencyKey);
             orders.setUserId(userId);
@@ -138,7 +153,10 @@ public class OrderServiceImpl implements OrderService {
             orders.setPayStatus(Orders.UN_PAID);
             orders.setStatus(Orders.PENDING_PAYMENT);
             if (selfPickup) {
-                orders.setAddressBookId(null);
+                // 自提履约不使用配送地址，但保留客户端已有的地址簿 ID，兼容尚未执行
+                // V10（orders.address_book_id 仍为 NOT NULL）的开发数据库。
+                // 对外展示始终使用下面的服务点文案，不会泄露或误用配送地址。
+                orders.setAddressBookId(addressId);
                 orders.setConsignee("悦选服务点自提");
                 orders.setAddress("悦选服务点");
                 orders.setPhone(null);
@@ -153,12 +171,7 @@ public class OrderServiceImpl implements OrderService {
             BigDecimal goodsAmount = list.stream()
                     .map(cart -> cart.getAmount().multiply(BigDecimal.valueOf(cart.getNumber())))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-            boolean containsPhysicalGoods = list.stream().anyMatch(cart -> {
-                if (cart.getDishId() == null) return true;
-                Dish cartDish = dishMapper.getById(cart.getDishId());
-                Category category = cartDish == null ? null : categoryMapper.getById(cartDish.getCategoryId());
-                return category == null || !"上门服务".equals(category.getName());
-            });
+            boolean containsPhysicalGoods = containsNonServiceItem;
             // 上门服务是预约履约，不属于商品打包或配送；任何服务订单均不收这两项费用。
             BigDecimal packingFee = !containsOnsiteService && containsPhysicalGoods ? BigDecimal.ONE : BigDecimal.ZERO;
             BigDecimal deliveryFee = !containsOnsiteService && !selfPickup ? BigDecimal.valueOf(4) : BigDecimal.ZERO;
@@ -387,6 +400,19 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.updateIfStatus(orders, Orders.PENDING_PAYMENT) == 1;
     }
 
+    /** 课程遗留表仍命名为 dish；按分类名称识别悦选“上门服务”业务语义。 */
+    private boolean isOnsiteServiceCart(ShoppingCart cart) {
+        if (cart == null || cart.getDishId() == null) {
+            return false;
+        }
+        Dish dish = dishMapper.getById(cart.getDishId());
+        if (dish == null || dish.getCategoryId() == null) {
+            return false;
+        }
+        Category category = categoryMapper.getById(dish.getCategoryId());
+        return category != null && "上门服务".equals(category.getName());
+    }
+
     private void validateIdempotencyKey(String idempotencyKey) {
         if (idempotencyKey == null || idempotencyKey.trim().isEmpty() || idempotencyKey.length() > 64) {
             throw new OrderBusinessException("幂等请求号不能为空且长度不能超过64位");
@@ -443,15 +469,28 @@ public class OrderServiceImpl implements OrderService {
      */
     private void publishOrderPaidAfterCommit(OrderPaidEvent event) {
         if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            orderPaidEventPublisher.publish(event);
+            publishOrderPaidWithoutAffectingPayment(event);
             return;
         }
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
             @Override
             public void afterCommit() {
-                orderPaidEventPublisher.publish(event);
+                publishOrderPaidWithoutAffectingPayment(event);
             }
         });
+    }
+
+    /**
+     * 阶段 A 还没有 Outbox：RabbitMQ 暂时不可用时记录事件发布失败，但绝不能把已经
+     * 提交成功的支付响应改成失败。阶段 C 会由 Outbox 持久化并自动补投这条事件。
+     */
+    private void publishOrderPaidWithoutAffectingPayment(OrderPaidEvent event) {
+        try {
+            orderPaidEventPublisher.publish(event);
+        } catch (RuntimeException ex) {
+            log.error("订单已支付，但 ORDER_PAID 事件发布失败，等待 Outbox 阶段补偿，eventId={}, orderId={}",
+                    event.getEventId(), event.getOrderId(), ex);
+        }
     }
     @Override
     public OrderStatisticsVO getStatistics() {

@@ -4529,6 +4529,21 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
     closeCart: function closeCart() {
       this.openOrderCartList = false;
     },
+    // 上门服务和实物商品的履约方式不同：前者需要预约上门，后者配送或自提。
+    // 前端先提示；服务端下单时仍会再次校验，避免绕过页面直接提交混合购物车。
+    isOnsiteServiceItem: function isOnsiteServiceItem(item) {
+      item = item && item.$orig ? item.$orig : item;
+      var category = String(item && (item.categoryName || item.category) || '');
+      var name = String(item && item.name || '');
+      return Number(item && (item.categoryId || item.category_id)) === 26 ||
+      category.indexOf('上门服务') !== -1 || Number(item && (item.dishId || item.id)) === 72 ||
+      /上门.*(服务|清洗)|服务.*上门/.test(name);
+    },
+    hasIncompatibleCartItem: function hasIncompatibleCartItem(item) {
+      var targetIsService = this.isOnsiteServiceItem(item);
+      var carts = this.orderListDataes || [];
+      return carts.some(function (cart) {return this.isOnsiteServiceItem(cart) !== targetIsService;}, this);
+    },
     increaseCartItem: function increaseCartItem(event) {
       var index = Number(event && event.currentTarget && event.currentTarget.dataset && event.currentTarget.dataset.cartIndex);
       var item = this.orderListDataes && this.orderListDataes[index];
@@ -4542,15 +4557,20 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
     // 加菜 - 添加菜品
     addDishAction: function addDishAction(item, form) {var _this11 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee8() {var dishFlavorDatas, flavorRemark, params;return _regenerator.default.wrap(function _callee8$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:
                 console.log(item);
-
+                item = item && item.$orig ? item.$orig : item;
+                if (!_this11.hasIncompatibleCartItem(item)) {_context8.next = 3;break;}
+                uni.showToast({
+                  title: '上门服务和其他商品请分开下单',
+                  icon: 'none',
+                  duration: 2200 });return _context8.abrupt("return", false);case 3:
 
                 // 规格
-                if (!(_this11.openMoreNormPop && (!_this11.flavorDataes || _this11.flavorDataes.length <= 0))) {_context8.next = 4;break;}
+                if (!(_this11.openMoreNormPop && (!_this11.flavorDataes || _this11.flavorDataes.length <= 0))) {_context8.next = 7;break;}
                 uni.showToast({
                   title: '请选择规格',
                   icon: 'none' });return _context8.abrupt("return",
 
-                false);case 4:
+                false);case 7:
 
                 // this.openDetailPop = false
                 _this11.openMoreNormPop = false;
@@ -20614,8 +20634,10 @@ function createAnimation(option, _this) {
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;
 
-var baseUrl = 'http://localhost:8080';//请求nginx，由nginx将请求转发到后端服务
-//var baseUrl = 'https://c223c79.r2.cpolar.top';
+// 真机上的 localhost 指向手机本身，不能访问电脑后端；这里使用当前 WLAN 的局域网 IPv4。
+// 换网络后请按 docs/mobile-device-debugging.md 的方式替换为电脑的新 IPv4。
+var baseUrl = 'http://192.168.43.233:8080';
+// 需要外网真机调试时可替换为已备案/可信 HTTPS 域名；不要把 localhost 用在手机上。
 
 exports.baseUrl = baseUrl;
 
@@ -22316,6 +22338,13 @@ var _default = {
             icon: 'none' });
 
         }
+      }).catch(function (error) {
+        // 请求模块会用后端 Result 拒绝 Promise。必须在页面消费异常，
+        // 否则微信会把 JSON 错误对象上报为 MiniProgramError 红屏。
+        _this7.isHandlePy = false;
+        var message = error && error.msg || error && error.data && error.data.msg || '提交失败，请稍后重试';
+        uni.showToast({title: message, icon: 'none', duration: 2500});
+        console.error('提交订单失败', error);
       });
     },
     // 拨打电话

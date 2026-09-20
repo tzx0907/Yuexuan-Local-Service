@@ -242,6 +242,10 @@ var _api = __webpack_require__(/*! @/pages/api/api.js */ 24);function ownKeys(ob
               content: res.msg
             })
           }
+        }).catch(function (error) {
+          var message = error && error.msg || error && error.data && error.data.msg || '支付失败，请稍后重试';
+          wx.showModal({title: '支付提示', content: message, showCancel: false});
+          console.error('订单支付失败', error);
         });
       }
 

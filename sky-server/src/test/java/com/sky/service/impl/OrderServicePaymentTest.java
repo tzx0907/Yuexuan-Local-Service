@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -126,5 +127,26 @@ class OrderServicePaymentTest {
         } finally {
             TransactionSynchronizationManager.clearSynchronization();
         }
+    }
+
+    @Test
+    void shouldKeepPaymentSuccessfulWhenRabbitMqIsUnavailable() {
+        Orders unpaidOrder = Orders.builder()
+                .id(1005L)
+                .number("202609150005")
+                .userId(13L)
+                .amount(new java.math.BigDecimal("73.00"))
+                .status(Orders.PENDING_PAYMENT)
+                .payStatus(Orders.UN_PAID)
+                .build();
+        when(orderMapper.getByNumber(unpaidOrder.getNumber())).thenReturn(unpaidOrder);
+        when(orderMapper.updateIfStatus(any(Orders.class), eq(Orders.PENDING_PAYMENT))).thenReturn(1);
+        doThrow(new RuntimeException("RabbitMQ connection refused"))
+                .when(orderPaidEventPublisher).publish(any());
+
+        assertDoesNotThrow(() -> orderService.paySuccess(unpaidOrder.getNumber()));
+
+        verify(orderMapper).updateIfStatus(any(Orders.class), eq(Orders.PENDING_PAYMENT));
+        verify(orderPaidEventPublisher).publish(any());
     }
 }

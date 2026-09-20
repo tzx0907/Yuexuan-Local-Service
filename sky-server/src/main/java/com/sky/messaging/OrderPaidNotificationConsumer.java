@@ -25,6 +25,7 @@ public class OrderPaidNotificationConsumer {
     private final ProcessedMessageMapper processedMessageMapper;
     private final WebSocketServer webSocketServer;
 
+    //依赖注入
     public OrderPaidNotificationConsumer(ProcessedMessageMapper processedMessageMapper,
                                          WebSocketServer webSocketServer) {
         this.processedMessageMapper = processedMessageMapper;

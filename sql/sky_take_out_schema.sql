@@ -143,7 +143,7 @@ CREATE TABLE `orders` (
   `number` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_bin DEFAULT NULL COMMENT '订单号',
   `status` int NOT NULL DEFAULT '1' COMMENT '订单状态 1待付款 2待接单 3已接单 4派送中 5已完成 6已取消 7退款',
   `user_id` bigint NOT NULL COMMENT '下单用户',
-  `address_book_id` bigint NOT NULL COMMENT '地址id',
+  `address_book_id` bigint DEFAULT NULL COMMENT '地址id；到店自提无需收货地址',
   `order_time` datetime NOT NULL COMMENT '下单时间',
   `checkout_time` datetime DEFAULT NULL COMMENT '结账时间',
   `pay_method` int NOT NULL DEFAULT '1' COMMENT '支付方式 1微信,2支付宝',

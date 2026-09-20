@@ -6,12 +6,15 @@ import com.sky.entity.AddressBook;
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
+import com.sky.entity.Dish;
+import com.sky.entity.Category;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.ProductSkuMapper;
+import com.sky.mapper.CategoryMapper;
 import com.sky.exception.OrderBusinessException;
 import com.sky.vo.OrderSubmitVO;
 import org.junit.jupiter.api.AfterEach;
@@ -66,6 +69,9 @@ class OrderServiceSubmitTest {
 
     @Mock
     private AddressBookMapper addressBookMapper;
+
+    @Mock
+    private CategoryMapper categoryMapper;
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
@@ -162,7 +168,8 @@ class OrderServiceSubmitTest {
         // 7. 检查返回的订单结果
         assertNotNull(result);
         assertEquals(1001L, result.getId());
-        assertEquals(new BigDecimal("54.00"), result.getOrderAmount());
+        // 商品小计 54.00 + 商品服务费 1.00 + 配送费 4.00
+        assertEquals(new BigDecimal("59.00"), result.getOrderAmount());
 
         // 8. 检查是否写入一条订单
         ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
@@ -246,5 +253,68 @@ class OrderServiceSubmitTest {
         verify(orderDetailMapper).batchInsert(detailsCaptor.capture());
         assertEquals(101L, detailsCaptor.getValue().get(0).getSkuId());
         assertEquals("规格:家庭装", detailsCaptor.getValue().get(0).getSkuSnapshot());
+    }
+
+    @Test
+    void shouldRejectMixedOnsiteServiceAndPhysicalGoodsBeforeStockIsReserved() {
+        when(valueOperations.setIfAbsent(anyString(), eq("PROCESSING"), eq(5L), eq(TimeUnit.MINUTES)))
+                .thenReturn(true);
+        ShoppingCart serviceCart = ShoppingCart.builder().dishId(72L).name("上门家电清洗")
+                .number(1).amount(new BigDecimal("188.00")).build();
+        ShoppingCart goodsCart = ShoppingCart.builder().dishId(46L).name("原生木浆抽纸")
+                .number(1).amount(new BigDecimal("6.00")).build();
+        when(shoppingCartMapper.list(any(ShoppingCart.class))).thenReturn(List.of(serviceCart, goodsCart));
+        when(dishMapper.getById(72L)).thenReturn(Dish.builder().id(72L).categoryId(26L).build());
+        when(dishMapper.getById(46L)).thenReturn(Dish.builder().id(46L).categoryId(10L).build());
+        when(categoryMapper.getById(26L)).thenReturn(Category.builder().id(26L).name("上门服务").build());
+        when(categoryMapper.getById(10L)).thenReturn(Category.builder().id(10L).name("日用百货").build());
+
+        OrdersSubmitDTO submitDTO = new OrdersSubmitDTO();
+        // 选择自提可绕过地址前置校验，从而准确验证“混单必须拒绝”的规则。
+        submitDTO.setDeliveryStatus(2);
+        OrderBusinessException exception = assertThrows(OrderBusinessException.class,
+                () -> orderService.submit(submitDTO, "test-mixed-service-goods-001"));
+
+        assertEquals("上门服务和其他商品请分开下单", exception.getMessage());
+        verify(dishMapper, never()).decrementStock(any(), any());
+        verify(productSkuMapper, never()).decrementStock(any(), any());
+        verify(orderMapper, never()).insert(any());
+    }
+
+    @Test
+    void shouldCreatePickupOrderAndPreserveAddressIdForLegacySchemaCompatibility() {
+        when(valueOperations.setIfAbsent(anyString(), eq("PROCESSING"), eq(5L), eq(TimeUnit.MINUTES)))
+                .thenReturn(true);
+        ShoppingCart cart = ShoppingCart.builder().dishId(46L).name("原生木浆抽纸")
+                .number(1).amount(new BigDecimal("6.00")).build();
+        when(shoppingCartMapper.list(any(ShoppingCart.class))).thenReturn(List.of(cart));
+        when(dishMapper.getById(46L)).thenReturn(Dish.builder().id(46L).categoryId(10L).build());
+        when(categoryMapper.getById(10L)).thenReturn(Category.builder().id(10L).name("日用百货").build());
+        when(dishMapper.decrementStock(46L, 1)).thenReturn(1);
+        doAnswer(invocation -> {
+            invocation.<Orders>getArgument(0).setId(1003L);
+            return null;
+        }).when(orderMapper).insert(any(Orders.class));
+
+        OrdersSubmitDTO submitDTO = new OrdersSubmitDTO();
+        submitDTO.setAddressBookId(6L);
+        submitDTO.setDeliveryStatus(2);
+        submitDTO.setPayMethod(1);
+        // 与小程序一致：餐具字段可不传，服务端应安全写入默认值而非抛 BeanUtils 异常。
+        submitDTO.setTablewareNumber(null);
+        submitDTO.setTablewareStatus(null);
+
+        OrderSubmitVO result = orderService.submit(submitDTO, "test-pickup-without-address-001");
+
+        assertEquals(1003L, result.getId());
+        assertEquals(new BigDecimal("7.00"), result.getOrderAmount());
+        ArgumentCaptor<Orders> orderCaptor = ArgumentCaptor.forClass(Orders.class);
+        verify(orderMapper).insert(orderCaptor.capture());
+        assertEquals(6L, orderCaptor.getValue().getAddressBookId());
+        assertEquals("悦选服务点自提", orderCaptor.getValue().getConsignee());
+        assertEquals("悦选服务点", orderCaptor.getValue().getAddress());
+        assertEquals(0, orderCaptor.getValue().getTablewareNumber());
+        assertEquals(1, orderCaptor.getValue().getTablewareStatus());
+        verify(addressBookMapper, never()).getById(any());
     }
 }
