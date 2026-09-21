@@ -12,11 +12,10 @@ import com.sky.event.OrderCloseEvent;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.*;
-import com.sky.messaging.OrderPaidEventPublisher;
-import com.sky.messaging.OrderCloseEventPublisher;
 import com.sky.result.PageResult;
 import com.sky.service.OrderStateMachine;
 import com.sky.service.OrderService;
+import com.sky.service.OutboxService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
@@ -68,9 +67,7 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private RedisTemplate redisTemplate;
     @Autowired
-    private OrderPaidEventPublisher orderPaidEventPublisher;
-    @Autowired
-    private OrderCloseEventPublisher orderCloseEventPublisher;
+    private OutboxService outboxService;
 
     /**
      * 提交订单
@@ -204,7 +201,7 @@ public class OrderServiceImpl implements OrderService {
             //提交订单后清空购物车
             shoppingCartMapper.cleanByUserId(userId);
             markSubmitSuccessAfterCommit(redisKey, orders.getId());
-            scheduleOrderCloseAfterCommit(orders);
+            scheduleOrderClose(orders);
             return orderSubmitVO;
         } catch (DuplicateKeyException e) {
             Orders existingOrder = orderMapper.getByUserIdAndSubmitRequestId(userId, idempotencyKey);
@@ -241,6 +238,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     @Transactional
+    // 改数据库状态和保存支付成功事件
     public void paySuccess(String outTradeNo) {
         Orders ordersDB = orderMapper.getByNumber(outTradeNo);
         if (ordersDB == null) {
@@ -267,7 +265,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 订单状态是支付的同步核心结果；运营提醒改由事务提交后异步消费。
         // 这样 MQ 或 WebSocket 短暂故障不会影响用户本次支付结果。
-        publishOrderPaidAfterCommit(OrderPaidEvent.builder()
+        saveOrderPaidEvent(OrderPaidEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .orderId(ordersDB.getId())
                 .orderNumber(ordersDB.getNumber())
@@ -276,6 +274,7 @@ public class OrderServiceImpl implements OrderService {
                 .paidAt(orders.getCheckoutTime())
                 .build());
     }
+    // 发送订单支付成功事件
     public void reminder(Long orderId){
         Map<String, Object> map = new HashMap<>();
         map.put("type",2);//1表示来单，2表示催单
@@ -468,25 +467,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 事务未提交时不能让消费者看到“已支付”事件，否则回滚会出现幽灵提醒。
-     * 单元测试或没有事务的调用路径则立即发布，便于独立验证业务逻辑。
-     * 阶段 C 会由 Outbox 取代这一步的直接发送，补齐提交后进程崩溃的窗口。
+     * 与订单支付状态处于同一个数据库事务；事务提交后由 Outbox 后台任务投递 RabbitMQ。
+     * 因此不会出现订单已经支付但进程在 afterCommit 发送前退出而永久丢消息的窗口。
      */
-    private void publishOrderPaidAfterCommit(OrderPaidEvent event) {
-        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            publishOrderPaidWithoutAffectingPayment(event);
-            return;
-        }
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCommit() {
-                publishOrderPaidWithoutAffectingPayment(event);
-            }
-        });
+    private void saveOrderPaidEvent(OrderPaidEvent event) {
+        outboxService.saveOrderPaidEvent(event);
     }
 
-    /** 订单创建事务提交后再投递延迟消息，避免回滚订单产生无效关闭事件。 */
-    private void scheduleOrderCloseAfterCommit(Orders order) {
+    /** 与订单创建事务一起保存延迟关闭事件，提交后由 Outbox 投递器发送。 */
+    private void scheduleOrderClose(Orders order) {
         OrderCloseEvent event = OrderCloseEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .orderId(order.getId())
@@ -494,38 +483,7 @@ public class OrderServiceImpl implements OrderService {
                 .createdAt(order.getOrderTime())
                 .closeAt(order.getOrderTime().plusMinutes(15))
                 .build();
-        Runnable publishAction = () -> {
-            try {
-                orderCloseEventPublisher.publish(event);
-            } catch (RuntimeException ex) {
-                // RabbitMQ 不可用时不能回滚已创建订单；每分钟定时任务会继续兜底关闭。
-                log.error("订单已创建，但超时关闭事件投递失败，将由定时任务兜底 eventId={}, orderId={}",
-                        event.getEventId(), event.getOrderId(), ex);
-            }
-        };
-        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            publishAction.run();
-            return;
-        }
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
-            @Override
-            public void afterCommit() {
-                publishAction.run();
-            }
-        });
-    }
-
-    /**
-     * 阶段 A 还没有 Outbox：RabbitMQ 暂时不可用时记录事件发布失败，但绝不能把已经
-     * 提交成功的支付响应改成失败。阶段 C 会由 Outbox 持久化并自动补投这条事件。
-     */
-    private void publishOrderPaidWithoutAffectingPayment(OrderPaidEvent event) {
-        try {
-            orderPaidEventPublisher.publish(event);
-        } catch (RuntimeException ex) {
-            log.error("订单已支付，但 ORDER_PAID 事件发布失败，等待 Outbox 阶段补偿，eventId={}, orderId={}",
-                    event.getEventId(), event.getOrderId(), ex);
-        }
+        outboxService.saveOrderCloseEvent(event);
     }
     @Override
     public OrderStatisticsVO getStatistics() {

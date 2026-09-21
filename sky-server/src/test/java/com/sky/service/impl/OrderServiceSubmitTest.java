@@ -16,6 +16,7 @@ import com.sky.mapper.DishMapper;
 import com.sky.mapper.ProductSkuMapper;
 import com.sky.mapper.CategoryMapper;
 import com.sky.exception.OrderBusinessException;
+import com.sky.service.OutboxService;
 import com.sky.vo.OrderSubmitVO;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -78,6 +79,9 @@ class OrderServiceSubmitTest {
 
     @Mock
     private ValueOperations<String, Object> valueOperations;
+
+    @Mock
+    private OutboxService outboxService;
 
     @BeforeEach
     void setUp() {
