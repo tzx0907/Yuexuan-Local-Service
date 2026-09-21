@@ -1,6 +1,6 @@
 -- 悦选本地到家服务平台：将课程餐饮演示数据替换为社区商品与到家服务演示数据。
 -- 仅更新既有演示记录，不删除订单、地址、用户或购物车数据。
-USE sky_take_out;
+USE `Yuexuan-Local-Service`;
 
 UPDATE category SET name = '日用百货' WHERE id = 11;
 UPDATE category SET name = '新鲜果蔬' WHERE id = 12;

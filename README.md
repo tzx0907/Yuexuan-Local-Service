@@ -121,7 +121,7 @@ docker compose up -d
 docker compose ps
 ```
 
-首次启动时，MySQL 会自动执行 `sql/sky_take_out_schema.sql` 创建数据库和表结构。MySQL 与 Redis 分别映射到本机 `3306` 和 `6379` 端口；若本机端口已被占用，请先停止冲突服务或调整 `docker-compose.yml` 中的端口映射。
+首次初始化时，执行 `sql/sky_take_out_schema.sql` 创建 `Yuexuan-Local-Service` 数据库和表结构。MySQL 与 Redis 分别映射到本机 `3306` 和 `6379` 端口；若本机端口已被占用，请先停止冲突服务或调整 `docker-compose.yml` 中的端口映射。
 
 ### 2. 初始化数据库
 
@@ -142,7 +142,7 @@ sky:
   datasource:
     host: localhost
     port: 3306
-    database: sky_take_out
+    database: Yuexuan-Local-Service
     username: root
     password: your-password
   redis:

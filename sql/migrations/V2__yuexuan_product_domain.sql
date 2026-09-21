@@ -1,13 +1,13 @@
 -- 悦选本地到家服务平台：商品/SKU 兼容迁移
 --
--- 适用范围：已使用旧版 sky_take_out 初始化脚本创建的数据库。
+-- 适用范围：已使用悦选初始化脚本创建的数据库。
 -- 原表 dish、setmeal、shopping_cart 不删除、不改名，避免影响既有订单、Mapper 和历史数据。
 -- 对外产品语义统一为“商品 / 服务组合”；物理表的旧名称仅作为兼容实现细节。
 --
 -- 执行方式：在目标 MySQL 数据库中执行一次本文件。
 -- 兼容 MySQL 5.7+ / 8.0+，可重复执行。
 
-USE sky_take_out;
+USE `Yuexuan-Local-Service`;
 
 -- 早期课程库没有 SKU 表，但当前购物车与下单服务已经依赖该模型。
 CREATE TABLE IF NOT EXISTS product_sku (

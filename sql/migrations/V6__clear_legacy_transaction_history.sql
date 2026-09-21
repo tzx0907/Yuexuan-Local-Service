@@ -1,6 +1,6 @@
 -- 用户已确认不保留历史交易记录。本迁移清空旧交易与旧服务组合，
 -- 不删除 user / address_book，以便继续进行小程序验收。
-USE sky_take_out;
+USE `Yuexuan-Local-Service`;
 
 START TRANSACTION;
 DELETE FROM order_detail;
