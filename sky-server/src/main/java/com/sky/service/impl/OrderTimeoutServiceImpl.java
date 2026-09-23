@@ -41,6 +41,12 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
     @Override
     @Transactional
     public boolean closeIfUnpaid(Long orderId, String triggerSource) {
+        return closeUnpaid(orderId, triggerSource, "支付超时，系统自动关闭");
+    }
+
+    @Override
+    @Transactional
+    public boolean closeUnpaid(Long orderId, String triggerSource, String cancelReason) {
         Orders current = orderMapper.getById(orderId);
         if (current == null || !Orders.PENDING_PAYMENT.equals(current.getStatus())
                 || !Orders.UN_PAID.equals(current.getPayStatus())) {
@@ -52,7 +58,7 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
                 .id(orderId)
                 .status(Orders.CANCELLED)
                 .cancelTime(LocalDateTime.now())
-                .cancelReason("支付超时，系统自动关闭")
+                .cancelReason(cancelReason)
                 .build();
         // MQ、定时任务或重复消息并发时，只有一个线程能从待支付状态更新成功。
         if (orderMapper.updateIfStatus(cancellation, Orders.PENDING_PAYMENT) != 1) {

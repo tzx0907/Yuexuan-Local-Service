@@ -16,6 +16,7 @@ import com.sky.result.PageResult;
 import com.sky.service.OrderStateMachine;
 import com.sky.service.OrderService;
 import com.sky.service.OutboxService;
+import com.sky.service.OrderTimeoutService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
@@ -72,6 +73,8 @@ public class OrderServiceImpl implements OrderService {
     private RedisTemplate redisTemplate;
     @Autowired
     private OutboxService outboxService;
+    @Autowired
+    private OrderTimeoutService orderTimeoutService;
 
     /**
      * 提交订单
@@ -329,8 +332,10 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
         }
         if (order.getStatus().equals(Orders.PENDING_PAYMENT)) {
-            transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
-                    .cancelReason("用户取消订单").build(), Orders.PENDING_PAYMENT);
+            // 不能仅改成已取消：下单时已扣 SKU、活动配额和限购额度，必须一起释放。
+            if (!orderTimeoutService.closeUnpaid(id, "user-cancel", "用户取消订单")) {
+                throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+            }
         } else if (order.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
             transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
                     .cancelReason("用户取消订单").build(), Orders.TO_BE_CONFIRMED);
