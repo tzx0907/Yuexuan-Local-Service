@@ -2,6 +2,7 @@ package com.sky.controller.user;
 
 import com.sky.dto.*;
 import com.sky.annotation.RateLimit;
+import com.sky.annotation.FlashSaleGuard;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
@@ -24,6 +25,7 @@ public class OrderController {
     @PostMapping("/submit")
     @ApiOperation("用户提交订单")
     @RateLimit(key = "order:submit", limit = 5, windowSeconds = 60)
+    @FlashSaleGuard
     public Result<OrderSubmitVO> submit(@RequestBody OrdersSubmitDTO ordersSubmitDTO,
                                         @RequestHeader("Idempotency-Key") String idempotencyKey){
         log.info("用户提交订单：{}, idempotencyKey={}", ordersSubmitDTO, idempotencyKey);
