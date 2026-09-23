@@ -61,6 +61,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private FlashSaleActivityMapper flashSaleActivityMapper;
     @Autowired
+    private FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
+    @Autowired
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
@@ -141,6 +143,11 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
             for (Map.Entry<Long, Integer> entry : flashSaleQuantities.entrySet()) {
+                FlashSaleActivity activity = flashSaleActivityMapper.getById(entry.getKey());
+                int quotaResult = flashSaleUserQuotaMapper.tryReserve(entry.getKey(), userId, entry.getValue(), activity.getPerUserLimit());
+                if (quotaResult == 0) {
+                    throw new OrderBusinessException("超过该限时购活动的每人累计限购数量");
+                }
                 if (flashSaleActivityMapper.decrementStock(entry.getKey(), entry.getValue()) != 1) {
                     throw new OrderBusinessException("限时购活动已结束或库存不足");
                 }

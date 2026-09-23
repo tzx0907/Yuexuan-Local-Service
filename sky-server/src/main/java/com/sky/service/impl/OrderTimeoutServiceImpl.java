@@ -8,6 +8,7 @@ import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ProductSkuMapper;
 import com.sky.mapper.FlashSaleActivityMapper;
+import com.sky.mapper.FlashSaleUserQuotaMapper;
 import com.sky.service.OrderTimeoutService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,15 +25,17 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
     private final DishMapper dishMapper;
     private final ProductSkuMapper productSkuMapper;
     private final FlashSaleActivityMapper flashSaleActivityMapper;
+    private final FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
 
     public OrderTimeoutServiceImpl(OrderMapper orderMapper, OrderDetailMapper orderDetailMapper,
                                    DishMapper dishMapper, ProductSkuMapper productSkuMapper,
-                                   FlashSaleActivityMapper flashSaleActivityMapper) {
+                                   FlashSaleActivityMapper flashSaleActivityMapper, FlashSaleUserQuotaMapper flashSaleUserQuotaMapper) {
         this.orderMapper = orderMapper;
         this.orderDetailMapper = orderDetailMapper;
         this.dishMapper = dishMapper;
         this.productSkuMapper = productSkuMapper;
         this.flashSaleActivityMapper = flashSaleActivityMapper;
+        this.flashSaleUserQuotaMapper = flashSaleUserQuotaMapper;
     }
 
     @Override
@@ -70,6 +73,9 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
             }
             if (detail.getFlashSaleActivityId() != null) {
                 flashSaleActivityMapper.incrementStock(detail.getFlashSaleActivityId(), detail.getNumber());
+                if (flashSaleUserQuotaMapper.release(detail.getFlashSaleActivityId(), current.getUserId(), detail.getNumber()) != 1) {
+                    throw new OrderBusinessException("订单超时限购名额回补失败");
+                }
             }
             if (updated != 1) {
                 throw new OrderBusinessException("订单超时库存回补失败");

@@ -12,6 +12,7 @@ import com.sky.mapper.SetmealMapper;
 import com.sky.mapper.ProductSkuMapper;
 import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.FlashSaleActivityMapper;
+import com.sky.mapper.FlashSaleUserQuotaMapper;
 import com.sky.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -34,6 +35,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     ProductSkuMapper productSkuMapper;
     @Autowired
     FlashSaleActivityMapper flashSaleActivityMapper;
+    @Autowired
+    FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
     /**
      * 添加购物车
      * @param shoppingCartDTO
@@ -45,6 +48,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
+        // 加购不占用活动库存/额度，只做只读预检查。真正占用必须在提交订单事务内完成，
+        // 否则用户长期不结算会把活动名额锁死。
+        validateFlashSaleQuotaBeforeAdd(shoppingCartDTO, userId);
         //如果存在 num++
         if(shoppingCartList != null && !shoppingCartList.isEmpty()){
             ShoppingCart cart = shoppingCartList.get(0);
@@ -154,5 +160,25 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
         cart.setFlashSaleActivityId(activity.getId());
         cart.setAmount(activity.getSalePrice());
+    }
+
+    private void validateFlashSaleQuotaBeforeAdd(ShoppingCartDTO dto, Long userId) {
+        if (dto.getFlashSaleActivityId() == null) {
+            return;
+        }
+        FlashSaleActivity activity = flashSaleActivityMapper.getById(dto.getFlashSaleActivityId());
+        if (activity == null) {
+            throw new IllegalArgumentException("限时购活动不存在");
+        }
+        ShoppingCart condition = new ShoppingCart();
+        condition.setUserId(userId);
+        condition.setFlashSaleActivityId(activity.getId());
+        int inCart = shoppingCartMapper.list(condition).stream()
+                .mapToInt(ShoppingCart::getNumber).sum();
+        Integer reserved = flashSaleUserQuotaMapper.getReservedQuantity(activity.getId(), userId);
+        int alreadyUsedOrSelected = inCart + (reserved == null ? 0 : reserved);
+        if (alreadyUsedOrSelected + 1 > activity.getPerUserLimit()) {
+            throw new IllegalArgumentException("超过该限时购活动的每人限购数量");
+        }
     }
 }
