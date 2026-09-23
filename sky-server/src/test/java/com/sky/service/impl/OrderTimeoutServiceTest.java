@@ -6,6 +6,8 @@ import com.sky.mapper.DishMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ProductSkuMapper;
+import com.sky.mapper.FlashSaleActivityMapper;
+import com.sky.mapper.FlashSaleUserQuotaMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,6 +37,10 @@ class OrderTimeoutServiceTest {
     private DishMapper dishMapper;
     @Mock
     private ProductSkuMapper productSkuMapper;
+    @Mock
+    private FlashSaleActivityMapper flashSaleActivityMapper;
+    @Mock
+    private FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
 
     @Test
     void shouldCloseUnpaidOrderAndRestoreProductAndSkuStockOnce() {
@@ -83,5 +89,27 @@ class OrderTimeoutServiceTest {
         verify(orderDetailMapper, never()).getOrderDetailByOrderId(any());
         verify(dishMapper, never()).incrementStock(any(), any());
         verify(productSkuMapper, never()).incrementStock(any(), any());
+    }
+
+    @Test
+    void shouldRestoreSkuActivityAndUserQuotaWhenUserCancelsUnpaidFlashSaleOrder() {
+        Orders pending = Orders.builder().id(2004L).userId(8L).status(Orders.PENDING_PAYMENT)
+                .payStatus(Orders.UN_PAID).build();
+        when(orderMapper.getById(2004L)).thenReturn(pending);
+        when(orderMapper.updateIfStatus(any(Orders.class), eq(Orders.PENDING_PAYMENT))).thenReturn(1);
+        when(orderDetailMapper.getOrderDetailByOrderId(2004L)).thenReturn(List.of(
+                OrderDetail.builder().skuId(101L).flashSaleActivityId(12L).number(2).build()));
+        when(productSkuMapper.incrementStock(101L, 2)).thenReturn(1);
+        when(flashSaleActivityMapper.incrementStock(12L, 2)).thenReturn(1);
+        when(flashSaleUserQuotaMapper.release(12L, 8L, 2)).thenReturn(1);
+
+        assertTrue(orderTimeoutService.closeUnpaid(2004L, "user-cancel", "用户取消订单"));
+
+        verify(productSkuMapper).incrementStock(101L, 2);
+        verify(flashSaleActivityMapper).incrementStock(12L, 2);
+        verify(flashSaleUserQuotaMapper).release(12L, 8L, 2);
+        ArgumentCaptor<Orders> update = ArgumentCaptor.forClass(Orders.class);
+        verify(orderMapper).updateIfStatus(update.capture(), eq(Orders.PENDING_PAYMENT));
+        org.junit.jupiter.api.Assertions.assertEquals("用户取消订单", update.getValue().getCancelReason());
     }
 }

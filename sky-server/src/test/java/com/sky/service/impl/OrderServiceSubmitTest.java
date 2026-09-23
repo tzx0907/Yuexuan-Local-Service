@@ -8,6 +8,7 @@ import com.sky.entity.Orders;
 import com.sky.entity.ShoppingCart;
 import com.sky.entity.Dish;
 import com.sky.entity.Category;
+import com.sky.entity.FlashSaleActivity;
 import com.sky.mapper.AddressBookMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
@@ -15,6 +16,8 @@ import com.sky.mapper.ShoppingCartMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.ProductSkuMapper;
 import com.sky.mapper.CategoryMapper;
+import com.sky.mapper.FlashSaleActivityMapper;
+import com.sky.mapper.FlashSaleUserQuotaMapper;
 import com.sky.exception.OrderBusinessException;
 import com.sky.service.OutboxService;
 import com.sky.vo.OrderSubmitVO;
@@ -82,6 +85,10 @@ class OrderServiceSubmitTest {
 
     @Mock
     private OutboxService outboxService;
+    @Mock
+    private FlashSaleActivityMapper flashSaleActivityMapper;
+    @Mock
+    private FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
 
     @BeforeEach
     void setUp() {
@@ -320,5 +327,38 @@ class OrderServiceSubmitTest {
         assertEquals(0, orderCaptor.getValue().getTablewareNumber());
         assertEquals(1, orderCaptor.getValue().getTablewareStatus());
         verify(addressBookMapper, never()).getById(any());
+    }
+
+    @Test
+    void shouldAtomicallyReserveQuotaAndBothStocksForFlashSaleOrder() {
+        when(valueOperations.setIfAbsent(anyString(), eq("PROCESSING"), eq(5L), eq(TimeUnit.MINUTES))).thenReturn(true);
+        when(addressBookMapper.getById(1L)).thenReturn(AddressBook.builder().id(1L).userId(1L)
+                .consignee("测试用户").phone("13800000000").provinceName("四川").cityName("成都")
+                .districtName("高新").detail("测试路").build());
+        ShoppingCart cart = ShoppingCart.builder().dishId(11L).skuId(101L).flashSaleActivityId(12L)
+                .number(1).amount(new BigDecimal("99.00")).name("限时购商品").build();
+        FlashSaleActivity activity = new FlashSaleActivity();
+        activity.setId(12L); activity.setSkuId(101L); activity.setSalePrice(new BigDecimal("9.90"));
+        activity.setPerUserLimit(2);
+        when(shoppingCartMapper.list(any(ShoppingCart.class))).thenReturn(List.of(cart));
+        when(flashSaleActivityMapper.getById(12L)).thenReturn(activity);
+        when(flashSaleUserQuotaMapper.tryReserve(12L, 1L, 1, 2)).thenReturn(1);
+        when(flashSaleActivityMapper.decrementStock(12L, 1)).thenReturn(1);
+        when(productSkuMapper.decrementStock(101L, 1)).thenReturn(1);
+        doAnswer(invocation -> { invocation.<Orders>getArgument(0).setId(1012L); return null; }).when(orderMapper).insert(any());
+
+        OrdersSubmitDTO dto = new OrdersSubmitDTO();
+        dto.setAddressBookId(1L); dto.setDeliveryStatus(1); dto.setPayMethod(1);
+        dto.setTablewareNumber(0); dto.setTablewareStatus(1);
+        OrderSubmitVO result = orderService.submit(dto, "flash-sale-submit-001");
+
+        assertEquals(new BigDecimal("14.90"), result.getOrderAmount());
+        verify(flashSaleUserQuotaMapper).tryReserve(12L, 1L, 1, 2);
+        verify(flashSaleActivityMapper).decrementStock(12L, 1);
+        verify(productSkuMapper).decrementStock(101L, 1);
+        ArgumentCaptor<List<OrderDetail>> details = ArgumentCaptor.forClass(List.class);
+        verify(orderDetailMapper).batchInsert(details.capture());
+        assertEquals(12L, details.getValue().get(0).getFlashSaleActivityId());
+        assertEquals(new BigDecimal("9.90"), details.getValue().get(0).getAmount());
     }
 }
