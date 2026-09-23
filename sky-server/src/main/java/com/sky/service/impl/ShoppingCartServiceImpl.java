@@ -6,10 +6,12 @@ import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.ProductSku;
 import com.sky.entity.ShoppingCart;
+import com.sky.entity.FlashSaleActivity;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.mapper.ProductSkuMapper;
 import com.sky.mapper.ShoppingCartMapper;
+import com.sky.mapper.FlashSaleActivityMapper;
 import com.sky.service.ShoppingCartService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -30,6 +32,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     SetmealMapper setmealMapper;
     @Autowired
     ProductSkuMapper productSkuMapper;
+    @Autowired
+    FlashSaleActivityMapper flashSaleActivityMapper;
     /**
      * 添加购物车
      * @param shoppingCartDTO
@@ -51,6 +55,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             Long dishId = shoppingCartDTO.getDishId();
             if(dishId!=null){
                 Dish dish = dishMapper.getById(dishId);
+                if (dish == null) {
+                    throw new IllegalArgumentException("商品不存在");
+                }
                 if (shoppingCartDTO.getSkuId() != null) {
                     ProductSku sku = productSkuMapper.getById(shoppingCartDTO.getSkuId());
                     if (sku == null || !dishId.equals(sku.getDishId()) || !Integer.valueOf(1).equals(sku.getStatus())) {
@@ -59,6 +66,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                     shoppingCart.setSkuId(sku.getId());
                     shoppingCart.setDishFlavor(sku.getSpecName() + ":" + sku.getSpecValue());
                     shoppingCart.setAmount(sku.getPrice());
+                    applyFlashSalePrice(shoppingCartDTO, shoppingCart, sku);
                 } else if (shoppingCartDTO.getDishFlavor() != null && !shoppingCartDTO.getDishFlavor().isBlank()) {
                     String specValue = shoppingCartDTO.getDishFlavor();
                     int separator = specValue.lastIndexOf(':');
@@ -126,5 +134,25 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      */
     public void clear() {
         shoppingCartMapper.cleanByUserId(BaseContext.getCurrentId());
+    }
+
+    /**
+     * 加购时仅用于展示活动价；提交订单时还会重新检查时间、配额和真实库存，
+     * 因此用户无法靠篡改请求金额获得过期优惠。
+     */
+    private void applyFlashSalePrice(ShoppingCartDTO dto, ShoppingCart cart, ProductSku sku) {
+        if (dto.getFlashSaleActivityId() == null) {
+            return;
+        }
+        FlashSaleActivity activity = flashSaleActivityMapper.getById(dto.getFlashSaleActivityId());
+        LocalDateTime now = LocalDateTime.now();
+        if (activity == null || !sku.getId().equals(activity.getSkuId())
+                || !Integer.valueOf(1).equals(activity.getStatus())
+                || now.isBefore(activity.getStartTime()) || !now.isBefore(activity.getEndTime())
+                || activity.getSoldStock() >= activity.getActivityStock()) {
+            throw new IllegalArgumentException("限时购活动未开始、已结束或库存不足");
+        }
+        cart.setFlashSaleActivityId(activity.getId());
+        cart.setAmount(activity.getSalePrice());
     }
 }

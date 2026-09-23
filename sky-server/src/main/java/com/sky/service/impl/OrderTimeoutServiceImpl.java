@@ -7,6 +7,7 @@ import com.sky.mapper.DishMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ProductSkuMapper;
+import com.sky.mapper.FlashSaleActivityMapper;
 import com.sky.service.OrderTimeoutService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,16 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
     private final OrderDetailMapper orderDetailMapper;
     private final DishMapper dishMapper;
     private final ProductSkuMapper productSkuMapper;
+    private final FlashSaleActivityMapper flashSaleActivityMapper;
 
     public OrderTimeoutServiceImpl(OrderMapper orderMapper, OrderDetailMapper orderDetailMapper,
-                                   DishMapper dishMapper, ProductSkuMapper productSkuMapper) {
+                                   DishMapper dishMapper, ProductSkuMapper productSkuMapper,
+                                   FlashSaleActivityMapper flashSaleActivityMapper) {
         this.orderMapper = orderMapper;
         this.orderDetailMapper = orderDetailMapper;
         this.dishMapper = dishMapper;
         this.productSkuMapper = productSkuMapper;
+        this.flashSaleActivityMapper = flashSaleActivityMapper;
     }
 
     @Override
@@ -63,6 +67,9 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
             } else {
                 // 组合商品当前下单时未扣减单品库存，待物料清单能力完成后统一处理。
                 continue;
+            }
+            if (detail.getFlashSaleActivityId() != null) {
+                flashSaleActivityMapper.incrementStock(detail.getFlashSaleActivityId(), detail.getNumber());
             }
             if (updated != 1) {
                 throw new OrderBusinessException("订单超时库存回补失败");

@@ -33,6 +33,9 @@ public class OrderDetail implements Serializable {
     //商品 SKU id
     private Long skuId;
 
+    // 限时购活动 id，用于历史订单展示及未支付关闭后的活动配额回补。
+    private Long flashSaleActivityId;
+
     //下单时的 SKU 规格快照
     private String skuSnapshot;
 

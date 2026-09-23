@@ -34,6 +34,9 @@ public class ShoppingCart implements Serializable {
     //商品 SKU id
     private Long skuId;
 
+    // 限时购活动 id。订单提交时必须再次校验活动，不信任购物车中的活动价。
+    private Long flashSaleActivityId;
+
     //套餐id
     private Long setmealId;
 

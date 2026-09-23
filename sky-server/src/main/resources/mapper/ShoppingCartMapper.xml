@@ -19,6 +19,9 @@
         <if test="skuId != null">
             and sku_id = #{skuId}
         </if>
+        <if test="flashSaleActivityId != null">
+            and flash_sale_activity_id = #{flashSaleActivityId}
+        </if>
         <if test="setmealId != null">
             and setmeal_id = #{setmealId}
         </if>

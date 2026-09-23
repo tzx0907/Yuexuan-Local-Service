@@ -13,8 +13,8 @@ public interface ShoppingCartMapper {
     List<ShoppingCart> list(ShoppingCart shoppingCart);
     @Update("update shopping_cart set number = #{number} where id = #{id}")
     void update(ShoppingCart cart);
-    @Insert("insert into shopping_cart (user_id, dish_id, sku_id, setmeal_id, dish_flavor, name, amount, image, number, create_time) " +
-            "values (#{userId}, #{dishId}, #{skuId}, #{setmealId}, #{dishFlavor}, #{name}, #{amount}, #{image}, #{number}, #{createTime})")
+    @Insert("insert into shopping_cart (user_id, dish_id, sku_id, flash_sale_activity_id, setmeal_id, dish_flavor, name, amount, image, number, create_time) " +
+            "values (#{userId}, #{dishId}, #{skuId}, #{flashSaleActivityId}, #{setmealId}, #{dishFlavor}, #{name}, #{amount}, #{image}, #{number}, #{createTime})")
     void insert(ShoppingCart shoppingCart);
 
     @Delete("delete from shopping_cart where id = #{id}")

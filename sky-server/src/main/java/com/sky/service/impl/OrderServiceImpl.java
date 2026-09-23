@@ -59,6 +59,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     private ProductSkuMapper productSkuMapper;
     @Autowired
+    private FlashSaleActivityMapper flashSaleActivityMapper;
+    @Autowired
     private UserMapper userMapper;
     @Autowired
     private WeChatPayUtil weChatPayUtil;
@@ -120,6 +122,28 @@ public class OrderServiceImpl implements OrderService {
             // 上门服务需要服务人员到用户地址履约，不允许切换为到店自提。
             if (containsOnsiteService && selfPickup) {
                 throw new OrderBusinessException("上门服务不支持到店自提，请选择预约上门时间");
+            }
+            // 限时购价格只能由活动服务端重新确认。购物车只是用户选择的暂存，
+            // 不能作为活动仍有效或金额正确的依据。
+            Map<Long, Integer> flashSaleQuantities = new HashMap<>();
+            for (ShoppingCart cart : list) {
+                if (cart.getFlashSaleActivityId() != null) {
+                    FlashSaleActivity activity = flashSaleActivityMapper.getById(cart.getFlashSaleActivityId());
+                    if (activity == null || !cart.getSkuId().equals(activity.getSkuId())) {
+                        throw new OrderBusinessException("限时购活动与商品规格不匹配");
+                    }
+                    int quantity = flashSaleQuantities.getOrDefault(activity.getId(), 0) + cart.getNumber();
+                    if (quantity > activity.getPerUserLimit()) {
+                        throw new OrderBusinessException("超过该限时购活动的单次限购数量");
+                    }
+                    flashSaleQuantities.put(activity.getId(), quantity);
+                    cart.setAmount(activity.getSalePrice());
+                }
+            }
+            for (Map.Entry<Long, Integer> entry : flashSaleQuantities.entrySet()) {
+                if (flashSaleActivityMapper.decrementStock(entry.getKey(), entry.getValue()) != 1) {
+                    throw new OrderBusinessException("限时购活动已结束或库存不足");
+                }
             }
             // 普通商品采用条件更新原子扣减库存；返回 0 表示商品已下架或库存不足。
             // 组合商品保留独立领域模型，后续按组合物料清单统一扣减 SKU 库存。
