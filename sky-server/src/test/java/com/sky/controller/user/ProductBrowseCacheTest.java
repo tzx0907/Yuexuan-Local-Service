@@ -2,6 +2,8 @@ package com.sky.controller.user;
 
 import com.sky.constant.ProductCacheKey;
 import com.sky.entity.Dish;
+import com.sky.entity.ProductSku;
+import com.sky.mapper.ProductSkuMapper;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,9 @@ class ProductBrowseCacheTest {
     @Mock
     private ValueOperations<String, Object> valueOperations;
 
+    @Mock
+    private ProductSkuMapper productSkuMapper;
+
     @Test
     void shouldReturnCachedProductsWithoutQueryingDatabase() {
         Long categoryId = 10L;
@@ -64,10 +69,14 @@ class ProductBrowseCacheTest {
         when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(valueOperations.get(ProductCacheKey.productListByCategory(categoryId))).thenReturn(null);
         when(dishService.listWithFlavor(any(Dish.class))).thenReturn(databaseProducts);
+        when(productSkuMapper.listByDishId(1L)).thenReturn(Collections.singletonList(
+                ProductSku.builder().id(101L).dishId(1L).specName("规格").specValue("标准装").build()));
 
         List<DishVO> result = dishController.list(categoryId).getData();
 
         assertEquals(databaseProducts, result);
+        assertEquals(1, result.get(0).getSkus().size());
+        assertEquals("标准装", result.get(0).getSkus().get(0).getSpecValue());
         ArgumentCaptor<Dish> dishCaptor = ArgumentCaptor.forClass(Dish.class);
         verify(dishService).listWithFlavor(dishCaptor.capture());
         assertEquals(categoryId, dishCaptor.getValue().getCategoryId());

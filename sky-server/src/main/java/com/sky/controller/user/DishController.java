@@ -42,9 +42,9 @@ public class DishController {
     @ApiOperation("根据分类 ID 查询商品")
     public Result<List<DishVO>> list(Long categoryId) {
         log.info("根据分类 ID 查询商品，分类 ID：{}", categoryId);
-        // v2 includes SKU price and stock.  Use a new key so pre-upgrade
-        // cached product objects cannot hide those fields from the client.
-        String key = ProductCacheKey.productListByCategory(categoryId) + ":v2";
+        // ProductCacheKey 本身已包含 yuexuan:v2 版本前缀。用户端读取与
+        // 管理端商品变更后的精确失效必须使用同一个 Key，不能在此额外拼接版本号。
+        String key = ProductCacheKey.productListByCategory(categoryId);
         // Cache Aside：先查缓存，命中后不再访问数据库。
         List<DishVO> list = (List<DishVO>) redisTemplate.opsForValue().get(key);
         if (list != null) {
