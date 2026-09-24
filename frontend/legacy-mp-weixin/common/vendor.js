@@ -1821,7 +1821,7 @@ function handleEvent(event) {var _this2 = this;
           // The legacy base library rejects "$event" inside order-page WXML
           // attributes.  Native picker changes are therefore declared with
           // no WXML argument and receive their event here explicitly.
-          if ((methodName === 'selectServiceDate' || methodName === 'selectServiceTime') && (!params || !params.length)) {
+          if ((methodName === 'selectServiceDate' || methodName === 'selectServiceTime' || methodName === 'addFlashSale') && (!params || !params.length)) {
             params = [event];
           }
 
@@ -4162,6 +4162,10 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
       // helper objects under $root cannot be used as event arguments by the
       // legacy uni-app WXML runtime.
       cartItems: [],
+      // 限时购活动由用户端接口加载；空数组会触发首页的友好空状态。
+      flashSaleItems: [],
+      // 限时购作为左侧引导栏的一个分类，不再占用首页顶部空间。
+      flashMode: false,
       // 存放左侧滚动区域菜品分类数组
       typeListData: [],
       dishListData: [],
@@ -4367,12 +4371,17 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                     }
                   }
                 });
+                if (_api.getFlashSaleActive) {
+                  _api.getFlashSaleActive().then(function (res) {
+                    _this2.flashSaleItems = res && res.code === 1 && Array.isArray(res.data) ? res.data : [];
+                  }).catch(function () { _this2.flashSaleItems = []; });
+                }
                 // 调用一次购物车集合---初始化
                 _this2.getTableOrderDishListes();case 4:case "end":return _context.stop();}}}, _callee);}))();
 
     },
     // 点击左边的栏目切换
-    swichMenu: function swichMenu(params, index) {var _this3 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee2() {return _regenerator.default.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:if (!(
+    swichMenu: function swichMenu(params, index) {var _this3 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee2() {return _regenerator.default.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:_this3.flashMode = false;if (!(
                 _this3.arr.length == 0)) {_context2.next = 3;break;}_context2.next = 3;return (
                   _this3.getMenuItemTop());case 3:if (!(
 
@@ -4384,6 +4393,11 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                   this.leftMenuStatus(index);
                 });
                 _this3.getDishListDataes(params, index);case 7:case "end":return _context2.stop();}}}, _callee2);}))();
+    },
+    // 左侧“限时购”分类：只展示当前有效活动，普通分类切换会自动退出该视图。
+    selectFlashSale: function selectFlashSale() {
+      this.flashMode = true;
+      this.openOrderCartList = false;
     },
     // 获取一个目标元素的高度
     getElRect: function getElRect(elClass, dataVal) {var _this4 = this;
@@ -4513,6 +4527,34 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                     }
                   }).catch(function (err) {}));case 2:case "end":return _context7.stop();}}}, _callee7);}))();
     },
+    // 限时购必须携带活动、商品和具体 SKU 三个标识，后端才会按活动价入购物车，
+    // 并在提交订单时再次校验活动时间、配额与库存。
+    addFlashSale: function addFlashSale(event) {var _thisFlash = this;
+      var index = Number(event && event.currentTarget && event.currentTarget.dataset && event.currentTarget.dataset.flashIndex);
+      var item = this.flashSaleItems && this.flashSaleItems[index];
+      if (!item || !item.id || !item.dishId || !item.skuId) {
+        uni.showToast({ title: '活动商品信息未加载完成，请稍后重试', icon: 'none' });
+        return;
+      }
+      if (this.hasIncompatibleCartItem(item)) {
+        uni.showToast({ title: '上门服务和其他商品请分开下单', icon: 'none', duration: 2200 });
+        return;
+      }
+      (0, _api.newAddShoppingCartAdd)({ dishId: item.dishId, skuId: item.skuId, flashSaleActivityId: item.id, dishFlavor: (item.specName || '规格') + ':' + (item.specValue || '默认规格') }).then(function (res) {
+        if (res && res.code === 1) {
+          uni.showToast({ title: '已按限时价加入购物车', icon: 'success' });
+          _thisFlash.getTableOrderDishListes();
+        } else {
+          uni.showToast({ title: res && res.msg || '加入失败，活动可能已结束', icon: 'none' });
+        }
+      }).catch(function (error) {
+        // 业务异常的 message 在小程序 request 封装中可能位于 response.data、data
+        // 或 message，优先展示服务端给出的限购/库存原因，避免误导用户“网络重试”。
+        var body = error && error.response && error.response.data || error && error.data || {};
+        var message = error && error.msg || body.msg || body.message || error && error.message || '加入失败，请稍后重试';
+        uni.showModal({ title: '未能加入购物车', content: String(message), showCancel: false, confirmText: '知道了' });
+      });
+    },
     // 去订单页面
     goOrder: function goOrder() {
       uni.navigateTo({
@@ -4609,7 +4651,9 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                   params = _objectSpread(_objectSpread({},
                   params), {}, {
                     dishId: item.id,
-                    skuId: item.skuId || null });
+                    skuId: item.skuId || null,
+                    flashSaleActivityId: null,
+                    normalPurchase: true });
 
                 } else if (item.type === 2) {
                   params = {
@@ -4620,7 +4664,8 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                     params = _objectSpread(_objectSpread({},
                     params), {}, {
                       dishId: item.dishId,
-                      skuId: item.skuId || null });
+                    skuId: item.skuId || null,
+                    flashSaleActivityId: item.flashSaleActivityId || null });
 
                   } else {
                     params = {
@@ -4641,7 +4686,18 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                     _this11.getDishListDataes(_this11.rightIdAndType);
                     _this11.flavorDataes = [];
                   }
-                }).catch(function (err) {});case 15:case "end":return _context8.stop();}}}, _callee8);}))();
+                }).catch(function (err) {
+                  // request.js 对 code !== 1 的业务响应会直接 reject(res.data)，
+                  // 因此限购、库存等原因在 err.msg，而不是网络错误的 err.message。
+                  // 购物车中的加号也必须展示服务端的真实原因，不能静默失败。
+                  var message = err && err.msg || err && err.data && (err.data.msg || err.data.message) || err && err.message || '加入失败，请稍后重试';
+                  uni.showModal({
+                    title: '未能加入购物车',
+                    content: String(message),
+                    showCancel: false,
+                    confirmText: '知道了'
+                  });
+                });case 15:case "end":return _context8.stop();}}}, _callee8);}))();
     },
     // 加入购物车
     addShop: function addShop(item) {
@@ -4690,7 +4746,8 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                     params = _objectSpread(_objectSpread({},
                     params), {}, {
                       dishId: item.dishId,
-                      skuId: item.skuId || null });
+                    skuId: item.skuId || null,
+                    flashSaleActivityId: item.flashSaleActivityId || null });
 
                   } else {
                     params = {
@@ -20177,6 +20234,11 @@ exports.getCategoryList = getCategoryList;var dishListByCategoryId = function di
     method: 'GET',
     params: params });
 
+};
+
+// 用户端首页限时购：活动为空时页面显示空状态，不影响普通商品加载。
+exports.getFlashSaleActive = function getFlashSaleActive() {
+  return (0, _request.request)({ url: '/user/flash-sale/active', method: 'GET' });
 };
 
 // 文件下载---预览

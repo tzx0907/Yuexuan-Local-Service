@@ -14,6 +14,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 
 import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
 
@@ -25,8 +27,17 @@ import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKN
 public class JacksonObjectMapper extends ObjectMapper {
 
     public static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
-    //public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm";
+    /**
+     * API 返回统一带秒；管理端旧页面提交到分钟、新页面提交到秒，两种格式都要接受。
+     */
+    public static final String DEFAULT_DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter DATE_TIME_INPUT_FORMATTER = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd HH:mm")
+            .optionalStart()
+            .appendPattern(":ss")
+            .optionalEnd()
+            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+            .toFormatter();
     public static final String DEFAULT_TIME_FORMAT = "HH:mm:ss";
 
     public JacksonObjectMapper() {
@@ -38,7 +49,7 @@ public class JacksonObjectMapper extends ObjectMapper {
         this.getDeserializationConfig().withoutFeatures(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
         SimpleModule simpleModule = new SimpleModule()
-                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT)))
+                .addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(DATE_TIME_INPUT_FORMATTER))
                 .addDeserializer(LocalDate.class, new LocalDateDeserializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_FORMAT)))
                 .addDeserializer(LocalTime.class, new LocalTimeDeserializer(DateTimeFormatter.ofPattern(DEFAULT_TIME_FORMAT)))
                 .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(DateTimeFormatter.ofPattern(DEFAULT_DATE_TIME_FORMAT)))

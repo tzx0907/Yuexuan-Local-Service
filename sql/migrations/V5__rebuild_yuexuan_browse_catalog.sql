@@ -7,7 +7,7 @@ START TRANSACTION;
 
 -- 用户端仅保留八个悦选分类，排序与首页一致。
 -- category.name 有唯一索引，先写入临时名称避免“宠物用品”等名称互换时冲突。
-UPDATE category SET name=CONCAT('__yx_reset_', id) WHERE id IN (11,12,16,17,18,19,20,21,26,13,15);
+UPDATE category SET name=CONCAT('__yx_reset_', id) WHERE id IN (11,12,16,17,18,19,20,26);
 UPDATE category SET name='日用百货', type=1, sort=1, status=1 WHERE id=11;
 UPDATE category SET name='新鲜果蔬', type=1, sort=2, status=1 WHERE id=12;
 UPDATE category SET name='乳品烘焙', type=1, sort=3, status=1 WHERE id=16;
@@ -16,7 +16,15 @@ UPDATE category SET name='宠物用品', type=1, sort=5, status=1 WHERE id=18;
 UPDATE category SET name='鲜花绿植', type=1, sort=6, status=1 WHERE id=19;
 UPDATE category SET name='健康护理', type=1, sort=7, status=1 WHERE id=20;
 UPDATE category SET name='上门服务', type=1, sort=8, status=1 WHERE id=26;
-UPDATE category SET status=0 WHERE id IN (13,15,21);
+-- 13、15、21 是旧课程分类，不属于悦选目录。仅在没有商品或组合商品引用时清理，
+-- 避免留下 __yx_reset_* 这类迁移占位名称，也避免删除仍被引用的数据。
+DELETE c
+FROM category c
+LEFT JOIN dish d ON d.category_id = c.id
+LEFT JOIN setmeal s ON s.category_id = c.id
+WHERE c.id IN (13,15,21)
+  AND d.id IS NULL
+  AND s.id IS NULL;
 
 -- 旧 dish 表保留为兼容物理表，但全部在售记录均改为悦选商品/服务。
 -- 同理，商品名有唯一索引，先使用临时名称以允许跨分类的重命名。

@@ -1,12 +1,14 @@
 package com.sky.service;
 
 import com.sky.dto.FlashSaleActivityDTO;
-import com.sky.entity.FlashSaleActivity;
+import com.sky.vo.FlashSaleActivityVO;
 
 import java.util.List;
 
 public interface FlashSaleActivityService {
     Long create(FlashSaleActivityDTO dto);
     void update(FlashSaleActivityDTO dto);
-    List<FlashSaleActivity> listActive();
+    List<FlashSaleActivityVO> listActive();
+    List<FlashSaleActivityVO> listAll();
+    void updateStatus(Long id, Integer status);
 }

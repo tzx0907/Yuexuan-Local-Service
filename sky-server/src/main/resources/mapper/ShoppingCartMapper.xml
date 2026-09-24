@@ -31,4 +31,22 @@
     </where>
 
     </select>
+
+    <select id="listSameSaleItem" resultType="com.sky.entity.ShoppingCart">
+        select sc.*, d.category_id as category_id, c.name as category_name
+        from shopping_cart sc
+        left join dish d on d.id = sc.dish_id
+        left join category c on c.id = d.category_id
+        <where>
+            user_id = #{userId}
+            <if test="dishId != null">and dish_id = #{dishId}</if>
+            <if test="skuId != null">and sku_id = #{skuId}</if>
+            <if test="setmealId != null">and setmeal_id = #{setmealId}</if>
+            <if test="dishFlavor != null">and dish_flavor = #{dishFlavor}</if>
+            <choose>
+                <when test="flashSaleActivityId != null">and flash_sale_activity_id = #{flashSaleActivityId}</when>
+                <otherwise>and flash_sale_activity_id is null</otherwise>
+            </choose>
+        </where>
+    </select>
 </mapper>

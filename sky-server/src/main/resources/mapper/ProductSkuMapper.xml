@@ -23,6 +23,19 @@
         select * from product_sku where dish_id = #{dishId} and spec_value = #{specValue} and status = 1 limit 1
     </select>
     <select id="listByDishId" resultType="com.sky.entity.ProductSku">select * from product_sku where dish_id = #{dishId} order by id</select>
+    <select id="searchSellable" resultType="com.sky.vo.ProductSkuSearchVO">
+        select p.id as skuId, p.dish_id as dishId, d.name as productName, d.image,
+               p.spec_name as specName, p.spec_value as specValue, p.price, p.stock
+        from product_sku p join dish d on d.id = p.dish_id
+        where p.status = 1 and d.status = 1
+        <if test="keyword != null and keyword != ''">
+            and (d.name like concat('%', #{keyword}, '%')
+              or p.spec_name like concat('%', #{keyword}, '%')
+              or p.spec_value like concat('%', #{keyword}, '%'))
+        </if>
+        order by d.name, p.id
+        limit 30
+    </select>
     <update id="decrementStock">
         update product_sku set stock = stock - #{quantity}
         where id = #{skuId} and status = 1 and stock >= #{quantity}

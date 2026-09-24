@@ -2,6 +2,7 @@ package com.sky.service.impl;
 
 import com.sky.context.BaseContext;
 import com.sky.dto.ShoppingCartDTO;
+import com.sky.exception.BaseException;
 import com.sky.entity.Dish;
 import com.sky.entity.Setmeal;
 import com.sky.entity.ProductSku;
@@ -42,12 +43,17 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
      * @param shoppingCartDTO
      */
     public void add(ShoppingCartDTO shoppingCartDTO){
+        // 不能只相信前端对象是否残留活动 id。普通商品入口显式声明后，
+        // 即使页面复用了旧对象，也绝不会写入或合并到限时购购物车行。
+        if (Boolean.TRUE.equals(shoppingCartDTO.getNormalPurchase())) {
+            shoppingCartDTO.setFlashSaleActivityId(null);
+        }
         //查询购物车看是否存在当前数据
         ShoppingCart shoppingCart = new ShoppingCart();
         BeanUtils.copyProperties(shoppingCartDTO,shoppingCart);
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
-        List<ShoppingCart> shoppingCartList = shoppingCartMapper.list(shoppingCart);
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.listSameSaleItem(shoppingCart);
         // 加购不占用活动库存/额度，只做只读预检查。真正占用必须在提交订单事务内完成，
         // 否则用户长期不结算会把活动名额锁死。
         validateFlashSaleQuotaBeforeAdd(shoppingCartDTO, userId);
@@ -62,12 +68,12 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             if(dishId!=null){
                 Dish dish = dishMapper.getById(dishId);
                 if (dish == null) {
-                    throw new IllegalArgumentException("商品不存在");
+                    throw new BaseException("商品不存在");
                 }
                 if (shoppingCartDTO.getSkuId() != null) {
                     ProductSku sku = productSkuMapper.getById(shoppingCartDTO.getSkuId());
                     if (sku == null || !dishId.equals(sku.getDishId()) || !Integer.valueOf(1).equals(sku.getStatus())) {
-                        throw new IllegalArgumentException("商品规格不可售");
+                        throw new BaseException("商品规格不可售");
                     }
                     shoppingCart.setSkuId(sku.getId());
                     shoppingCart.setDishFlavor(sku.getSpecName() + ":" + sku.getSpecValue());
@@ -81,7 +87,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                     }
                     ProductSku sku = productSkuMapper.getByDishIdAndSpecValue(dishId, specValue);
                     if (sku == null) {
-                        throw new IllegalArgumentException("商品规格不可售");
+                        throw new BaseException("商品规格不可售");
                     }
                     shoppingCart.setSkuId(sku.getId());
                     shoppingCart.setDishFlavor(sku.getSpecName() + ":" + sku.getSpecValue());
@@ -156,7 +162,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                 || !Integer.valueOf(1).equals(activity.getStatus())
                 || now.isBefore(activity.getStartTime()) || !now.isBefore(activity.getEndTime())
                 || activity.getSoldStock() >= activity.getActivityStock()) {
-            throw new IllegalArgumentException("限时购活动未开始、已结束或库存不足");
+            throw new BaseException("限时购活动未开始、已结束或库存不足");
         }
         cart.setFlashSaleActivityId(activity.getId());
         cart.setAmount(activity.getSalePrice());
@@ -168,7 +174,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         }
         FlashSaleActivity activity = flashSaleActivityMapper.getById(dto.getFlashSaleActivityId());
         if (activity == null) {
-            throw new IllegalArgumentException("限时购活动不存在");
+            throw new BaseException("限时购活动不存在");
         }
         ShoppingCart condition = new ShoppingCart();
         condition.setUserId(userId);
@@ -178,7 +184,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Integer reserved = flashSaleUserQuotaMapper.getReservedQuantity(activity.getId(), userId);
         int alreadyUsedOrSelected = inCart + (reserved == null ? 0 : reserved);
         if (alreadyUsedOrSelected + 1 > activity.getPerUserLimit()) {
-            throw new IllegalArgumentException("超过该限时购活动的每人限购数量");
+            throw new BaseException("已超过购买上限，本次活动每人最多购买" + activity.getPerUserLimit() + "件");
         }
     }
 }

@@ -1,6 +1,6 @@
 package com.sky.controller.user;
 
-import com.sky.entity.FlashSaleActivity;
+import com.sky.vo.FlashSaleActivityVO;
 import com.sky.result.Result;
 import com.sky.service.FlashSaleActivityService;
 import io.swagger.annotations.Api;
@@ -20,5 +20,5 @@ public class FlashSaleActivityController {
 
     @GetMapping("/active")
     @ApiOperation("查询正在进行的限时购")
-    public Result<List<FlashSaleActivity>> active() { return Result.success(activityService.listActive()); }
+    public Result<List<FlashSaleActivityVO>> active() { return Result.success(activityService.listActive()); }
 }

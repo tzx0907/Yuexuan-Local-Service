@@ -20,6 +20,7 @@ public class ShopController {
     public Result<Integer> getStatus(){
         Integer status = (Integer) redisTemplate.opsForValue().get("SHOP_STATUS");
         log.info("获取营业状态：{}",status == 1 ? "营业中" : "打烊中");
-        return Result.success(status);
+        // 尚未人工设置时默认服务中；只有管理端明确设为 0 才禁止新订单。
+        return Result.success(status == null ? 1 : status);
     }
 }

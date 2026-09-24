@@ -7,8 +7,10 @@ import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.FlashSaleActivityMapper;
 import com.sky.mapper.ProductSkuMapper;
 import com.sky.service.FlashSaleActivityService;
+import com.sky.vo.FlashSaleActivityVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,13 +27,17 @@ public class FlashSaleActivityServiceImpl implements FlashSaleActivityService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long create(FlashSaleActivityDTO dto) {
         FlashSaleActivity activity = toValidatedActivity(dto, false);
-        activityMapper.insert(activity);
+        if (activityMapper.insert(activity) != 1 || activity.getId() == null) {
+            throw new OrderBusinessException("限时购活动创建失败，未写入数据库");
+        }
         return activity.getId();
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(FlashSaleActivityDTO dto) {
         if (dto.getId() == null || activityMapper.getById(dto.getId()) == null) {
             throw new OrderBusinessException("限时购活动不存在");
@@ -43,8 +49,18 @@ public class FlashSaleActivityServiceImpl implements FlashSaleActivityService {
     }
 
     @Override
-    public List<FlashSaleActivity> listActive() {
+    public List<FlashSaleActivityVO> listActive() {
         return activityMapper.listActive();
+    }
+
+    @Override
+    public List<FlashSaleActivityVO> listAll() { return activityMapper.listAll(); }
+
+    @Override
+    public void updateStatus(Long id, Integer status) {
+        if (id == null || (status == null || (status != 0 && status != 1)) || activityMapper.updateStatus(id, status) != 1) {
+            throw new OrderBusinessException("限时购活动不存在或状态不合法");
+        }
     }
 
     private FlashSaleActivity toValidatedActivity(FlashSaleActivityDTO dto, boolean updating) {

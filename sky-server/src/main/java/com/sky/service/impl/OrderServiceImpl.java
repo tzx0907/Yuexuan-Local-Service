@@ -85,6 +85,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public OrderSubmitVO submit(OrdersSubmitDTO ordersSubmitDTO,String idempotencyKey) {
         Long userId = BaseContext.getCurrentId();
+        Object shopStatus = redisTemplate.opsForValue().get("SHOP_STATUS");
+        if (Integer.valueOf(0).equals(shopStatus)) {
+            throw new OrderBusinessException("平台当前暂停接单，请稍后再试");
+        }
         validateIdempotencyKey(idempotencyKey);
         String redisKey = "order:submit:" + userId + ":" + idempotencyKey;
         Boolean acquired = redisTemplate.opsForValue().setIfAbsent(
@@ -139,7 +143,7 @@ public class OrderServiceImpl implements OrderService {
                     }
                     int quantity = flashSaleQuantities.getOrDefault(activity.getId(), 0) + cart.getNumber();
                     if (quantity > activity.getPerUserLimit()) {
-                        throw new OrderBusinessException("超过该限时购活动的单次限购数量");
+                        throw new OrderBusinessException("已超过购买上限，本次活动每人最多购买" + activity.getPerUserLimit() + "件");
                     }
                     flashSaleQuantities.put(activity.getId(), quantity);
                     cart.setAmount(activity.getSalePrice());
@@ -149,7 +153,7 @@ public class OrderServiceImpl implements OrderService {
                 FlashSaleActivity activity = flashSaleActivityMapper.getById(entry.getKey());
                 int quotaResult = flashSaleUserQuotaMapper.tryReserve(entry.getKey(), userId, entry.getValue(), activity.getPerUserLimit());
                 if (quotaResult == 0) {
-                    throw new OrderBusinessException("超过该限时购活动的每人累计限购数量");
+                    throw new OrderBusinessException("已超过购买上限，本次活动每人最多购买" + activity.getPerUserLimit() + "件");
                 }
                 if (flashSaleActivityMapper.decrementStock(entry.getKey(), entry.getValue()) != 1) {
                     throw new OrderBusinessException("限时购活动已结束或库存不足");
