@@ -4,7 +4,7 @@
 
 本仓库从餐饮点单练习项目持续演进而来，当前已完成订单状态机、支付与下单幂等、SKU 库存、Redis Cache Aside 与 Lua 限流、RabbitMQ 超时关闭、Outbox 可靠投递、限时购和组合商品闭环。所有业务迭代均以“悦选本地到家服务平台”为产品主题。
 
-用户端前端统一位于 [`frontend/`](frontend/README.md)。当前已迁入可运行的小程序基线 `frontend/legacy-mp-weixin`；课程资料未包含其原始 uni-app 源码，因此后续会在 `frontend/yuexuan-miniprogram` 中重建可维护的源码，并逐页完成接口与产品主题迁移。
+用户端和管理端均已完成悦选本地到家服务平台的主题、商品/服务文案、交易流程与接口适配。用户端当前位于 [`frontend/legacy-mp-weixin`](frontend/legacy-mp-weixin)，可用于运行和演示；该目录为历史 uni-app 小程序构建产物，课程资料未包含原始 `.vue` 源码。后续如需持续迭代前端页面，将在 `frontend/yuexuan-miniprogram` 中重建可维护的源码工程。
 
 数据库从 [`sql/sky_take_out_schema.sql`](sql/sky_take_out_schema.sql) 初始化后，再按 [`sql/migrations/`](sql/migrations/) 中的版本顺序执行增量脚本。迁移脚本保留了课程项目早期的重复版本号命名，因此当前采用**人工、按文件名与说明顺序执行**，并未接入 Flyway 自动迁移；执行前请先备份本地数据库。具体顺序见本文“快速启动”。
 
@@ -82,14 +82,14 @@ sequenceDiagram
 
 ## 已知限制
 
-- `frontend/legacy-mp-weixin` 是从 uni-app 编译得到的旧课程小程序基线/构建产物，不是可维护的 `.vue` 源码；它已做悦选主题和交易流程适配，但尚未完成完整、可维护的悦选小程序源码重建。
+- 用户端与管理端均已完成悦选主题和交易流程适配。`frontend/legacy-mp-weixin` 是历史 uni-app 小程序构建产物，不包含可维护的 `.vue` 源码；当前可用于运行和演示，但后续新增页面或进行大规模迭代时，需要在 `frontend/yuexuan-miniprogram` 中重建可维护的前端源码工程。
 - 后端仍沿用 `dish`、`setmeal`、`dish_flavor` 等课程项目表名和部分包名作为兼容层；对外业务含义分别是商品、组合商品和规格元数据。
 - 数据库增量脚本尚未接入 Flyway；首次搭建与升级需要按文档人工执行并记录已执行版本。
 - OSS、微信真实支付与真实小程序 AppID/证书依赖外部账号配置；本地开发使用 mock 登录和模拟支付链路验证。
 
 ## 下一阶段计划
 
-1. 重建可维护的悦选小程序源码，移除对编译产物直接修改的依赖。
+1. 重建可维护的悦选小程序源码工程：保留当前已完成的悦选用户端演示与接口能力，逐步从历史构建产物迁移到 `frontend/yuexuan-miniprogram`，降低后续页面迭代成本。
 2. 接入 Flyway 或 Liquibase，统一管理数据库版本与执行记录。
 3. 完善配送员、服务范围、售后退款、评价与优惠能力。
 4. 为 RabbitMQ DLQ、Outbox 长时间重试和库存异常增加监控与告警。
@@ -133,12 +133,16 @@ sequenceDiagram
 ## 项目结构
 
 ```text
-yuexuan-local-service/              # Maven 父工程产物名
+yuexuan-local-service/
+├── .github/workflows/               # GitHub Actions 持续集成
+├── docs/                            # 交付说明、演示流程、面试笔记
+├── frontend/                        # 已完成悦选适配的用户端与管理端前端
 ├── sky-common/                      # 公共配置、工具类、常量、异常、结果封装
 ├── sky-pojo/                        # Entity、DTO、VO 等业务对象
 ├── sky-server/                      # Spring Boot 启动模块、Controller、Service、Mapper
 ├── sql/                             # 建表脚本与增量迁移脚本
-├── docker-compose.yml               # 本地 MySQL、Redis
+├── .env.example                     # 本地依赖环境变量模板
+├── docker-compose.yml               # MySQL、Redis、RabbitMQ 本地依赖
 └── pom.xml
 ```
 
@@ -150,13 +154,15 @@ yuexuan-local-service/              # Maven 父工程产物名
 - Maven 3.6+
 - MySQL 8.0
 - Redis 7+
-- 可选：阿里云 OSS、微信小程序与微信支付相关配置
+- Docker Desktop / Docker Compose（推荐，用于一键启动本地依赖）
+- RabbitMQ 3.x（使用 Docker Compose 时无需单独安装）
+- 可选的外部账号配置：阿里云 OSS、微信小程序与微信支付真实链路
 
 ## 快速开始
 
 ### 1. 启动本地依赖
 
-项目提供 Docker Compose，用于启动 MySQL 8.0 和 Redis 7。复制环境变量模板并填写一个仅用于本地开发的 MySQL root 密码：
+项目提供 Docker Compose，用于启动 MySQL 8.0、Redis 7 和 RabbitMQ。复制环境变量模板并填写仅用于本地开发的依赖密码：
 
 ```bash
 cp .env.example .env
@@ -222,13 +228,21 @@ mvn -pl sky-server -am spring-boot:run
 
 RabbitMQ 管理台为 `http://localhost:15672`，账号密码来自 `.env` 的 `RABBITMQ_DEFAULT_USER` 和 `RABBITMQ_DEFAULT_PASS`。`mvn test` 当前以 Mockito 单元测试为主，不要求本地 MySQL、Redis、RabbitMQ 或 WebSocket 容器运行；完整接口演示仍需要启动上述依赖。
 
+## 演示入口
+
+- 后端接口文档：[http://localhost:8080/doc.html](http://localhost:8080/doc.html)
+- RabbitMQ 管理台：[http://localhost:15672](http://localhost:15672)
+- 用户端：[`frontend/legacy-mp-weixin`](frontend/legacy-mp-weixin)，已完成悦选主题与接口适配；使用微信开发者工具打开并重新编译该构建产物进行演示。
+- 管理端：[`frontend/admin-vue-ts`](frontend/admin-vue-ts)。构建并由本地 Nginx 部署后，当前本地演示入口为 [http://localhost:90/](http://localhost:90/)；登录、商品、组合、订单和限时购操作依赖后端服务运行。
+
 ## 后续演进路线
 
-1. **组合商品库存**：为商品组合建立物料清单，并按组合明细扣减多个 SKU 库存。
-2. **多门店与服务范围**：门店营业时间、配送半径、服务区域、商品可售范围。
-3. **履约能力**：配送方式、预约时间窗、配送员接单与履约轨迹。
-4. **营销与售后**：优惠券、满减、退款、评价与投诉。
-5. **工程化能力**：Redis 缓存一致性、接口限流、消息队列与可观测性。
+1. **多商品/多 SKU 组合库存**：支持一次组合购买原子扣减多个商品或 SKU，并完善取消订单后的库存回补校验。
+2. **多门店与服务范围**：支持门店营业时间、配送半径、服务区域和商品可售范围。
+3. **履约能力**：支持配送方式、预约时间窗、配送员接单和履约轨迹。
+4. **营销与售后**：支持优惠券、满减、退款、评价与投诉。
+5. **工程化增强**：引入 Flyway 或 Liquibase；为 RabbitMQ DLQ、Outbox 长时间重试、库存异常补充监控、告警与处理台账。
+6. **前端源码工程**：将当前已完成的悦选用户端演示能力逐步迁移到可维护的源码工程。
 
 ## 开发约定
 
