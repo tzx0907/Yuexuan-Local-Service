@@ -68,7 +68,39 @@
 8. 可靠性说明：展示 `outbox_event`、RabbitMQ 队列和 `processed_message` 的作用；创建未支付订单后说明 15 分钟关闭及库存回补。
 9. 暂停接单：管理端关闭服务状态，用户端首页显示暂停接单，提交订单被后端明确拒绝。
 
-## 6. 验收清单
+## 6. 可执行的接口验收步骤
+
+以下命令假定后端运行在 `http://localhost:8080`，并已通过小程序或登录接口取得用户 JWT。将占位符替换为当前环境的真实值；不要把 Token、密码或支付证书提交到仓库。
+
+```powershell
+$base = 'http://localhost:8080'
+$token = '用户 JWT'
+$headers = @{ authentication = $token }
+
+# 1. 浏览分类商品，确认 SKU 商品返回 skus，组合商品返回 type=2。
+Invoke-RestMethod "$base/user/dish/list?categoryId=17" -Headers $headers
+
+# 2. 清空购物车后，以明确 skuId 加购；同一商品换另一 skuId 应形成另一购物车行。
+Invoke-RestMethod "$base/user/shoppingCart/add" -Method Post -Headers $headers -ContentType 'application/json' `
+  -Body '{"dishId":62,"skuId":123}'
+Invoke-RestMethod "$base/user/shoppingCart/list" -Headers $headers
+```
+
+`skuId` 不应在文档中写死；从第一步返回的 `skus[].id` 选择。若不传 `skuId` 请求有 SKU 的商品，后端应返回“请选择商品规格”。库存不足时可在管理端把某个 SKU 库存调为 0，再按该 SKU 提交订单，预期返回库存不足且不创建部分订单。
+
+下单必须显式携带 `Idempotency-Key`。同一个 Key 和同一业务请求连续发两次，第二次应返回第一次创建的订单，而不是生成新订单：
+
+```powershell
+$idempotencyKey = [guid]::NewGuid().ToString()
+$submitHeaders = @{ authentication = $token; 'Idempotency-Key' = $idempotencyKey }
+$body = '{"addressBookId":1,"deliveryStatus":1,"payMethod":1,"remark":"接口验收"}'
+Invoke-RestMethod "$base/user/order/submit" -Method Post -Headers $submitHeaders -ContentType 'application/json' -Body $body
+Invoke-RestMethod "$base/user/order/submit" -Method Post -Headers $submitHeaders -ContentType 'application/json' -Body $body
+```
+
+支付后检查订单从“待支付”变为“待接单”，再在 MySQL 中按订单 ID 查看 `outbox_event`。投递器处理后事件会进入 `SENT`，RabbitMQ 管理台 `http://localhost:15672` 可查看支付通知和延迟关单队列。响应头中的 `X-Trace-Id` 可用于在后端日志中搜索同一次请求的过滤器、鉴权、下单、库存或异常记录。
+
+## 7. 验收清单
 
 | 场景 | 预期结果 |
 | --- | --- |
@@ -82,7 +114,7 @@
 | 重复支付/重复 MQ 消息 | 状态和通知不重复处理 |
 | 管理端暂停接单 | 首页可见暂停状态，后端提交接口拒绝新订单 |
 
-## 7. 最终提交建议（不执行提交）
+## 8. 最终提交建议（不执行提交）
 
 建议将当前工作分两次提交，便于代码审阅和回滚：
 

@@ -6,9 +6,7 @@
 
 用户端前端统一位于 [`frontend/`](frontend/README.md)。当前已迁入可运行的小程序基线 `frontend/legacy-mp-weixin`；课程资料未包含其原始 uni-app 源码，因此后续会在 `frontend/yuexuan-miniprogram` 中重建可维护的源码，并逐页完成接口与产品主题迁移。
 
-已有数据库升级请执行 [`sql/migrations/V2__yuexuan_product_domain.sql`](sql/migrations/V2__yuexuan_product_domain.sql)。该迁移不会删除旧表或历史订单；它补齐 SKU 购物车字段、查询索引，并提供以“商品/服务组合”命名的兼容视图。
-
-课程库中的餐饮演示分类、商品文案和图片可使用 [`sql/migrations/V3__yuexuan_demo_catalog.sql`](sql/migrations/V3__yuexuan_demo_catalog.sql) 替换为悦选社区商品与到家服务演示数据。执行后需清理 Redis 商品缓存或重启 Redis，才能立即看到更新。
+数据库从 [`sql/sky_take_out_schema.sql`](sql/sky_take_out_schema.sql) 初始化后，再按 [`sql/migrations/`](sql/migrations/) 中的版本顺序执行增量脚本。迁移脚本保留了课程项目早期的重复版本号命名，因此当前采用**人工、按文件名与说明顺序执行**，并未接入 Flyway 自动迁移；执行前请先备份本地数据库。具体顺序见本文“快速启动”。
 
 ## 产品定位
 
@@ -51,6 +49,50 @@
 - 提交订单、模拟支付、订单详情与历史订单
 - 催单、再次购买
 - 门店营业状态查询
+
+## 核心架构与可靠性设计
+
+```mermaid
+flowchart LR
+    U[用户端 / 管理端] --> S[Spring Boot API]
+    S --> R[(Redis\n缓存、幂等、限流)]
+    S --> M[(MySQL\n订单、SKU、库存、Outbox)]
+    M --> O[OutboxDispatchTask]
+    O --> Q[RabbitMQ]
+    Q --> C[订单支付通知 / 超时关单消费者]
+    C --> W[管理端 WebSocket 通知]
+    C --> M
+```
+
+下单主路径以 MySQL 事务为最终一致性边界：Redis 先做短期幂等与限流，库存使用条件更新扣减；订单、明细、库存变更与 Outbox 事件一起提交。异步消费者可以重复收到消息，但以事件 ID 幂等和订单状态条件更新避免重复执行业务。
+
+```mermaid
+sequenceDiagram
+    participant Client as 客户端
+    participant Redis as Redis
+    participant App as Spring Boot
+    participant DB as MySQL
+    Client->>App: 提交订单 + Idempotency-Key
+    App->>Redis: SETNX 幂等键 + Lua 限流
+    App->>DB: 条件扣减库存
+    App->>DB: 写订单、明细、Outbox（同一事务）
+    DB-->>App: 提交成功
+    App-->>Client: 返回订单 ID
+```
+
+## 已知限制
+
+- `frontend/legacy-mp-weixin` 是从 uni-app 编译得到的旧课程小程序基线/构建产物，不是可维护的 `.vue` 源码；它已做悦选主题和交易流程适配，但尚未完成完整、可维护的悦选小程序源码重建。
+- 后端仍沿用 `dish`、`setmeal`、`dish_flavor` 等课程项目表名和部分包名作为兼容层；对外业务含义分别是商品、组合商品和规格元数据。
+- 数据库增量脚本尚未接入 Flyway；首次搭建与升级需要按文档人工执行并记录已执行版本。
+- OSS、微信真实支付与真实小程序 AppID/证书依赖外部账号配置；本地开发使用 mock 登录和模拟支付链路验证。
+
+## 下一阶段计划
+
+1. 重建可维护的悦选小程序源码，移除对编译产物直接修改的依赖。
+2. 接入 Flyway 或 Liquibase，统一管理数据库版本与执行记录。
+3. 完善配送员、服务范围、售后退款、评价与优惠能力。
+4. 为 RabbitMQ DLQ、Outbox 长时间重试和库存异常增加监控与告警。
 
 ## 交易可靠性
 
@@ -122,17 +164,30 @@ docker compose up -d
 docker compose ps
 ```
 
-首次初始化时，执行 `sql/sky_take_out_schema.sql` 创建 `Yuexuan-Local-Service` 数据库和表结构。MySQL 与 Redis 分别映射到本机 `3306` 和 `6379` 端口；若本机端口已被占用，请先停止冲突服务或调整 `docker-compose.yml` 中的端口映射。
+首次初始化时，Docker Compose 会启动 MySQL、Redis 和 RabbitMQ。MySQL、Redis、RabbitMQ AMQP 与 RabbitMQ 管理台分别映射到本机 `3306`、`6379`、`5672`、`15672`；若端口已被占用，请调整 `docker-compose.yml`。
 
 ### 2. 初始化数据库
 
-项目提供 `sql/sky_take_out_schema.sql`，用于创建空的本地开发数据库及其表结构：
+项目提供 `sql/sky_take_out_schema.sql`，用于创建 `yuexuan_local_service` 本地开发数据库及基础表结构：
 
 ```bash
 mysql -u root -p < sql/sky_take_out_schema.sql
 ```
 
-使用 Docker Compose 首次启动时无需手动执行该命令。脚本仅包含数据库和表结构，不包含用户、订单或其他业务数据。脚本会删除同名表，因此只应在新建的本地开发数据库中执行。
+使用 Docker Compose 首次启动时，脚本会自动挂载到 MySQL 初始化目录，通常无需重复执行。脚本会删除同名表，因此只应在新建的本地开发数据库中执行。其后按下面顺序执行增量脚本；其中 V2、V3 有历史同版本号文件，必须按列出的文件顺序人工执行：
+
+```text
+V2__yuexuan_product_domain.sql
+V2__add_order_submit_idempotency.sql
+V3__add_product_stock.sql
+V3__yuexuan_demo_catalog.sql
+V4__add_product_sku.sql
+V5__rebuild_yuexuan_browse_catalog.sql
+V6__clear_legacy_transaction_history.sql
+V7 ～ V10、V12 ～ V23：按文件名前缀升序执行
+```
+
+> V6 会清理课程演示交易记录，只适用于首次本地演示初始化；已有真实演示数据时不要再次执行。执行任意迁移前先备份数据库，并记录已执行文件。
 
 ### 3. 配置开发环境
 
@@ -143,7 +198,7 @@ sky:
   datasource:
     host: localhost
     port: 3306
-    database: Yuexuan-Local-Service
+    database: yuexuan_local_service
     username: root
     password: your-password
   redis:
@@ -164,6 +219,8 @@ mvn -pl sky-server -am spring-boot:run
 ```
 
 服务默认监听 `http://localhost:8080`；接口文档地址为 `http://localhost:8080/doc.html`。管理员端接口通常以 `/admin` 开头，用户端接口通常以 `/user` 开头。
+
+RabbitMQ 管理台为 `http://localhost:15672`，账号密码来自 `.env` 的 `RABBITMQ_DEFAULT_USER` 和 `RABBITMQ_DEFAULT_PASS`。`mvn test` 当前以 Mockito 单元测试为主，不要求本地 MySQL、Redis、RabbitMQ 或 WebSocket 容器运行；完整接口演示仍需要启动上述依赖。
 
 ## 后续演进路线
 
