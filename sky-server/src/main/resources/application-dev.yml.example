@@ -3,14 +3,17 @@ sky:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost
-    port: 3306
+    # 使用本仓库 docker-compose.yml 时，宿主机映射端口为 3307。
+    port: 3307
     database: yuexuan_local_service
     username: root
-    # Docker Compose 默认 Redis 不启用密码；若自行配置 requirepass，再填写密码。
+    # Docker Compose 默认 MySQL 密码来自 .env 的 MYSQL_ROOT_PASSWORD。
     password:
   redis:
     host: localhost
-    port: 6379
+    # 使用本仓库 docker-compose.yml 时，宿主机映射端口为 6380。
+    port: 6380
+    # Docker Compose 默认 Redis 不启用密码；若自行配置 requirepass，再填写密码。
     password: CHANGE_ME
     database: 0
   rabbitmq:

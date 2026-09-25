@@ -1,6 +1,5 @@
 server:
   port: 8080
-
 spring:
   application:
     name: yuexuan-local-service
@@ -30,7 +29,6 @@ spring:
       simple:
         acknowledge-mode: manual
         default-requeue-rejected: false
-
 mybatis:
   #mapper配置文件
   mapper-locations: classpath:mapper/*.xml
@@ -38,7 +36,6 @@ mybatis:
   configuration:
     #开启驼峰命名
     map-underscore-to-camel-case: true
-
 logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] [traceId=%X{traceId:-}] %logger{36} - %msg%n"
@@ -48,20 +45,16 @@ logging:
         mapper: debug
         service: info
         controller: info
-
 sky:
   jwt:
-    # 设置jwt签名加密时使用的秘钥
+    # 仅提供占位默认值；本地 application-dev.yml 或环境变量必须覆盖为自己的安全值。
     admin-secret-key: ${YUEXUAN_ADMIN_JWT_SECRET:CHANGE_ME_ADMIN_JWT_SECRET}
     # 设置jwt过期时间
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
-    # 设置jwt签名加密时使用的秘钥
     user-secret-key: ${YUEXUAN_USER_JWT_SECRET:CHANGE_ME_USER_JWT_SECRET}
-    # 设置jwt过期时间
     user-ttl: 7200000
-    # 设置前端传递过来的令牌名称
     user-token-name: authentication
   wechat:
     appid: ${sky.wechat.appid}
