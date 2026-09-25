@@ -130,7 +130,7 @@ var render = function() {
   var l0 = _vm.__map(_vm.recentOrdersList, function(item, index) {
     var $orig = _vm.__get_orig(item)
 
-    var m0 = _vm.statusWord(item.status, _vm.getOvertime(item.orderTime))
+    var m0 = item.rejectionReason ? '商家拒单' : _vm.statusWord(item.status, _vm.getOvertime(item.orderTime))
     var g0 = _vm.numes(item.orderDetailList).total.toFixed(2)
     var m1 = _vm.numes(item.orderDetailList)
     var m2 = item.status === 1 && _vm.getOvertime(item.orderTime) > 0

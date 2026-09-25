@@ -127,7 +127,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  var m0 = _vm.statusWord(_vm.orderDetailsData.status)
+  var m0 = _vm.statusWord(_vm.orderDetailsData.status, _vm.orderDetailsData.rejectionReason)
 
   var l0 = _vm.__map(_vm.orderDataes, function(obj, index) {
     var $orig = _vm.__get_orig(obj)

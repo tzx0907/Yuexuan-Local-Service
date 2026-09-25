@@ -89,14 +89,6 @@
               </template>
             </el-table-column>
             <el-table-column
-              prop="tablewareNumber"
-              label="附加数量"
-              min-width="80"
-              align="center"
-              v-if="status === 3"
-            >
-            </el-table-column>
-            <el-table-column
               label="操作"
               align="center"
               :class-name="dialogOrderStatus === 0 ? 'operate' : 'otherOperate'"

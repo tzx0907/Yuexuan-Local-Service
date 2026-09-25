@@ -142,14 +142,6 @@
           align="center"
         />
         <el-table-column
-          v-if="[2, 3, 4].includes(orderStatus)"
-          key="tablewareNumber"
-          prop="tablewareNumber"
-          label="餐具数量"
-          align="center"
-          min-width="80"
-        />
-        <el-table-column
           prop="btn"
           label="操作"
           align="center"

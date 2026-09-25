@@ -356,8 +356,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void reject(Long id, String rejectionReason) {
+        String reason = rejectionReason == null || rejectionReason.trim().isEmpty()
+                ? "商家暂时无法接单" : rejectionReason.trim();
         transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
-                .rejectionReason(rejectionReason).build(), Orders.TO_BE_CONFIRMED);
+                .rejectionReason(reason).build(), Orders.TO_BE_CONFIRMED);
     }
 
     @Override

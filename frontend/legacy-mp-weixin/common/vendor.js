@@ -1821,7 +1821,7 @@ function handleEvent(event) {var _this2 = this;
           // The legacy base library rejects "$event" inside order-page WXML
           // attributes.  Native picker changes are therefore declared with
           // no WXML argument and receive their event here explicitly.
-          if ((methodName === 'selectServiceDate' || methodName === 'selectServiceTime' || methodName === 'addFlashSale') && (!params || !params.length)) {
+          if ((methodName === 'selectServiceDate' || methodName === 'selectServiceTime' || methodName === 'addFlashSale' || methodName === 'openBundleDetail') && (!params || !params.length)) {
             params = [event];
           }
 
@@ -4585,6 +4585,42 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
       var targetIsService = this.isOnsiteServiceItem(item);
       var carts = this.orderListDataes || [];
       return carts.some(function (cart) {return this.isOnsiteServiceItem(cart) !== targetIsService;}, this);
+    },
+    // WXML 仅传组合商品在当前右侧列表中的索引，避免旧基础库解析事件对象/嵌套参数失败。
+    openBundleDetail: function openBundleDetail(event) {
+      var index = Number(event && event.currentTarget && event.currentTarget.dataset && event.currentTarget.dataset.bundleIndex);
+      var item = this.dishListItems && this.dishListItems[index];
+      // 旧版 uni-app 的渲染数组在不同基础库中可能有一层或多层 $orig 包装；
+      // 列表尚未同步时则从原始列表兜底，不能因此把一个有效的组合误判为未加载。
+      if (!item) {
+        item = this.dishListData && this.dishListData[index];
+      }
+      for (var unwrapCount = 0; item && item.$orig && unwrapCount < 3; unwrapCount++) {
+        item = item.$orig;
+      }
+      var setmealId = item && (item.setmealId || item.id);
+      if (!setmealId) {
+        uni.showToast({ title: '组合内容暂未加载完成', icon: 'none' });
+        return;
+      }
+      var _thisBundle = this;
+      // 不经过 openDetailHandle 的 type 严格判断：接口以组合 ID 为准，避免编译包装层丢失 type 时无法查看。
+      this.dishDetailes = _objectSpread(_objectSpread({}, item || {}), {}, { id: setmealId, type: 2 });
+      (0, _api.querySetmealDishById)({ id: setmealId }).then(function (res) {
+        if (res && res.code === 1) {
+          _thisBundle.dishMealData = res.data || [];
+          _thisBundle.openDetailPop = true;
+          return;
+        }
+        uni.showToast({ title: res && res.msg || '组合内容加载失败', icon: 'none' });
+      }).catch(function (err) {
+        var message = err && (err.msg || err.message) || '组合内容加载失败';
+        uni.showToast({ title: String(message).slice(0, 18), icon: 'none' });
+      });
+    },
+    closeBundleDetail: function closeBundleDetail() {
+      this.openDetailPop = false;
+      this.dishMealData = null;
     },
     increaseCartItem: function increaseCartItem(event) {
       var index = Number(event && event.currentTarget && event.currentTarget.dataset && event.currentTarget.dataset.cartIndex);
@@ -28853,9 +28889,12 @@ var _default = {
                 });case 3:case "end":return _context.stop();}}}, _callee);}))();
     },
     // 处理状态
-    statusWord: function statusWord(status) {
+    statusWord: function statusWord(status, rejectionReason) {
       console.log(this.timeout, status);
-      if (this.timeout && status === 1 || this.orderDetailsData.status === 6) {
+      if (status === 6 && rejectionReason) {
+        return '商家拒单：' + rejectionReason;
+      }
+      if (this.timeout && status === 1 || status === 6) {
         return '订单已取消';
       }
       switch (status) {

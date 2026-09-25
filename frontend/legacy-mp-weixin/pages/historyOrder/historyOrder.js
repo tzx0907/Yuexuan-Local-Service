@@ -134,7 +134,7 @@ var render = function() {
             var $orig = _vm.__get_orig(item)
 
             var m0 = Number(index)
-            var m1 = _vm.statusWord(
+            var m1 = item.rejectionReason ? '商家拒单' : _vm.statusWord(
               item.status,
               _vm.getOvertime(item.orderTime)
             )
