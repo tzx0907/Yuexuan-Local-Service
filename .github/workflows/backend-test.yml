@@ -1,0 +1,23 @@
+name: 后端单元测试
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: JDK 17 Maven 测试
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: 执行后端单元测试
+        run: mvn -q -pl sky-server -am test
