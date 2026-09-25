@@ -5,6 +5,41 @@ USE `yuexuan_local_service`;
 
 START TRANSACTION;
 
+-- 课程导出的基础 Schema 可能只有表结构、没有演示数据。先补齐本迁移后续
+-- 按固定 ID 更新的目录和商品；已有课程演示数据时 INSERT IGNORE 不会覆盖它。
+INSERT IGNORE INTO category (id,type,name,sort,status,create_time,update_time,create_user,update_user) VALUES
+ (11,1,'日用百货',1,1,NOW(),NOW(),1,1),(12,1,'新鲜果蔬',2,1,NOW(),NOW(),1,1),
+ (16,1,'乳品烘焙',3,1,NOW(),NOW(),1,1),(17,1,'家庭清洁',4,1,NOW(),NOW(),1,1),
+ (18,1,'宠物用品',5,1,NOW(),NOW(),1,1),(19,1,'鲜花绿植',6,1,NOW(),NOW(),1,1),
+ (20,1,'健康护理',7,1,NOW(),NOW(),1,1),(26,1,'上门服务',8,1,NOW(),NOW(),1,1);
+
+INSERT IGNORE INTO dish (id,name,category_id,price,image,description,status,stock,create_time,update_time,create_user,update_user) VALUES
+ (46,'原生木浆抽纸',11,6.00,'http://localhost:8080/assets/yuexuan-product.svg','家庭日用，柔韧亲肤',1,100,NOW(),NOW(),1,1),
+ (47,'加厚家用垃圾袋',11,4.00,'http://localhost:8080/assets/yuexuan-product.svg','韧性加厚，日常收纳',1,100,NOW(),NOW(),1,1),
+ (48,'天然矿泉水',11,24.00,'http://localhost:8080/assets/yuexuan-product.svg','整箱配送，随时补货',1,100,NOW(),NOW(),1,1),
+ (49,'红富士苹果',12,12.90,'http://localhost:8080/assets/yuexuan-product.svg','脆甜多汁，新鲜到家',1,100,NOW(),NOW(),1,1),
+ (50,'精品香蕉',12,5.90,'http://localhost:8080/assets/yuexuan-product.svg','自然成熟，香甜软糯',1,100,NOW(),NOW(),1,1),
+ (51,'山东蜜薯',12,8.90,'http://localhost:8080/assets/yuexuan-product.svg','软糯香甜，当日精选',1,100,NOW(),NOW(),1,1),
+ (52,'有机西兰花',12,6.90,'http://localhost:8080/assets/yuexuan-product.svg','翠绿新鲜，营养丰富',1,100,NOW(),NOW(),1,1),
+ (53,'鲜切玉米',12,9.90,'http://localhost:8080/assets/yuexuan-product.svg','香甜软糯，早餐优选',1,100,NOW(),NOW(),1,1),
+ (54,'向日葵花束',19,18.00,'http://localhost:8080/assets/yuexuan-product.svg','明亮温暖，节日送礼',1,100,NOW(),NOW(),1,1),
+ (55,'白玫瑰花束',19,18.00,'http://localhost:8080/assets/yuexuan-product.svg','优雅浪漫，精致包装',1,100,NOW(),NOW(),1,1),
+ (56,'绿萝盆栽',19,18.00,'http://localhost:8080/assets/yuexuan-product.svg','净化空气，好养耐活',1,100,NOW(),NOW(),1,1),
+ (57,'多肉组合盆栽',19,18.00,'http://localhost:8080/assets/yuexuan-product.svg','小巧可爱，桌面点缀',1,100,NOW(),NOW(),1,1),
+ (58,'猫咪主食罐头',18,39.90,'http://localhost:8080/assets/yuexuan-product.svg','营养配方，宠物喜爱',1,100,NOW(),NOW(),1,1),
+ (59,'天然豆腐猫砂',18,29.90,'http://localhost:8080/assets/yuexuan-product.svg','低尘易结团，除味清新',1,100,NOW(),NOW(),1,1),
+ (60,'宠物拾便袋',18,6.90,'http://localhost:8080/assets/yuexuan-product.svg','外出遛宠，随手清洁',1,100,NOW(),NOW(),1,1),
+ (61,'宠物洁齿零食',18,12.90,'http://localhost:8080/assets/yuexuan-product.svg','帮助清洁牙齿，营养美味',1,100,NOW(),NOW(),1,1),
+ (62,'浓缩洗衣凝珠',17,29.90,'http://localhost:8080/assets/yuexuan-product.svg','深层洁净，留香持久',1,100,NOW(),NOW(),1,1),
+ (63,'多用途除菌湿巾',17,14.90,'http://localhost:8080/assets/yuexuan-product.svg','居家清洁，一擦即净',1,100,NOW(),NOW(),1,1),
+ (64,'浴室清洁喷雾',17,19.90,'http://localhost:8080/assets/yuexuan-product.svg','快速除垢，清新无异味',1,100,NOW(),NOW(),1,1),
+ (65,'鲜牛奶家庭装',16,39.90,'http://localhost:8080/assets/yuexuan-product.svg','冷链配送，新鲜到家',1,100,NOW(),NOW(),1,1),
+ (66,'全麦吐司',16,12.90,'http://localhost:8080/assets/yuexuan-product.svg','麦香浓郁，早餐常备',1,100,NOW(),NOW(),1,1),
+ (67,'黄油可颂',16,12.90,'http://localhost:8080/assets/yuexuan-product.svg','黄油香气，现烤风味',1,100,NOW(),NOW(),1,1),
+ (68,'医用护理口罩',20,8.90,'http://localhost:8080/assets/yuexuan-product.svg','独立包装，日常防护',1,100,NOW(),NOW(),1,1),
+ (69,'碘伏消毒棉签',20,7.90,'http://localhost:8080/assets/yuexuan-product.svg','温和消毒，家庭常备',1,100,NOW(),NOW(),1,1),
+ (72,'上门家电清洗',26,188.00,'http://localhost:8080/assets/yuexuan-product.svg','专业技师，预约上门',1,100,NOW(),NOW(),1,1);
+
 -- 用户端仅保留八个悦选分类，排序与首页一致。
 -- category.name 有唯一索引，先写入临时名称避免“宠物用品”等名称互换时冲突。
 UPDATE category SET name=CONCAT('__yx_reset_', id) WHERE id IN (11,12,16,17,18,19,20,26);
