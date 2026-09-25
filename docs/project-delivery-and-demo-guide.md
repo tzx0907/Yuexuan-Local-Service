@@ -86,7 +86,7 @@ Invoke-RestMethod "$base/user/shoppingCart/add" -Method Post -Headers $headers -
 Invoke-RestMethod "$base/user/shoppingCart/list" -Headers $headers
 ```
 
-`skuId` 不应在文档中写死；从第一步返回的 `skus[].id` 选择。若不传 `skuId` 请求有 SKU 的商品，后端应返回“请选择商品规格”。库存不足时可在管理端把某个 SKU 库存调为 0，再按该 SKU 提交订单，预期返回库存不足且不创建部分订单。
+`skuId` 不应在文档中写死；从第一步返回的 `skus[].id` 选择。若不传 `skuId` 请求有 SKU 的商品，后端应返回“请选择商品规格”。库存不足时可在管理端把某个 SKU 库存调为 0，再按该 SKU 加入购物车，预期立即返回库存不足；最终提交订单仍以 MySQL 条件扣减作为并发安全兜底。
 
 下单必须显式携带 `Idempotency-Key`。同一个 Key 和同一业务请求连续发两次，第二次应返回第一次创建的订单，而不是生成新订单：
 
@@ -114,7 +114,22 @@ Invoke-RestMethod "$base/user/order/submit" -Method Post -Headers $submitHeaders
 | 重复支付/重复 MQ 消息 | 状态和通知不重复处理 |
 | 管理端暂停接单 | 首页可见暂停状态，后端提交接口拒绝新订单 |
 
-## 8. 最终提交建议（不执行提交）
+## 8. Docker 全链路验收记录
+
+本项目使用 Docker Compose 启动基础设施，宿主机端口如下：
+
+| 服务 | 宿主机入口 | 容器内部端口 | 验收内容 |
+| --- | --- | --- | --- |
+| MySQL 8 | `localhost:3307` | `3306` | 自动创建 `yuexuan_local_service`，挂载基础建表脚本并执行增量迁移 |
+| Redis 7 | `localhost:6380` | `6379` | Cache Aside、限流和店铺接单状态读写 |
+| RabbitMQ 3.13 | `localhost:5672` | `5672` | Outbox 投递、支付通知和延迟关单 |
+| RabbitMQ 管理台 | `http://localhost:15672` | `15672` | exchange、queue、Ready / Unacked 与 DLQ 观察 |
+
+Docker 全链路验收时，应确保宿主机原生 RabbitMQ 服务未占用 `5672` / `15672`。应用 RabbitMQ 账号只需具备 `/` vhost 的 configure、write、read 权限；调用管理台 HTTP API 还需要额外的管理 tag，这与后端 AMQP 连接无关。
+
+已验收链路：用户模拟登录、JWT 鉴权、地址簿、SKU 加购、加购库存预检查、配送下单、订单落库、店铺暂停接单的用户端展示与后端拒单。支付、Outbox 与 RabbitMQ 可继续按第 6 节使用同一订单完成验收。
+
+## 9. 最终提交建议（不执行提交）
 
 建议将当前工作分两次提交，便于代码审阅和回滚：
 

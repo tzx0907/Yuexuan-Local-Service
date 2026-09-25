@@ -170,7 +170,7 @@ docker compose up -d
 docker compose ps
 ```
 
-首次初始化时，Docker Compose 会启动 MySQL、Redis 和 RabbitMQ。MySQL、Redis、RabbitMQ AMQP 与 RabbitMQ 管理台分别映射到本机 `3306`、`6379`、`5672`、`15672`；若端口已被占用，请调整 `docker-compose.yml`。
+首次初始化时，Docker Compose 会启动 MySQL、Redis 和 RabbitMQ。为避免干扰本机已有的 MySQL / Redis，MySQL、Redis、RabbitMQ AMQP 与 RabbitMQ 管理台分别映射到本机 `3307`、`6380`、`5672`、`15672`；容器内部 MySQL / Redis 端口仍为 `3306` / `6379`。若端口已被占用，请调整 `docker-compose.yml`，并同步更新本机 `application-dev.yml`。
 
 ### 2. 初始化数据库
 
@@ -203,13 +203,13 @@ V7 ～ V10、V12 ～ V23：按文件名前缀升序执行
 sky:
   datasource:
     host: localhost
-    port: 3306
+    port: 3307
     database: yuexuan_local_service
     username: root
     password: your-password
   redis:
     host: localhost
-    port: 6379
+    port: 6380
     password:
     database: 0
 ```
