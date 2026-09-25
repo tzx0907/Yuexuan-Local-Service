@@ -6,3 +6,25 @@
 **/application-dev.yml
 .env
 
+# 本地运行输出、权限排查和临时文件不属于项目交付物。
+logs/
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+erse
+git-permissions-before-fix.txt
+
+# 常见本地工具与密钥材料。
+.vscode/
+.project
+.classpath
+.settings/
+*.keystore
+*.p12
+*.pem
+*.key
+*.crt
+
