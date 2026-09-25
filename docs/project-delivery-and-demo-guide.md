@@ -129,6 +129,12 @@ Docker 全链路验收时，应确保宿主机原生 RabbitMQ 服务未占用 `5
 
 已验收链路：用户模拟登录、JWT 鉴权、地址簿、SKU 加购、加购库存预检查、配送下单、订单落库、店铺暂停接单的用户端展示与后端拒单。支付、Outbox 与 RabbitMQ 可继续按第 6 节使用同一订单完成验收。
 
+### Flyway 迁移接管
+
+Flyway 在 Spring Boot 启动阶段、业务 Bean 初始化之前运行，迁移记录存储于 `flyway_schema_history`。Docker 首次创建时仍由 Compose 导入基础 Schema；Flyway 以版本 `0` 建立基线，再执行 `classpath:db/migration/` 的 V2.1～V23 唯一版本升级。已有的完整 Docker 演示库应将本机 `application-dev.yml` 的 `spring.flyway.baseline-version` 设为 `23`，仅建立基线记录，不重跑历史迁移。
+
+`V6__clear_legacy_transaction_history.sql` 被刻意排除在 Flyway 自动目录外，因为它会删除交易和购物车演示数据。后续任何结构或数据升级只新增 `V24__...sql` 及更高版本，不修改已执行文件，也不使用 Flyway `clean`。
+
 ## 9. 最终提交建议（不执行提交）
 
 建议将当前工作分两次提交，便于代码审阅和回滚：

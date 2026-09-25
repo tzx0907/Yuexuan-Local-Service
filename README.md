@@ -180,7 +180,11 @@ docker compose ps
 mysql -u root -p < sql/sky_take_out_schema.sql
 ```
 
-使用 Docker Compose 首次启动时，脚本会自动挂载到 MySQL 初始化目录，通常无需重复执行。脚本会删除同名表，因此只应在新建的本地开发数据库中执行。其后按下面顺序执行增量脚本；其中 V2、V3 有历史同版本号文件，必须按列出的文件顺序人工执行：
+使用 Docker Compose 首次启动时，基础 Schema 会自动挂载到 MySQL 初始化目录。后端启动时 Flyway 会读取 `sky-server/src/main/resources/db/migration/`，建立 `flyway_schema_history` 并自动执行尚未应用的升级脚本。不要再把该目录中的脚本逐个手工执行。
+
+当前已有的 Docker 演示库已经完成历史 V2～V23 迁移：本机 `application-dev.yml` 应设置 `spring.flyway.baseline-version: 23`，Flyway 只会写入基线记录，不会重跑历史 SQL。全新 Docker 库使用 `baseline-version: 0`，会在基础 Schema 之上自动执行 V2.1～V23。
+
+`sql/migrations/` 保留为历史迁移参考；Flyway 自动执行目录中的 V2.1、V2.2、V3.1、V3.2 将早期重复版本号转为唯一版本。以下清单仅用于理解历史顺序：
 
 ```text
 V2__yuexuan_product_domain.sql
@@ -193,7 +197,7 @@ V6__clear_legacy_transaction_history.sql
 V7 ～ V10、V12 ～ V23：按文件名前缀升序执行
 ```
 
-> V6 会清理课程演示交易记录，只适用于首次本地演示初始化；已有真实演示数据时不要再次执行。执行任意迁移前先备份数据库，并记录已执行文件。
+> `V6__clear_legacy_transaction_history.sql` 不在 Flyway 自动目录中。它会清理课程演示交易记录，只能在全新演示库且确认无需保留交易数据时由开发者手工执行；已有演示数据时绝不能执行。
 
 ### 3. 配置开发环境
 
@@ -227,6 +231,14 @@ mvn -pl sky-server -am spring-boot:run
 服务默认监听 `http://localhost:8080`；接口文档地址为 `http://localhost:8080/doc.html`。管理员端接口通常以 `/admin` 开头，用户端接口通常以 `/user` 开头。
 
 RabbitMQ 管理台为 `http://localhost:15672`，账号密码来自 `.env` 的 `RABBITMQ_DEFAULT_USER` 和 `RABBITMQ_DEFAULT_PASS`。`mvn test` 当前以 Mockito 单元测试为主，不要求本地 MySQL、Redis、RabbitMQ 或 WebSocket 容器运行；完整接口演示仍需要启动上述依赖。
+
+Flyway 成功执行后可在目标数据库检查迁移历史：
+
+```sql
+SELECT installed_rank, version, description, script, success
+FROM flyway_schema_history
+ORDER BY installed_rank;
+```
 
 ## 演示入口
 

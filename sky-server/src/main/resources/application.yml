@@ -29,6 +29,18 @@ spring:
       simple:
         acknowledge-mode: manual
         default-requeue-rejected: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    table: flyway_schema_history
+    baseline-on-migrate: true
+    # 新 Docker 库先由 Compose 导入基础 Schema，再以 0 为基线执行历史升级。
+    # 已手工完整迁移的库应在 application-dev.yml 覆盖为 23，避免重复执行 V2.1～V23。
+    baseline-version: ${YUEXUAN_FLYWAY_BASELINE_VERSION:0}
+    baseline-description: yuexuan-existing-schema
+    validate-on-migrate: true
+    out-of-order: false
+    clean-disabled: true
 mybatis:
   #mapper配置文件
   mapper-locations: classpath:mapper/*.xml
