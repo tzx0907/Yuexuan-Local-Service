@@ -62,6 +62,9 @@ public interface DishMapper {
     /** 超时关闭或取消订单时原子回补商品库存。 */
     int incrementStock(@Param("dishId") Long dishId, @Param("quantity") Integer quantity);
 
+    /** 多规格商品的 dish.stock 只是可售 SKU 库存之和，用于列表展示。 */
+    int syncStockFromSkus(@Param("dishId") Long dishId);
+
     /**
      * 根据条件查询菜品列表
      * @param dish

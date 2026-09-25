@@ -187,6 +187,7 @@ var _api = __webpack_require__(/*! @/pages/api/api.js */ 24);function ownKeys(ob
       timeout: false,
       rocallTime: '',
       orderId: null,
+      deliveryStatus: 1,
       orderDataInfo: {},
       activeRadio: 0,
       payMethodList: ['微信支付'],
@@ -203,6 +204,7 @@ var _api = __webpack_require__(/*! @/pages/api/api.js */ 24);function ownKeys(ob
   },
   onLoad: function onLoad(options) {
     this.orderId = options.orderId;
+    this.deliveryStatus = Number(options.deliveryStatus || 1);
   },
   methods: _objectSpread(_objectSpread({},
   (0, _vuex.mapState)(['orderData'])), {}, {
@@ -227,7 +229,7 @@ var _api = __webpack_require__(/*! @/pages/api/api.js */ 24);function ownKeys(ob
               title: '提示',
               content: '支付成功',
               success: function() {
-                uni.redirectTo({ url: '/pages/success/index?orderId=' + _this.orderId });
+                uni.redirectTo({ url: '/pages/success/index?orderId=' + _this.orderId + '&deliveryStatus=' + _this.deliveryStatus });
               }
             });
             console.log('支付成功!');

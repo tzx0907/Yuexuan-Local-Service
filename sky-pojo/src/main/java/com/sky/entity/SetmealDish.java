@@ -27,6 +27,12 @@ public class SetmealDish implements Serializable {
     //菜品id
     private Long dishId;
 
+    // 组合中指定的商品 SKU；为空时表示无规格商品，使用 dish 库存。
+    private Long skuId;
+
+    // 组合配置时选定的规格快照，例如“规格：家庭装”。
+    private String skuSnapshot;
+
     //菜品名称 （冗余字段）
     private String name;
 

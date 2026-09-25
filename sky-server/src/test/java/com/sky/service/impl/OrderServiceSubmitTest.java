@@ -18,6 +18,8 @@ import com.sky.mapper.ProductSkuMapper;
 import com.sky.mapper.CategoryMapper;
 import com.sky.mapper.FlashSaleActivityMapper;
 import com.sky.mapper.FlashSaleUserQuotaMapper;
+import com.sky.mapper.SetmealDishMapper;
+import com.sky.entity.SetmealDish;
 import com.sky.exception.OrderBusinessException;
 import com.sky.service.OutboxService;
 import com.sky.vo.OrderSubmitVO;
@@ -89,6 +91,8 @@ class OrderServiceSubmitTest {
     private FlashSaleActivityMapper flashSaleActivityMapper;
     @Mock
     private FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
+    @Mock
+    private SetmealDishMapper setmealDishMapper;
 
     @BeforeEach
     void setUp() {
@@ -152,6 +156,9 @@ class OrderServiceSubmitTest {
         when(shoppingCartMapper.list(any(ShoppingCart.class)))
                 .thenReturn(Arrays.asList(dishCart, setmealCart));
         when(dishMapper.decrementStock(11L, 1)).thenReturn(1);
+        when(setmealDishMapper.getBySetmealId(21L)).thenReturn(List.of(
+                SetmealDish.builder().setmealId(21L).dishId(21L).copies(1).build()));
+        when(dishMapper.decrementStock(21L, 1)).thenReturn(1);
 
         // 4. 模拟 MyBatis 插入订单后回填数据库主键
         doAnswer(invocation -> {

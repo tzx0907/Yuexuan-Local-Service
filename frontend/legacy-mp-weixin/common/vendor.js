@@ -4473,8 +4473,11 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
                   (0, _api.dishListByCategoryId)(param).then(function (res) {
                     if (res && res.code === 1) {
                       // 添加一个字段去实时更新加入购物车number数量 ----- newCardNumber
-                      _this7.dishListData = res.data && res.data.map(function (obj) {return _objectSpread(_objectSpread({},
+                      _this7.dishListData = res.data && res.data.map(function (obj) {var skus = obj.skus || obj.skuList || [];var prices = skus.map(function (sku) {return Number(sku.price);}).filter(function (price) {return !isNaN(price);});return _objectSpread(_objectSpread({},
                         obj), {}, {
+                          // 数据库对多规格商品不再保存 dish.price；首页仅以 SKU 最低价做“起”价展示。
+                          price: prices.length ? Math.min.apply(Math, prices) : obj.price,
+                          hasSkuPrice: prices.length > 0,
                           type: 1,
                           newCardNumber: 0 });});
 
@@ -22428,7 +22431,7 @@ var _default = {
           _this7.setRemark('');
           console.log(res.data);
           uni.redirectTo({
-            url: '/pages/pay/index?orderId=' + res.data.id });
+            url: '/pages/pay/index?orderId=' + res.data.id + '&deliveryStatus=' + params.deliveryStatus });
 
         } else {
           uni.showToast({
@@ -28889,10 +28892,16 @@ var _default = {
                 });case 3:case "end":return _context.stop();}}}, _callee);}))();
     },
     // 处理状态
-    statusWord: function statusWord(status, rejectionReason) {
+    statusWord: function statusWord(status, rejectionReason, cancelReason) {
       console.log(this.timeout, status);
       if (status === 6 && rejectionReason) {
         return '商家拒单：' + rejectionReason;
+      }
+      if (status === 6 && cancelReason) {
+        if (cancelReason === '用户取消订单' || /支付超时|系统自动关闭/.test(cancelReason)) {
+          return '订单已取消：' + cancelReason;
+        }
+        return '商家已取消订单：' + cancelReason;
       }
       if (this.timeout && status === 1 || status === 6) {
         return '订单已取消';

@@ -3,6 +3,7 @@ package com.sky.controller.admin;
 import com.sky.dto.ProductSkuDTO;
 import com.sky.entity.ProductSku;
 import com.sky.mapper.ProductSkuMapper;
+import com.sky.mapper.DishMapper;
 import com.sky.result.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,8 @@ import java.util.List;
 public class ProductSkuController {
     @Autowired
     private ProductSkuMapper productSkuMapper;
+    @Autowired
+    private DishMapper dishMapper;
 
     @PostMapping
     @ApiOperation("新增商品 SKU")
@@ -31,6 +34,7 @@ public class ProductSkuController {
             sku.setStock(0);
         }
         productSkuMapper.insert(sku);
+        dishMapper.syncStockFromSkus(sku.getDishId());
         return Result.success(sku.getId());
     }
 
@@ -40,6 +44,10 @@ public class ProductSkuController {
         ProductSku sku = new ProductSku();
         BeanUtils.copyProperties(dto, sku);
         productSkuMapper.update(sku);
+        ProductSku saved = productSkuMapper.getById(sku.getId());
+        if (saved != null) {
+            dishMapper.syncStockFromSkus(saved.getDishId());
+        }
         return Result.success();
     }
 

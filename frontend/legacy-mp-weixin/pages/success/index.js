@@ -178,6 +178,7 @@ var _env = __webpack_require__(/*! ../../utils/env.js */ 26);function ownKeys(ob
   data: function data() {
     return {
       arrivalTime: '',
+      deliveryStatus: 1,
       orderId: null };
 
   },
@@ -190,6 +191,7 @@ var _env = __webpack_require__(/*! ../../utils/env.js */ 26);function ownKeys(ob
     // 获取一小时以后的时间
     this.getHarfAnOur();
     this.orderId = options.orderId;
+    this.deliveryStatus = Number(options.deliveryStatus || 1);
   },
   methods: _objectSpread(_objectSpread({},
   (0, _vuex.mapState)(['shopInfo', 'arrivals'])), {}, {

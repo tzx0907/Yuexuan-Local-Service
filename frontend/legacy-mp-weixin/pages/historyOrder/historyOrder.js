@@ -447,6 +447,23 @@ var _index = __webpack_require__(/*! @/utils/index.js */ 29);function _interopRe
         }
       });
     },
+    // 仅待接单订单可由用户取消；成功后重置分页并重新请求，确保列表状态立即同步。
+    cancelPendingOrder: function cancelPendingOrder(type, id) {var _this4 = this;
+      (0, _api.cancelOrder)(id).then(function (res) {
+        if (res && res.code === 1) {
+          _this4.showConfirm = true;
+          _this4.textTip = '订单已取消。';
+          _this4.$refs.commonPopup.open(type);
+          _this4.pageInfo.page = 1;
+          _this4.recentOrdersList = [];
+          _this4.getList();
+          return;
+        }
+        uni.showToast({ title: res && res.msg || '取消订单失败', icon: 'none' });
+      }).catch(function (err) {
+        uni.showToast({ title: err && err.msg || '取消订单失败', icon: 'none' });
+      });
+    },
     // 关闭弹层
     closePopup: function closePopup(type) {
       this.$refs.commonPopup.close(type);

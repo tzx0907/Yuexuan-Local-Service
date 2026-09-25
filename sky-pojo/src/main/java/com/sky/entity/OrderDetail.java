@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 订单明细
@@ -53,4 +54,11 @@ public class OrderDetail implements Serializable {
 
     //图片
     private String image;
+
+    /**
+     * 组合商品的组成明细，仅用于订单接口返回，不映射 order_detail 表字段。
+     * 普通商品保持为空；组合商品返回下单时所属组合的商品、每组合份数，
+     * 供用户端和管理端在订单中展开查看。
+     */
+    private List<SetmealDish> setmealDishes;
 }

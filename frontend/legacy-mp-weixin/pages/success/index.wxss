@@ -178,3 +178,4 @@
 }
 .success_content.data-v-6fde291d{min-height:100vh;background:linear-gradient(180deg,#eaf3ff,#f7faff)}.yx-success-mark.data-v-6fde291d{display:flex;align-items:center;justify-content:center;width:120rpx;height:120rpx;margin:0 auto 30rpx;border-radius:50%;background:#1677ff;color:#fff;font-size:72rpx;font-weight:700}.success_content .success_info .success_title.data-v-6fde291d{color:#174d92}.success_content .success_info .success_desc.data-v-6fde291d{color:#7084a0}.success_content .success_info .btns .go_dish.data-v-6fde291d{background:#1677ff}.success_content .success_info .btns .go_dish.defaultBtn.data-v-6fde291d{background:#fff!important;border-color:#1677ff!important;color:#1677ff!important}
 
+.yx-pickup-code.data-v-6fde291d{margin:20rpx auto 8rpx;color:#1677ff;font-size:36rpx;font-weight:700;letter-spacing:3rpx;text-align:center}

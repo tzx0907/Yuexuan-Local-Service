@@ -76,6 +76,15 @@ public class SetmealServiceImpl implements SetmealService {
             return null;
         }
         List<SetmealDish> setmealDishes = setmealDishMapper.getBySetmealId(id);
+        // 旧版小程序组合弹窗只渲染 name 和数量；将规格快照并入展示名称，
+        // 使用户查看组合内容时也能明确知道每项的 SKU 规格。
+        if (setmealDishes != null) {
+            setmealDishes.forEach(item -> {
+                if (item.getSkuSnapshot() != null && !item.getSkuSnapshot().trim().isEmpty()) {
+                    item.setName(item.getName() + "（" + item.getSkuSnapshot() + "）");
+                }
+            });
+        }
 
         SetmealVO setmealVO = new SetmealVO();
         BeanUtils.copyProperties(setmeal, setmealVO);

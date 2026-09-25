@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -75,6 +76,8 @@ public class OrderServiceImpl implements OrderService {
     private OutboxService outboxService;
     @Autowired
     private OrderTimeoutService orderTimeoutService;
+    @Autowired
+    private SetmealDishMapper setmealDishMapper;
 
     /**
      * 提交订单
@@ -162,9 +165,16 @@ public class OrderServiceImpl implements OrderService {
             // 普通商品采用条件更新原子扣减库存；返回 0 表示商品已下架或库存不足。
             // 组合商品保留独立领域模型，后续按组合物料清单统一扣减 SKU 库存。
             for (ShoppingCart shoppingCart : list) {
+                if (shoppingCart.getSetmealId() != null) {
+                    decrementSetmealStock(shoppingCart.getSetmealId(), shoppingCart.getNumber());
+                    continue;
+                }
                 if (shoppingCart.getSkuId() != null
                         && productSkuMapper.decrementStock(shoppingCart.getSkuId(), shoppingCart.getNumber()) != 1) {
                     throw new OrderBusinessException("商品规格库存不足或已下架");
+                }
+                if (shoppingCart.getSkuId() != null) {
+                    syncDishStockForSku(shoppingCart.getSkuId());
                 }
                 if (shoppingCart.getSkuId() == null && shoppingCart.getDishId() != null
                         && dishMapper.decrementStock(shoppingCart.getDishId(), shoppingCart.getNumber()) != 1) {
@@ -324,6 +334,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderVO getOrderDetail(Long id){
         OrderVO orderVO = new OrderVO();
         List<OrderDetail> orderDetailList = orderDetailMapper.getOrderDetailByOrderId(id);
+        enrichSetmealDetails(orderDetailList);
         orderVO.setOrderDetailList(orderDetailList);
         Orders orders = orderMapper.getById(id);
         BeanUtils.copyProperties(orders, orderVO);
@@ -343,6 +354,7 @@ public class OrderServiceImpl implements OrderService {
         } else if (order.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
             transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
                     .cancelReason("用户取消订单").build(), Orders.TO_BE_CONFIRMED);
+            restoreOrderStock(id, order.getUserId());
         } else {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
@@ -360,14 +372,19 @@ public class OrderServiceImpl implements OrderService {
                 ? "商家暂时无法接单" : rejectionReason.trim();
         transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
                 .rejectionReason(reason).build(), Orders.TO_BE_CONFIRMED);
+        Orders order = getOrder(id);
+        restoreOrderStock(id, order.getUserId());
     }
 
     @Override
     public void cancelByAdmin(Long id, String cancelReason) {
         Orders order = getOrder(id);
+        String reason = cancelReason == null || cancelReason.trim().isEmpty()
+                ? "商家暂时无法履约" : cancelReason.trim();
         if (order.getStatus().equals(Orders.TO_BE_CONFIRMED) || order.getStatus().equals(Orders.CONFIRMED)) {
             transition(Orders.builder().id(id).status(Orders.CANCELLED).cancelTime(LocalDateTime.now())
-                    .cancelReason(cancelReason).build(), order.getStatus());
+                    .cancelReason(reason).build(), order.getStatus());
+            restoreOrderStock(id, order.getUserId());
             return;
         }
         throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
@@ -413,10 +430,93 @@ public class OrderServiceImpl implements OrderService {
             BeanUtils.copyProperties(orders, orderVO);
             Long orderId = orders.getId();
             List<OrderDetail> orderDetailList = orderDetailMapper.getOrderDetailByOrderId(orderId);
+            enrichSetmealDetails(orderDetailList);
             orderVO.setOrderDetailList(orderDetailList);
+            orderVO.setOrderDishes(buildOrderDishes(orderDetailList));
             page.add(orderVO);
         }
         return new PageResult(ordersPage.getTotal(), page.getResult());
+    }
+
+    /** 为组合订单补齐组成商品，避免订单页只能看到一个组合名称。 */
+    private void enrichSetmealDetails(List<OrderDetail> orderDetails) {
+        if (orderDetails == null) {
+            return;
+        }
+        for (OrderDetail orderDetail : orderDetails) {
+            if (orderDetail.getSetmealId() != null) {
+                List<SetmealDish> setmealDishes = setmealDishMapper.getBySetmealId(orderDetail.getSetmealId());
+                orderDetail.setSetmealDishes(setmealDishes);
+                // 订单明细表只保存了组合名称。返回时补上组成，旧小程序无需依赖新字段
+                // 也能在订单详情、历史订单卡片中直接展示“组合包含什么”。
+                if (setmealDishes != null && !setmealDishes.isEmpty()) {
+                    String contents = setmealDishes.stream()
+                            .map(item -> item.getName() + (item.getSkuSnapshot() == null ? "" : "（" + item.getSkuSnapshot() + "）") + "×" + item.getCopies())
+                            .collect(Collectors.joining("、"));
+                    orderDetail.setName(orderDetail.getName() + "（组合包含：" + contents + "）");
+                }
+            }
+        }
+    }
+
+    /** 管理端订单列表使用的简洁清单，组合会同时标明其包含的商品。 */
+    private String buildOrderDishes(List<OrderDetail> orderDetails) {
+        if (orderDetails == null || orderDetails.isEmpty()) {
+            return "";
+        }
+        return orderDetails.stream().map(detail -> {
+            String quantity = "×" + (detail.getNumber() == null ? 0 : detail.getNumber());
+            if (detail.getSetmealId() == null || detail.getSetmealDishes() == null || detail.getSetmealDishes().isEmpty()) {
+                return detail.getName() + quantity;
+            }
+            return detail.getName() + quantity;
+        }).collect(Collectors.joining("；"));
+    }
+
+    private void decrementSetmealStock(Long setmealId, Integer quantity) {
+        List<SetmealDish> items = setmealDishMapper.getBySetmealId(setmealId);
+        if (items == null || items.isEmpty()) {
+            throw new OrderBusinessException("组合商品内容不存在，无法下单");
+        }
+        for (SetmealDish item : items) {
+            int count = quantity * (item.getCopies() == null ? 1 : item.getCopies());
+            int updated = item.getSkuId() != null
+                    ? productSkuMapper.decrementStock(item.getSkuId(), count)
+                    : dishMapper.decrementStock(item.getDishId(), count);
+            if (updated != 1) {
+                throw new OrderBusinessException("组合内商品规格库存不足或已下架");
+            }
+            if (item.getSkuId() != null) {
+                dishMapper.syncStockFromSkus(item.getDishId());
+            }
+        }
+    }
+
+    private void restoreOrderStock(Long orderId, Long userId) {
+        List<OrderDetail> details = orderDetailMapper.getOrderDetailByOrderId(orderId);
+        for (OrderDetail detail : details) {
+            if (detail.getSetmealId() != null) {
+                for (SetmealDish item : setmealDishMapper.getBySetmealId(detail.getSetmealId())) {
+                    int count = detail.getNumber() * (item.getCopies() == null ? 1 : item.getCopies());
+                    int updated = item.getSkuId() != null ? productSkuMapper.incrementStock(item.getSkuId(), count)
+                            : dishMapper.incrementStock(item.getDishId(), count);
+                    if (updated != 1) throw new OrderBusinessException("取消订单时组合库存回补失败");
+                    if (item.getSkuId() != null) dishMapper.syncStockFromSkus(item.getDishId());
+                }
+            } else if (detail.getSkuId() != null) {
+                productSkuMapper.incrementStock(detail.getSkuId(), detail.getNumber());
+                syncDishStockForSku(detail.getSkuId());
+            } else if (detail.getDishId() != null) {
+                dishMapper.incrementStock(detail.getDishId(), detail.getNumber());
+            }
+        }
+    }
+
+    private void syncDishStockForSku(Long skuId) {
+        ProductSku sku = productSkuMapper.getById(skuId);
+        if (sku != null) {
+            dishMapper.syncStockFromSkus(sku.getDishId());
+        }
     }
     private Orders getOrder(Long id) {
         Orders order = orderMapper.getById(id);

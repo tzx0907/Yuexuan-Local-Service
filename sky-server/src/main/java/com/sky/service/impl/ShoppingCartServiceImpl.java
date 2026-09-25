@@ -93,6 +93,11 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
                     shoppingCart.setDishFlavor(sku.getSpecName() + ":" + sku.getSpecValue());
                     shoppingCart.setAmount(sku.getPrice());
                 }
+                // 商品一旦配置 SKU，SKU 价格就是唯一的成交价。拒绝绕过规格直接加购，
+                // 防止客户端再使用已置空的商品级价格，或伪造一个错误的统一价格。
+                if (shoppingCart.getAmount() == null && !productSkuMapper.listByDishId(dishId).isEmpty()) {
+                    throw new BaseException("请选择商品规格");
+                }
                 shoppingCart.setImage(dish.getImage());
                 shoppingCart.setName(dish.getName());
                 if (shoppingCart.getAmount() == null) {

@@ -53,6 +53,11 @@
     <update id="incrementStock">
         update dish set stock = stock + #{quantity} where id = #{dishId}
     </update>
+    <update id="syncStockFromSkus">
+        update dish
+        set stock = (select coalesce(sum(stock), 0) from product_sku where dish_id = #{dishId} and status = 1)
+        where id = #{dishId}
+    </update>
 
     <select id="list" parameterType="Dish" resultType="Dish">
         select * from dish

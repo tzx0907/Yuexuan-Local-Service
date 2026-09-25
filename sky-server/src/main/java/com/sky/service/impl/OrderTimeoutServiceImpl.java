@@ -2,11 +2,13 @@ package com.sky.service.impl;
 
 import com.sky.entity.OrderDetail;
 import com.sky.entity.Orders;
+import com.sky.entity.SetmealDish;
 import com.sky.exception.OrderBusinessException;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.ProductSkuMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.FlashSaleActivityMapper;
 import com.sky.mapper.FlashSaleUserQuotaMapper;
 import com.sky.service.OrderTimeoutService;
@@ -26,16 +28,19 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
     private final ProductSkuMapper productSkuMapper;
     private final FlashSaleActivityMapper flashSaleActivityMapper;
     private final FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
+    private final SetmealDishMapper setmealDishMapper;
 
     public OrderTimeoutServiceImpl(OrderMapper orderMapper, OrderDetailMapper orderDetailMapper,
                                    DishMapper dishMapper, ProductSkuMapper productSkuMapper,
-                                   FlashSaleActivityMapper flashSaleActivityMapper, FlashSaleUserQuotaMapper flashSaleUserQuotaMapper) {
+                                   FlashSaleActivityMapper flashSaleActivityMapper, FlashSaleUserQuotaMapper flashSaleUserQuotaMapper,
+                                   SetmealDishMapper setmealDishMapper) {
         this.orderMapper = orderMapper;
         this.orderDetailMapper = orderDetailMapper;
         this.dishMapper = dishMapper;
         this.productSkuMapper = productSkuMapper;
         this.flashSaleActivityMapper = flashSaleActivityMapper;
         this.flashSaleUserQuotaMapper = flashSaleUserQuotaMapper;
+        this.setmealDishMapper = setmealDishMapper;
     }
 
     @Override
@@ -69,8 +74,12 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
         List<OrderDetail> details = orderDetailMapper.getOrderDetailByOrderId(orderId);
         for (OrderDetail detail : details) {
             int updated;
-            if (detail.getSkuId() != null) {
+            if (detail.getSetmealId() != null) {
+                restoreSetmealStock(detail);
+                continue;
+            } else if (detail.getSkuId() != null) {
                 updated = productSkuMapper.incrementStock(detail.getSkuId(), detail.getNumber());
+                syncDishStockForSku(detail.getSkuId());
             } else if (detail.getDishId() != null) {
                 updated = dishMapper.incrementStock(detail.getDishId(), detail.getNumber());
             } else {
@@ -89,5 +98,30 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
         }
         log.info("订单支付超时已关闭并回补库存 orderId={}, source={}", orderId, triggerSource);
         return true;
+    }
+
+    private void restoreSetmealStock(OrderDetail detail) {
+        List<SetmealDish> items = setmealDishMapper.getBySetmealId(detail.getSetmealId());
+        if (items == null || items.isEmpty()) {
+            throw new OrderBusinessException("组合商品内容不存在，无法回补库存");
+        }
+        for (SetmealDish item : items) {
+            int quantity = detail.getNumber() * (item.getCopies() == null ? 1 : item.getCopies());
+            int updated = item.getSkuId() != null ? productSkuMapper.incrementStock(item.getSkuId(), quantity)
+                    : dishMapper.incrementStock(item.getDishId(), quantity);
+            if (updated != 1) {
+                throw new OrderBusinessException("组合商品库存回补失败");
+            }
+            if (item.getSkuId() != null) {
+                dishMapper.syncStockFromSkus(item.getDishId());
+            }
+        }
+    }
+
+    private void syncDishStockForSku(Long skuId) {
+        com.sky.entity.ProductSku sku = productSkuMapper.getById(skuId);
+        if (sku != null) {
+            dishMapper.syncStockFromSkus(sku.getDishId());
+        }
     }
 }

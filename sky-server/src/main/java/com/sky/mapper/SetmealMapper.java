@@ -24,7 +24,9 @@ public interface SetmealMapper {
 
     List<Setmeal> list(Setmeal setmeal);
 
-    @Select("select sd.name, sd.copies, d.image, d.description from setmeal_dish sd left join dish d on sd.dish_id = d.id where sd.setmeal_id = #{id}")
+    // 用户端“查看组合内容”接口使用 DishItemVO；旧小程序弹窗只展示 name，
+    // 因此在查询阶段把 SKU 规格快照拼进名称，避免规格字段被前端编译产物忽略。
+    @Select("select concat(sd.name, '（', coalesce(sd.sku_snapshot, '默认规格'), '）') as name, sd.copies, d.image, d.description from setmeal_dish sd left join dish d on sd.dish_id = d.id where sd.setmeal_id = #{id}")
     List<DishItemVO> getDishItemBySetmealId(Long id);
 
     @AutoFill(OperationType.INSERT)
