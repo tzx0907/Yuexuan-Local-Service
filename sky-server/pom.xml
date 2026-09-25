@@ -112,6 +112,12 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <!-- Flyway 8 将 MySQL 方言支持拆分为独立模块，必须与 flyway-core 同版本加载。 -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>javax.xml.bind</groupId>
