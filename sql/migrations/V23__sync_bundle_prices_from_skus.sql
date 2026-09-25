@@ -1,5 +1,5 @@
 -- 组合内所有已绑定 SKU 的组成价必须取实时 SKU 售价，随后按“单买总价 8 折”重算组合价。
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 START TRANSACTION;
 

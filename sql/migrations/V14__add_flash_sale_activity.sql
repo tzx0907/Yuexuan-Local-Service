@@ -1,5 +1,5 @@
 -- 限时购的“活动库存”是促销配额，SKU.stock 仍是真实商品库存；下单时两者都必须条件扣减。
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 CREATE TABLE IF NOT EXISTS flash_sale_activity (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '活动 id',

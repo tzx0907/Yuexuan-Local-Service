@@ -1,4 +1,4 @@
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 -- 当前本地 MySQL 不支持 ADD COLUMN IF NOT EXISTS，故按元数据决定是否执行。
 SET @has_cart_column := (SELECT COUNT(*) FROM information_schema.columns

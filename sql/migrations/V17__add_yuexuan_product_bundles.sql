@@ -1,7 +1,7 @@
 -- 悦选组合商品演示数据。
 -- 旧 setmeal / setmeal_dish 物理表继续承载组合商品，避免破坏既有购物车、订单与管理端接口。
 -- 本脚本可重复执行：只维护本脚本定义的“精选组合”及其三组组合明细。
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 START TRANSACTION;
 

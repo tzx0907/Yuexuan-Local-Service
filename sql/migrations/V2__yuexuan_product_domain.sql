@@ -7,7 +7,7 @@
 -- 执行方式：在目标 MySQL 数据库中执行一次本文件。
 -- 兼容 MySQL 5.7+ / 8.0+，可重复执行。
 
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 -- 早期课程库没有 SKU 表，但当前购物车与下单服务已经依赖该模型。
 CREATE TABLE IF NOT EXISTS product_sku (

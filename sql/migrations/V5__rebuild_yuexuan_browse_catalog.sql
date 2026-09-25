@@ -1,7 +1,7 @@
 -- 悦选用户端浏览目录重建。
 -- 保留 dish ID、订单、订单明细和购物车；不删除历史交易数据。
 -- dish_flavor 仅是旧模板的可选项元数据，替换为商品规格。
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 START TRANSACTION;
 

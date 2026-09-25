@@ -1,6 +1,6 @@
 -- 悦选目录定价与规格统一：鲜花绿植保留单品；其他商品/服务均以 SKU 为唯一售价。
 -- 有 SKU 的 dish.price 置空，dish.stock 仅为所有在售 SKU 库存之和的展示值。
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 START TRANSACTION;
 

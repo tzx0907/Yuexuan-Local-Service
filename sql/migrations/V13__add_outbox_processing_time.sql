@@ -1,5 +1,5 @@
 -- V12 已执行的数据库补充发送抢占时间，避免按创建时间误判正在发送的旧事件。
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 DROP PROCEDURE IF EXISTS add_outbox_processing_time;
 DELIMITER //

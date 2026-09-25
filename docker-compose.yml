@@ -1,11 +1,11 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: sky-take-out-mysql
+    container_name: yuexuan-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
-      MYSQL_DATABASE: sky_take_out
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-yuexuan_local_service}
       TZ: Asia/Shanghai
     ports:
       - "3306:3306"
@@ -20,7 +20,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: sky-take-out-redis
+    container_name: yuexuan-redis
     restart: unless-stopped
     command: redis-server --appendonly yes
     ports:

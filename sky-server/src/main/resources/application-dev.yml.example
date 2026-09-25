@@ -4,9 +4,10 @@ sky:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost
     port: 3306
-    database: sky_take_out
+    database: yuexuan_local_service
     username: root
-    password: CHANGE_ME
+    # Docker Compose 默认 Redis 不启用密码；若自行配置 requirepass，再填写密码。
+    password:
   redis:
     host: localhost
     port: 6379

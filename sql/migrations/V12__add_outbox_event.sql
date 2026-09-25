@@ -1,5 +1,5 @@
 -- Outbox：与订单状态更新同一事务写入，后台任务再可靠投递至 RabbitMQ。
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 CREATE TABLE IF NOT EXISTS outbox_event (
     id BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',

@@ -1,4 +1,4 @@
-USE `Yuexuan-Local-Service`;
+USE `yuexuan_local_service`;
 
 CREATE TABLE IF NOT EXISTS flash_sale_user_quota (
     id BIGINT NOT NULL AUTO_INCREMENT,
