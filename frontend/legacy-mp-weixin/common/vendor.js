@@ -4276,11 +4276,20 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
     this.openMoreNormPop = false;
     this.openDetailPop = false;
     this.flavorDataes = [];
+    // 管理端可随时暂停/恢复接单；回到首页立即拉取，并保持短周期同步。
+    this.getShopInfo();
+    this.startShopStatusPolling();
     // 有sessionId免授权
     // this.sessionId() && 
     if (this.token()) {
       this.init();
     }
+  },
+  onHide: function onHide() {
+    this.stopShopStatusPolling();
+  },
+  onUnload: function onUnload() {
+    this.stopShopStatusPolling();
   },
   methods: _objectSpread(_objectSpread(_objectSpread({},
   (0, _vuex.mapMutations)(['setShopInfo', 'setShopPhone', 'setShopStatus', 'initdishListMut', 'setStoreInfo',
@@ -4502,10 +4511,24 @@ var _index = __webpack_require__(/*! ../../utils/index.js */ 29);function _inter
     // 获取首页店铺信息
     getShopInfo: function getShopInfo() {var _this8 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee5() {return _regenerator.default.wrap(function _callee5$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:_context5.next = 2;return (
                   (0, _api.getShopStatus)().then(function (res) {
-                    _this8.shopStatus = res.data;
-                    // console.log(res.data)
-                    _this8.setShopStatus(res.data);
+                    // 只接受后端约定的 0/1；请求失败时保留上一帧状态，避免误显示营业。
+                    if (res && res.code === 1 && (res.data === 0 || res.data === 1)) {
+                      _this8.shopStatus = res.data;
+                      _this8.setShopStatus(res.data);
+                    }
                   }).catch(function (err) {}));case 2:case "end":return _context5.stop();}}}, _callee5);}))();
+    },
+    startShopStatusPolling: function startShopStatusPolling() {var _thisShopStatus = this;
+      this.stopShopStatusPolling();
+      this._shopStatusTimer = setInterval(function () {
+        _thisShopStatus.getShopInfo();
+      }, 3000);
+    },
+    stopShopStatusPolling: function stopShopStatusPolling() {
+      if (this._shopStatusTimer) {
+        clearInterval(this._shopStatusTimer);
+        this._shopStatusTimer = null;
+      }
     },
     // 获取店铺电话
     getShopPhone: function getShopPhone() {var _this9 = this;return _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee6() {return _regenerator.default.wrap(function _callee6$(_context6) {while (1) {switch (_context6.prev = _context6.next) {case 0:_context6.next = 2;return (

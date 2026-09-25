@@ -846,6 +846,8 @@
 .yx-service-card.data-v-57280228 { position: relative; z-index: 10; height: 138rpx; margin: 190rpx 24rpx 14rpx; padding: 20rpx 26rpx; box-sizing: border-box; border-radius: 20rpx; color: #1757ad; background: #fff; box-shadow: 0 10rpx 28rpx rgba(22,119,255,.16); }
 .yx-service-row.data-v-57280228 { display:flex; justify-content:space-between; font-size:28rpx; font-weight:600; }
 .yx-service-note.data-v-57280228 { margin-top:10rpx; color:#6b7d99; font-size:23rpx; }
+.yx-status.data-v-57280228 { display: flex; align-items: center; justify-content: center; height: 36rpx; padding: 0 14rpx; box-sizing: border-box; border-radius: 18rpx; background: #1677ff; color: #fff; font-size: 22rpx; font-weight: 500; line-height: 1; }
+.yx-status-closed.data-v-57280228 { background: #6f7f95; }
 .yx-content.data-v-57280228 { display:flex; min-height:0; height:calc(100vh - 342rpx); overflow:hidden; background:#fff; }
 .yx-sidebar.data-v-57280228 { width:174rpx; flex:none; background:#edf4ff; }
 .yx-sidebar .menu-scroll-view.data-v-57280228 { height:100%; }

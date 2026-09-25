@@ -54,6 +54,12 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         Long userId = BaseContext.getCurrentId();
         shoppingCart.setUserId(userId);
         List<ShoppingCart> shoppingCartList = shoppingCartMapper.listSameSaleItem(shoppingCart);
+        int requestedQuantity = shoppingCartList != null && !shoppingCartList.isEmpty()
+                ? shoppingCartList.get(0).getNumber() + 1 : 1;
+
+        // 加购阶段做用户可见的库存预检查，避免把明显无法结算的数量放入购物车。
+        // 这不是最终扣减：提交订单时仍以 MySQL 条件更新做原子扣减，防止并发超卖。
+        validateProductStockBeforeAdd(shoppingCartDTO, requestedQuantity);
         // 加购不占用活动库存/额度，只做只读预检查。真正占用必须在提交订单事务内完成，
         // 否则用户长期不结算会把活动名额锁死。
         validateFlashSaleQuotaBeforeAdd(shoppingCartDTO, userId);
@@ -190,6 +196,47 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         int alreadyUsedOrSelected = inCart + (reserved == null ? 0 : reserved);
         if (alreadyUsedOrSelected + 1 > activity.getPerUserLimit()) {
             throw new BaseException("已超过购买上限，本次活动每人最多购买" + activity.getPerUserLimit() + "件");
+        }
+    }
+
+    /**
+     * 购物车仅做库存快照预检查，最终库存结果必须以下单事务中的条件扣减为准。
+     * 多规格商品只检查所选 SKU；无规格商品才检查商品级库存。
+     */
+    private void validateProductStockBeforeAdd(ShoppingCartDTO dto, int requestedQuantity) {
+        if (dto.getDishId() == null) {
+            return;
+        }
+
+        ProductSku sku = null;
+        if (dto.getSkuId() != null) {
+            sku = productSkuMapper.getById(dto.getSkuId());
+        } else if (dto.getDishFlavor() != null && !dto.getDishFlavor().isBlank()) {
+            String specValue = dto.getDishFlavor();
+            int separator = specValue.lastIndexOf(':');
+            if (separator >= 0) {
+                specValue = specValue.substring(separator + 1);
+            }
+            sku = productSkuMapper.getByDishIdAndSpecValue(dto.getDishId(), specValue);
+        }
+
+        if (sku != null || dto.getSkuId() != null || (dto.getDishFlavor() != null && !dto.getDishFlavor().isBlank())) {
+            if (sku == null || !dto.getDishId().equals(sku.getDishId())
+                    || !Integer.valueOf(1).equals(sku.getStatus())) {
+                throw new BaseException("商品规格不可售");
+            }
+            if (sku.getStock() == null || sku.getStock() < requestedQuantity) {
+                throw new BaseException("商品规格库存不足，最多可购买" + (sku.getStock() == null ? 0 : sku.getStock()) + "件");
+            }
+            return;
+        }
+
+        Dish dish = dishMapper.getById(dto.getDishId());
+        if (dish == null || !Integer.valueOf(1).equals(dish.getStatus())) {
+            throw new BaseException("商品不可售");
+        }
+        if (dish.getStock() == null || dish.getStock() < requestedQuantity) {
+            throw new BaseException("商品库存不足，最多可购买" + (dish.getStock() == null ? 0 : dish.getStock()) + "件");
         }
     }
 }
