@@ -6,7 +6,7 @@
 
 用户端和管理端均已完成悦选本地到家服务平台的主题、商品/服务文案、交易流程与接口适配。用户端当前位于 [`frontend/legacy-mp-weixin`](frontend/legacy-mp-weixin)，可用于运行和演示；该目录为历史 uni-app 小程序构建产物，课程资料未包含原始 `.vue` 源码。后续如需持续迭代前端页面，将在 `frontend/yuexuan-miniprogram` 中重建可维护的源码工程。
 
-数据库从 [`sql/sky_take_out_schema.sql`](sql/sky_take_out_schema.sql) 初始化后，再按 [`sql/migrations/`](sql/migrations/) 中的版本顺序执行增量脚本。迁移脚本保留了课程项目早期的重复版本号命名，因此当前采用**人工、按文件名与说明顺序执行**，并未接入 Flyway 自动迁移；执行前请先备份本地数据库。具体顺序见本文“快速启动”。
+Docker 首次启动由 [`sql/sky_take_out_schema.sql`](sql/sky_take_out_schema.sql) 导入基础 Schema；后端启动时由 Flyway 自动执行 [`sky-server/src/main/resources/db/migration/`](sky-server/src/main/resources/db/migration/) 中的唯一版本增量迁移，并将执行记录保存到 `flyway_schema_history`。[`sql/migrations/`](sql/migrations/) 仅保留为课程项目历史迁移参考；具体基线与接管方式见本文“快速启动”。
 
 ## 产品定位
 
@@ -84,13 +84,13 @@ sequenceDiagram
 
 - 用户端与管理端均已完成悦选主题和交易流程适配。`frontend/legacy-mp-weixin` 是历史 uni-app 小程序构建产物，不包含可维护的 `.vue` 源码；当前可用于运行和演示，但后续新增页面或进行大规模迭代时，需要在 `frontend/yuexuan-miniprogram` 中重建可维护的前端源码工程。
 - 后端仍沿用 `dish`、`setmeal`、`dish_flavor` 等课程项目表名和部分包名作为兼容层；对外业务含义分别是商品、组合商品和规格元数据。
-- 数据库增量脚本尚未接入 Flyway；首次搭建与升级需要按文档人工执行并记录已执行版本。
+- Flyway 已接管 Docker 演示库的后续迁移；早期课程迁移保留为历史参考，且清理交易数据的 V6 脚本必须始终手工、审慎执行。
 - OSS、微信真实支付与真实小程序 AppID/证书依赖外部账号配置；本地开发使用 mock 登录和模拟支付链路验证。
 
 ## 下一阶段计划
 
 1. 重建可维护的悦选小程序源码工程：保留当前已完成的悦选用户端演示与接口能力，逐步从历史构建产物迁移到 `frontend/yuexuan-miniprogram`，降低后续页面迭代成本。
-2. 接入 Flyway 或 Liquibase，统一管理数据库版本与执行记录。
+2. 完善 Flyway 迁移治理：后续数据库变更只新增 V24+ 迁移；在 CI 中校验迁移命名、历史校验和与新环境升级路径，持续维护迁移执行台账。
 3. 完善配送员、服务范围、售后退款、评价与优惠能力。
 4. 为 RabbitMQ DLQ、Outbox 长时间重试和库存异常增加监控与告警。
 
@@ -253,7 +253,7 @@ ORDER BY installed_rank;
 2. **多门店与服务范围**：支持门店营业时间、配送半径、服务区域和商品可售范围。
 3. **履约能力**：支持配送方式、预约时间窗、配送员接单和履约轨迹。
 4. **营销与售后**：支持优惠券、满减、退款、评价与投诉。
-5. **工程化增强**：引入 Flyway 或 Liquibase；为 RabbitMQ DLQ、Outbox 长时间重试、库存异常补充监控、告警与处理台账。
+5. **工程化增强**：完善 Flyway 新环境升级校验；为 RabbitMQ DLQ、Outbox 长时间重试、库存异常补充监控、告警与处理台账。
 6. **前端源码工程**：将当前已完成的悦选用户端演示能力逐步迁移到可维护的源码工程。
 
 ## 开发约定
