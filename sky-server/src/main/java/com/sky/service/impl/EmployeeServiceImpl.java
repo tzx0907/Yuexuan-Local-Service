@@ -16,6 +16,7 @@ import com.sky.result.PageResult;
 import com.sky.service.EmployeeService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -27,6 +28,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     /**
      * 员工登录
@@ -46,13 +50,13 @@ public class EmployeeServiceImpl implements EmployeeService {
             //账号不存在
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
-        //密码比对
-        //对密码进行md5加密
-        password = DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
-        if (!password.equals(employee.getPassword())) {
+        //密码比对：BCrypt（当前格式）与历史 MD5 存储均兼容
+        if (!matchesPassword(password, employee.getPassword())) {
             //密码错误
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
+        //历史 MD5 密码登录成功后透明升级为 BCrypt
+        upgradeLegacyMd5Password(employee, password);
 
         if (employee.getStatus() == StatusConstant.DISABLE) {
             //账号被锁定
@@ -73,7 +77,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = new Employee();
         BeanUtils.copyProperties(employeeDTO, employee);
         employee.setStatus(StatusConstant.ENABLE);
-        employee.setPassword(DigestUtils.md5DigestAsHex(PasswordConstant.DEFAULT_PASSWORD.getBytes(StandardCharsets.UTF_8)));
+        employee.setPassword(passwordEncoder.encode(PasswordConstant.DEFAULT_PASSWORD));
         employeeMapper.insert(employee);
     }
     /**
@@ -150,13 +154,11 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
 
-        String oldPasswordMd5 = DigestUtils.md5DigestAsHex(oldPassword.getBytes(StandardCharsets.UTF_8));
-        if (!oldPasswordMd5.equals(employee.getPassword())) {
+        if (!matchesPassword(oldPassword, employee.getPassword())) {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
-        String newPasswordMd5 = DigestUtils.md5DigestAsHex(newPassword.getBytes(StandardCharsets.UTF_8));
-        if (newPasswordMd5.equals(employee.getPassword())) {
+        if (matchesPassword(newPassword, employee.getPassword())) {
             throw new PasswordErrorException("新密码不能与旧密码相同");
         }
 
@@ -166,9 +168,33 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         Employee updateEmployee = Employee.builder()
                 .id(empId)
-                .password(newPasswordMd5)
+                .password(passwordEncoder.encode(newPassword))
                 .build();
-        
+
         employeeMapper.update(updateEmployee);
+    }
+
+    /** 统一密码比对：BCrypt 存储用 matches，历史 MD5 存储回退为摘要比对。 */
+    private boolean matchesPassword(String rawPassword, String storedPassword) {
+        if (isBCrypt(storedPassword)) {
+            return passwordEncoder.matches(rawPassword, storedPassword);
+        }
+        String md5 = DigestUtils.md5DigestAsHex(rawPassword.getBytes(StandardCharsets.UTF_8));
+        return md5.equalsIgnoreCase(storedPassword);
+    }
+
+    private boolean isBCrypt(String storedPassword) {
+        return storedPassword != null && storedPassword.startsWith("$2");
+    }
+
+    /** 存量数据仍为 MD5 时，登录成功后改写为 BCrypt，逐步完成迁移。 */
+    private void upgradeLegacyMd5Password(Employee employee, String rawPassword) {
+        if (isBCrypt(employee.getPassword())) {
+            return;
+        }
+        employeeMapper.update(Employee.builder()
+                .id(employee.getId())
+                .password(passwordEncoder.encode(rawPassword))
+                .build());
     }
 }

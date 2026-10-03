@@ -101,6 +101,12 @@
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
+        <!-- 密码哈希：仅使用 BCrypt 工具，不引入 Spring Security 过滤链 -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- 订单支付事件、失败重试与死信队列 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
