@@ -46,19 +46,25 @@ public class OrderPaidNotificationConsumer {
             containerFactory = "orderEventRabbitListenerContainerFactory")
     public void onOrderPaid(OrderPaidEvent event, Channel channel,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
-        //查幂等表
-        int inserted = processedMessageMapper.insertIgnore(event.getEventId(), CONSUMER_NAME, LocalDateTime.now());
-        if (inserted == 0) {
+        // 前置查询挡住 ACK 丢失后的重投，避免重复提醒（此时推送还没执行过）
+        if (processedMessageMapper.exists(event.getEventId(), CONSUMER_NAME) > 0) {
             log.info("重复 ORDER_PAID 事件已跳过 eventId={}, orderId={}", event.getEventId(), event.getOrderId());
             channel.basicAck(deliveryTag, false);
             return;
         }
-        //向运营端发送新订单提醒
+        //向运营端发送新订单提醒；先推送、后落幂等标记，崩溃窗口内由重投补偿
         Map<String, Object> message = new HashMap<>();
         message.put("type", 1);
         message.put("orderId", event.getOrderId());
         message.put("content", "新订单：" + event.getOrderNumber());
-        webSocketServer.sendToAllClient(com.alibaba.fastjson.JSON.toJSONString(message));
+        int failed = webSocketServer.sendToAllAndCountFailures(com.alibaba.fastjson.JSON.toJSONString(message));
+        if (failed > 0) {
+            // 不落标记、不 ACK：让 RabbitMQ 重投，重试耗尽后进 DLQ 供人工重放
+            throw new IllegalStateException("WebSocket 广播失败 " + failed + " 个会话，等待重投 eventId="
+                    + event.getEventId());
+        }
+        // 推送成功后才写完成标记，避免“标记已写但提醒没发出去”
+        processedMessageMapper.insertIgnore(event.getEventId(), CONSUMER_NAME, LocalDateTime.now());
         channel.basicAck(deliveryTag, false);
         log.info("ORDER_PAID 事件消费完成并 ACK eventId={}, orderId={}", event.getEventId(), event.getOrderId());
     }

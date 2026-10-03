@@ -58,15 +58,27 @@ public class WebSocketServer {
      * @param message
      */
     public void sendToAllClient(String message) {
+        sendToAllAndCountFailures(message);
+    }
+
+    /**
+     * 群发并统计失败的会话数。需要感知投递结果（失败后交由 MQ 重投）的调用方使用此方法。
+     *
+     * @return 发送失败的会话数
+     */
+    public int sendToAllAndCountFailures(String message) {
+        int failed = 0;
         Collection<Session> sessions = sessionMap.values();
         for (Session session : sessions) {
             try {
                 //服务器向客户端发送消息
                 session.getBasicRemote().sendText(message);
             } catch (Exception e) {
+                failed++;
                 e.printStackTrace();
             }
         }
+        return failed;
     }
 
 }

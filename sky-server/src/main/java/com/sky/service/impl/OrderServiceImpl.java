@@ -358,7 +358,6 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
-        webSocketServer.sendToAllClient("订单号"+id+"已取消");
     }
 
     @Override
