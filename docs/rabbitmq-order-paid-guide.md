@@ -55,10 +55,11 @@ RabbitMQ 的常见语义是“至少一次”，不是“恰好一次”。所�
 1. `OrderServiceImpl.paySuccess` 先通过 `WHERE id = ? AND status = 待支付` 改订单状态；
 2. 只有条件更新成功，才构造一次性的 `OrderPaidEvent`；重复支付会在前面直接返回，绝不再发事件；
 3. `publishOrderPaidAfterCommit` 注册事务提交回调，防止事务最终回滚却已经提醒运营端；
-4. `OrderPaidEventPublisher` 发送 JSON 消息并等待 RabbitMQ Confirm；
-5. 消费者先尝试写入幂等表，再发 WebSocket，并最后 ACK；重复投递只 ACK。
+4. 同一个事务内写入 `outbox_event(PENDING)`；事务提交后由 `OutboxDispatchTask` 抢占、发布并等待 RabbitMQ Confirm；
+5. 只有 Confirm ACK 且没有 returned message，事件才标为 `SENT`；否则记录错误并退避重试；
+6. 消费者先检查幂等记录，再发 WebSocket，推送成功后写幂等记录并最后 ACK；重复投递只 ACK。
 
-> 当前阶段仍有一个必须诚实说明的窗口：数据库已经提交、但 JVM 在直接发布 MQ 前崩溃时，事件可能未发出。下一阶段 **Outbox** 会把事件记录和订单更新写在同一 MySQL 事务里，由独立投递器扫描并补投，从而解决数据库与 MQ 双写不一致。
+Outbox 解决“数据库已提交、进程却在发布 MQ 前退出”的双写窗口：订单状态更新和待投递事件要么一起提交，要么一起回滚。它不承诺恰好一次投递；生产端可能因 `SENT` 前进程中断而重发，所以消费端仍必须按 `eventId` 幂等。
 
 ## 5. 本地启动和演示
 
@@ -87,8 +88,8 @@ RabbitMQ 确认收到 ORDER_PAID 事件
 ORDER_PAID 事件消费完成并 ACK
 ```
 
-可通过管理台临时停止消费者或制造数据库不可用来观察重试与 DLQ；不要在正式演示数据库中手工删除业务订单来制造失败。
+可通过本地 `dev` 的故障注入开关观察重试与 DLQ；详细、可恢复的步骤见 [`outbox-failure-demo.md`](outbox-failure-demo.md)。不要在正式演示数据库中手工删除业务订单来制造失败。
 
 ## 6. 面试中可以怎么解释
 
-“支付状态是强一致的核心交易数据，因此在本地事务中同步更新；运营提醒不是支付成功的前提，改为 MQ 异步处理。生产端 Confirm 确认 Broker 收到消息，消费端手动 ACK 保证业务完成后才确认。MQ 可能重复投递，所以以业务 eventId 加数据库唯一键实现幂等。重复失败的消息进入 DLQ 留给排查。阶段 A 仍有数据库与 MQ 的双写窗口，阶段 C 用 Outbox 补齐最终一致性。”
+“支付状态是强一致的核心交易数据，因此在本地事务中同步更新；订单状态变更和 Outbox 事件也在同一个事务中落库。投递器以至少一次方式发布，只有 Producer Confirm ACK 且路由成功才将 Outbox 标为 SENT。消费者手动 ACK、以 eventId 加数据库唯一键实现幂等；重复失败的消息进入 DLQ 留给排查与人工重放。Outbox 保证业务成功必有待投递记录，消费者幂等保证重复投递不产生重复副作用。”

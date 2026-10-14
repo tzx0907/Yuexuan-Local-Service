@@ -8,6 +8,7 @@ import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +25,13 @@ public class OrderPaidNotificationConsumer {
 
     private final ProcessedMessageMapper processedMessageMapper;
     private final WebSocketServer webSocketServer;
+
+    /** 仅用于本地 dev 环境演示“消费失败 -> 重试 -> DLQ”，默认关闭。 */
+    @Value("${sky.messaging.fault-injection.order-paid-consumer-fail:false}")
+    private boolean forceConsumerFailure;
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfiles;
 
     //依赖注入
     public OrderPaidNotificationConsumer(ProcessedMessageMapper processedMessageMapper,
@@ -46,6 +54,9 @@ public class OrderPaidNotificationConsumer {
             containerFactory = "orderEventRabbitListenerContainerFactory")
     public void onOrderPaid(OrderPaidEvent event, Channel channel,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
+        if (forceConsumerFailure && activeProfiles.contains("dev")) {
+            throw new IllegalStateException("dev 故障注入：强制 ORDER_PAID 消费失败 eventId=" + event.getEventId());
+        }
         // 前置查询挡住 ACK 丢失后的重投，避免重复提醒（此时推送还没执行过）
         if (processedMessageMapper.exists(event.getEventId(), CONSUMER_NAME) > 0) {
             log.info("重复 ORDER_PAID 事件已跳过 eventId={}, orderId={}", event.getEventId(), event.getOrderId());

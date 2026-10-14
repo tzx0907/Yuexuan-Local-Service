@@ -4,6 +4,10 @@ spring:
     # 当前已人工完整迁移的 Docker 演示库填 23；全新 Docker 库首次启动填 0。
     baseline-version: 23
 sky:
+  messaging:
+    # 仅用于本地演示消费者失败重试和 DLQ。正常开发必须保持 false，生产环境不配置此项。
+    fault-injection:
+      order-paid-consumer-fail: false
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: localhost

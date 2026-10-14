@@ -33,7 +33,7 @@ class OutboxDispatchTaskTest {
     @InjectMocks private OutboxDispatchTask outboxDispatchTask;
 
     @Test
-    void shouldMarkEventSentAfterRabbitMqAcceptsIt() throws Exception {
+    void shouldMarkEventSentOnlyAfterPublisherConfirmationSucceeds() throws Exception {
         OutboxEvent outbox = OutboxEvent.builder().id(1L).eventId("paid-1")
                 .eventType("ORDER_PAID").payload("{}").retryCount(0).build();
         OrderPaidEvent event = OrderPaidEvent.builder().eventId("paid-1").orderId(101L)
@@ -63,5 +63,23 @@ class OutboxDispatchTaskTest {
 
         verify(outboxEventMapper, never()).markSent(anyLong());
         verify(outboxEventMapper).markRetry(eq(2L), any(LocalDateTime.class), eq("RuntimeException: RabbitMQ unavailable"));
+    }
+
+    @Test
+    void shouldScheduleRetryWhenRabbitMqNacksThePublish() throws Exception {
+        OutboxEvent outbox = OutboxEvent.builder().id(3L).eventId("paid-3")
+                .eventType("ORDER_PAID").payload("{}").retryCount(0).build();
+        OrderPaidEvent event = OrderPaidEvent.builder().eventId("paid-3").orderId(103L).build();
+        when(outboxEventMapper.findSendable(50)).thenReturn(List.of(outbox));
+        when(outboxEventMapper.claim(3L)).thenReturn(1);
+        when(objectMapper.readValue("{}", OrderPaidEvent.class)).thenReturn(event);
+        doThrow(new IllegalStateException("RabbitMQ 未确认消息 eventId=paid-3, reason=broker-nack"))
+                .when(orderPaidEventPublisher).publish(event);
+
+        outboxDispatchTask.dispatchPendingEvents();
+
+        verify(outboxEventMapper, never()).markSent(3L);
+        verify(outboxEventMapper).markRetry(eq(3L), any(LocalDateTime.class),
+                eq("IllegalStateException: RabbitMQ 未确认消息 eventId=paid-3, reason=broker-nack"));
     }
 }

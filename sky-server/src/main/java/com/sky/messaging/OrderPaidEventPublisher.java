@@ -3,13 +3,12 @@ package com.sky.messaging;
 import com.sky.config.RabbitMqConfig;
 import com.sky.event.OrderPaidEvent;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
-/** 仅负责发布；阶段 C 将以 Outbox 投递器替换此处的直接发布。 */
+/** 发布订单支付事件，并等待 RabbitMQ 的生产者确认。 */
 @Component
 @Slf4j
 public class OrderPaidEventPublisher {
@@ -41,10 +40,9 @@ public class OrderPaidEventPublisher {
     }
 
     public void publish(OrderPaidEvent event) {
-        CorrelationData correlationData = new CorrelationData(event.getEventId());
-        rabbitTemplate.convertAndSend(RabbitMqConfig.ORDER_EVENT_EXCHANGE,
-                RabbitMqConfig.ORDER_PAID_ROUTING_KEY, event, correlationData);
-        log.info("已投递 ORDER_PAID 事件，等待 RabbitMQ Confirm eventId={}, orderId={}",
+        RabbitPublishConfirmAwaiter.sendAndAwait(rabbitTemplate, RabbitMqConfig.ORDER_EVENT_EXCHANGE,
+                RabbitMqConfig.ORDER_PAID_ROUTING_KEY, event, event.getEventId());
+        log.info("ORDER_PAID 已获 RabbitMQ 确认并路由 eventId={}, orderId={}",
                 event.getEventId(), event.getOrderId());
     }
 }
