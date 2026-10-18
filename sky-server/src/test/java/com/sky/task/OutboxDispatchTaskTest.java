@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -81,5 +82,30 @@ class OutboxDispatchTaskTest {
         verify(outboxEventMapper, never()).markSent(3L);
         verify(outboxEventMapper).markRetry(eq(3L), any(LocalDateTime.class),
                 eq("IllegalStateException: RabbitMQ 未确认消息 eventId=paid-3, reason=broker-nack"));
+    }
+
+    @Test
+    void shouldMarkEventFailedWhenRetryCountExceeded() throws Exception {
+        OutboxEvent outbox = OutboxEvent.builder().id(4L).eventId("paid-4")
+                .eventType("ORDER_PAID").payload("{}").retryCount(OutboxDispatchTask.MAX_RETRY).build();
+        OrderPaidEvent event = OrderPaidEvent.builder().eventId("paid-4").orderId(104L).build();
+        when(outboxEventMapper.findSendable(50)).thenReturn(List.of(outbox));
+        when(outboxEventMapper.claim(4L)).thenReturn(1);
+        when(objectMapper.readValue("{}", OrderPaidEvent.class)).thenReturn(event);
+        doThrow(new RuntimeException("RabbitMQ unavailable")).when(orderPaidEventPublisher).publish(event);
+
+        outboxDispatchTask.dispatchPendingEvents();
+
+        verify(outboxEventMapper, never()).markRetry(anyLong(), any(), any());
+        verify(outboxEventMapper).markFailed(4L, "RuntimeException: RabbitMQ unavailable");
+    }
+
+    @Test
+    void shouldCapRetryBackoffAtFiveMinutes() {
+        assertEquals(2L, OutboxDispatchTask.backoffSeconds(1));
+        assertEquals(8L, OutboxDispatchTask.backoffSeconds(3));
+        assertEquals(256L, OutboxDispatchTask.backoffSeconds(8));
+        assertEquals(300L, OutboxDispatchTask.backoffSeconds(9));
+        assertEquals(300L, OutboxDispatchTask.backoffSeconds(50));
     }
 }

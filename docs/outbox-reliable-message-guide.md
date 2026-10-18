@@ -25,14 +25,14 @@ outbox_event 插入一条 ORDER_PAID 事件
 
 事务只有两种结果：两条都提交，或两条都回滚。因此不再有“订单成功但连一条待发送记录都没有”的情况。
 
-后台 `OutboxDispatchTask` 每 10 秒扫描待发送事件，先通过条件更新抢占为 `SENDING`，再发布到 RabbitMQ。只有同时满足以下条件才标记 `SENT`：
+后台 `OutboxDispatchTask` 每 10 秒扫描待发送事件，单轮连续处理多批（最多 10 批、500 条，取空提前结束），先通过条件更新抢占为 `SENDING`，再发布到 RabbitMQ。只有同时满足以下条件才标记 `SENT`：
 
 1. RabbitMQ 的 correlated publisher confirm 返回 ACK；
 2. mandatory 路由没有收到 broker returned message。
 
-确认超时、NACK、无匹配队列、序列化异常或网络异常都会记录最近错误、增加重试次数，并按指数退避安排下一次投递。第 1 次失败等待 2 秒，随后为 4 秒、8 秒，最长 300 秒。
+确认超时、NACK、无匹配队列、序列化异常或网络异常都会记录最近错误、增加重试次数，并按指数退避安排下一次投递。第 1 次失败等待 2 秒，随后为 4 秒、8 秒……256 秒，之后固定 300 秒封顶；累计重试 20 次仍失败的事件进入 `FAILED` 终态，通过错误日志告警人工处理，不再无限重试。
 
-```text
+```
 订单事务
   ├─ orders / order_detail / 库存
   └─ outbox_event（PENDING）
@@ -58,9 +58,10 @@ outbox_event 插入一条 ORDER_PAID 事件
 | `SENDING` | 某个实例已经抢到发送权 |
 | `RETRY` | 发送失败，等待退避后重试 |
 | `SENT` | Broker 已 confirm ACK 且消息已路由到目标队列 |
+| `FAILED` | 重试次数耗尽，停止自动投递，等待人工排查 |
 
 多个应用实例同时跑任务时，会先通过条件更新把一条记录抢成 `SENDING`，只有抢到的实例发送。超过 5 分钟仍是 `SENDING` 的记录会被重新调度，应对发送进程中断。
 
-`SENT` 不等于“消费者业务已经完成”，只代表生产端已经获得 RabbitMQ 对该消息的确认；消费者侧仍以手动 ACK、有限重试、DLQ 和幂等设计处理下游失败与重复投递。
+`SENT` 不等于“消费者业务已经完成”，只代表生产端已经获得 RabbitMQ 对该消息的确认；消费者侧仍以手动 ACK、有限重试、DLQ 和幂等设计处理下游失败与重复投递。`SENT` 记录保留 7 天后由 `OutboxCleanupTask` 每天凌晨分批清理，避免表无限膨胀。
 
 可执行的生产端失败、消费者重试、DLQ 与恢复演示，以及长时间未投递事件的排查 SQL，见 [`outbox-failure-demo.md`](outbox-failure-demo.md)。
