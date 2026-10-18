@@ -26,7 +26,8 @@ public class AutoFillAspect {
     @Before("autoFillPointCut()")
     public void autoFill(JoinPoint joinPoint){
         log.info("开始进行公共字段自动填充...");
-
+        //joinPoint保存着目标方法的信息
+        //获取目标方法的签名
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         AutoFill autoFill = signature.getMethod().getAnnotation(AutoFill.class);
         OperationType operationType = autoFill.value();
