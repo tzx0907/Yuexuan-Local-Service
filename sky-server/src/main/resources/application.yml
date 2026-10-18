@@ -55,7 +55,9 @@ logging:
   level:
     com:
       sky:
-        mapper: debug
+        # 常态不输出每条 MyBatis SQL，避免高并发交易时大量控制台 I/O 干扰延迟。
+        # 需要排查单条 SQL 时，在本机 application-dev.yml 临时覆盖为 debug。
+        mapper: info
         service: info
         controller: info
 sky:

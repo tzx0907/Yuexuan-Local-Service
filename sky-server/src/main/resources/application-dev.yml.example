@@ -4,6 +4,9 @@ spring:
     # 当前已人工完整迁移的 Docker 演示库填 23；全新 Docker 库首次启动填 0。
     baseline-version: 23
 sky:
+  performance:
+    # k6 测试用户生成接口仅在 dev profile 且此项显式为 true 时注册；默认必须关闭。
+    enabled: false
   messaging:
     # 仅用于本地演示消费者失败重试和 DLQ。正常开发必须保持 false，生产环境不配置此项。
     fault-injection:
@@ -46,3 +49,10 @@ sky:
     wechat-pay-cert-file-path: CHANGE_ME
     notifyUrl: http://localhost:8080/notify/paySuccess
     refundNotifyUrl: http://localhost:8080/notify/refundSuccess
+
+# 排查单条 MyBatis SQL 时才临时开启；压测和日常运行应保持 application.yml 中的 info。
+# logging:
+#   level:
+#     com:
+#       sky:
+#         mapper: debug

@@ -6,6 +6,9 @@
 **/application-dev.yml
 .env
 
+# k6 压测的本地 JWT / 压测商品配置。示例模板保留在仓库，真实凭据绝不提交。
+docs/performance/vu-data.local.json
+
 # 本地运行输出、权限排查和临时文件不属于项目交付物。
 logs/
 *.log
