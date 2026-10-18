@@ -50,4 +50,10 @@ public interface OutboxEventMapper {
     @Update("update outbox_event set status='RETRY', processing_time=null, next_attempt_time=now(), "
             + "last_error='投递进程中断，已重新调度' where status='SENDING' and processing_time < #{staleBefore}")
     int recoverStaleSending(@Param("staleBefore") LocalDateTime staleBefore);
+
+    /**
+     * 仅供受控的失败消息重放流程读取原始事件载荷；不会修改 Outbox 的 SENT 状态。
+     */
+    @Select("select * from outbox_event where event_id=#{eventId}")
+    OutboxEvent getByEventId(@Param("eventId") String eventId);
 }

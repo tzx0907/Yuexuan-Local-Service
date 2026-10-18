@@ -2,6 +2,7 @@ package com.sky.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.aopalliance.intercept.MethodInterceptor;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -10,8 +11,8 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer;
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
+import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -137,11 +138,20 @@ public class RabbitMqConfig {
         configurer.configure(factory, connectionFactory);
         factory.setAcknowledgeMode(org.springframework.amqp.core.AcknowledgeMode.MANUAL);//设置手动ACK
         factory.setDefaultRequeueRejected(false);//设置默认不重新入队
-        // 重试策略拦截器
+        // 重试策略拦截器。手动 ACK 模式下，Spring 2.4 的默认
+        // RejectAndDontRequeueRecoverer 不会主动拒绝尚未 ACK 的消息，
+        // 可能使消息永久停留在 Unacked。这里显式标记 rejectManual=true，
+        // 使重试耗尽后容器执行 basicNack(requeue=false)，由 RabbitMQ 路由至 DLQ。
         MethodInterceptor retryInterceptor = RetryInterceptorBuilder.stateless()
                 .maxAttempts(3) // 最大重试次数
                 .backOffOptions(500, 2.0, 5000) //退避策略：初始等待500ms，每次*2倍，上限5000ms
-                .recoverer(new RejectAndDontRequeueRecoverer()) //失败后进入恢复器
+                .recoverer((message, cause) -> {
+                    throw new ListenerExecutionFailedException(
+                            "订单事件消费重试耗尽，拒绝消息并路由至死信队列",
+                            new AmqpRejectAndDontRequeueException(
+                                    "订单事件消费失败，拒绝且不重新入队", true, cause),
+                            message);
+                })
                 .build();
         factory.setAdviceChain(retryInterceptor);
         return factory;
