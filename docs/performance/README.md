@@ -11,6 +11,7 @@
 - 数据库只读校验：[`order-consistency-check.sql`](order-consistency-check.sql)
 - 结果记录模板：[`performance-report.md`](performance-report.md)
 - MySQL 运行时诊断 SQL：[`mysql-diagnostics.sql`](mysql-diagnostics.sql)
+- 一键本地验收脚本：[`run-order-test.ps1`](run-order-test.ps1)
 
 下单接口按用户限流为 60 秒 5 次。因此 100 并发实验必须使用至少 100 个**独立测试用户**；不能复用一个 JWT，否则测到的是限流而不是库存并发控制。每个用户只调用一次“加购 → 下单”，避免同一购物车或同一幂等键互相污染。
 
@@ -59,6 +60,23 @@ $prepared.data | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 docs/perfo
 将示例中的 `dishId=50` 和 `skuId=37` 替换为选定的普通上架商品与 SKU。先做单用户冒烟验证时，将 `count=100` 改成 `count=1`。完成压测后把 `sky.performance.enabled` 改回 `false` 或删除该段并重启后端；该接口随之不再注册。
 
 ## 执行 100 库存 / 100 并发下单实验
+
+### 推荐：一条命令执行
+
+完成前置条件（Docker 与后端已启动，且本机 `application-dev.yml` 已显式设置
+`sky.performance.enabled: true`）后，优先在项目根目录运行：
+
+```powershell
+.\docs\performance\run-order-test.ps1 -DishId 50 -SkuId 37 -Vus 100
+```
+
+它不会修改库存，也不会操作本机旧 `sky_take_out` 库。脚本会检查被测 SKU 已上架且
+库存不少于 VUs，自动准备独立测试用户、运行 k6、等待 Outbox 扫描，并执行只读一致性
+校验。每轮的 k6 摘要、带本轮参数的 SQL 和校验结果仅保存在被 Git 忽略的
+`docs/performance/runs/`，不会提交 JWT 或运行噪声。若 k6 因 P95 阈值返回非 0，脚本
+仍会继续执行一致性 SQL；性能阈值与“无超卖、无重复订单”的正确性结论必须分开判断。
+
+### 手动分步执行（用于理解和排查）
 
 先在 MySQL 中记录开始时间与库存；将对应值填入校验 SQL 的变量区。随后在项目根目录执行：
 

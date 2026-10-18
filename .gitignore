@@ -8,6 +8,8 @@
 
 # k6 压测的本地 JWT / 压测商品配置。示例模板保留在仓库，真实凭据绝不提交。
 docs/performance/vu-data.local.json
+# k6 每轮运行的本地 JWT、原始摘要与 SQL 输出；正式结论写入 performance-report.md。
+docs/performance/runs/
 
 # 本地运行输出、权限排查和临时文件不属于项目交付物。
 logs/
