@@ -28,7 +28,7 @@ Docker 首次启动由 [`sql/sky_take_out_schema.sql`](sql/sky_take_out_schema.s
 
 ### 运营端
 
-- 运营人员登录、账号、密码与状态管理
+- 运营人员登录、账号、密码与状态管理；密码使用 BCrypt 哈希存储与校验，不使用 MD5 或明文密码
 - 工作台数据概览：交易额、有效订单、用户与商品统计
 - 商品、规格、组合商品、分类的维护与上下架
 - 门店营业状态管理
@@ -115,6 +115,21 @@ sequenceDiagram
 - 选择 SKU 的商品下单时优先扣减 SKU 库存；订单明细保存 `skuId` 与规格快照，避免后续规格变更影响历史订单展示。
 - 每个 HTTP 请求会携带或生成 `X-Trace-Id`，该值写入日志 MDC 并原样返回响应头。可按 `traceId` 串联“请求开始、鉴权、限流、订单、支付、异常”等同一次请求的日志；非法请求头不会直接写日志，避免日志污染。
 - 创建订单和支付成功会在同一个本地事务内写入 `outbox_event`；后台投递器可靠发布 RabbitMQ 消息，消费者以 `eventId` 幂等处理。详见 [`docs/project-delivery-and-demo-guide.md`](docs/project-delivery-and-demo-guide.md)。
+- 运营端密码使用 BCrypt 哈希校验。BCrypt 会为每次哈希生成随机盐并包含计算成本，不保存或比较明文密码，也不再使用易受彩虹表攻击的 MD5。
+
+## 可靠性验证材料
+
+仓库提供可复现的下单压测与 MySQL 一致性校验材料，使用独立测试用户验证“加购 → 条件扣库存 → 创建订单 → 同事务写入 Outbox”的完整链路；不会用未经环境说明的 QPS 数字替代结论。
+
+| 场景 | 并发 / 库存 | 校验目标 | P95 | 错误率 |
+| --- | --- | --- | --- | --- |
+| 普通下单 | 100 VUs / 100 件 | 100 笔订单、库存由 100 扣至 0、无超卖、每单 1 条 `ORDER_CLOSE` Outbox 事件 | 2.48s（未达到当前 1.5s 阈值） | 0.00% |
+| 重复提交 | 单用户、同一 `Idempotency-Key` | 重复请求返回同一订单，库存仅扣一次 | 待实测 | 待实测 |
+| 消息重复投递 | 人为触发 | `processed_message` 去重，不重复产生业务副作用 | 待实测 | 待实测 |
+
+已完成的一次本机 Docker 验收中，100 个独立压测用户均成功完成“加购 → 到店自提下单”：创建订单数 100、订单明细总数量 100、SKU 库存由 100 变为 0，`ORDER_CLOSE` Outbox 事件为 100 条且均为 `SENT`，未出现负库存或超卖。该轮 k6 下单平均响应时间为 1.79s、P95 为 2.48s、HTTP 错误率为 0.00%。因此可靠性校验通过，但当前 1.5s 的 P95 性能目标未通过；项目如实保留该瓶颈，后续以日志、连接池、数据库索引和缓存命中等实际证据定位后再优化，不以修改阈值掩盖结果。
+
+脚本、只读校验 SQL、环境记录模板和执行步骤见 [`docs/performance/README.md`](docs/performance/README.md)。真实 JWT 仅保存在被 Git 忽略的 `docs/performance/vu-data.local.json`，不得提交。
 
 ## 技术栈
 
@@ -123,7 +138,7 @@ sequenceDiagram
 | 基础框架 | Spring Boot 2.7.3、Spring MVC |
 | 持久层 | MyBatis、PageHelper、MySQL |
 | 缓存与状态 | Redis、Spring Cache |
-| 安全 | JWT（运营端与用户端独立密钥） |
+| 安全 | JWT（运营端与用户端独立密钥）、BCrypt 密码哈希校验 |
 | 文件存储 | 阿里云 OSS |
 | 接口文档 | Knife4j / Swagger |
 | 实时通信 | WebSocket |
