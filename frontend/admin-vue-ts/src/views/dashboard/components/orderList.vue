@@ -443,7 +443,7 @@ export default class extends Vue {
     },
     {
       value: 3,
-      label: '餐厅已打烊，暂时无法接单',
+      label: '商家已停止营业，暂时无法接单',
     },
     {
       value: 0,

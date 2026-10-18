@@ -28877,7 +28877,11 @@ var _default = {
           _this2.textTip = '您的催单信息已发出！';
           _this2.$refs.commonPopup.open(type);
           _this2.orderId = id;
+          return;
         }
+        uni.showToast({ title: res && res.msg || '催单失败，请稍后重试', icon: 'none' });
+      }).catch(function (err) {
+        uni.showToast({ title: err && err.msg || '催单失败，请稍后重试', icon: 'none' });
       });
     },
     // 取消订单接口

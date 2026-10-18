@@ -322,8 +322,32 @@ public class OrderServiceImpl implements OrderService {
                 .paidAt(orders.getCheckoutTime())
                 .build());
     }
-    // 发送订单支付成功事件
+    /** 同一订单 60 秒内最多发一次催单；到期后允许用户再次催单。 */
     public void reminder(Long orderId){
+        Orders order = getOrder(orderId);
+        Long userId = BaseContext.getCurrentId();
+        if (userId == null || !userId.equals(order.getUserId())) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        if (!Orders.TO_BE_CONFIRMED.equals(order.getStatus())) {
+            throw new OrderBusinessException("当前订单状态不能催单");
+        }
+        // SETNX + TTL 是限时去重，不是可靠投递：重复请求不会再次广播。
+        // 仅在通过归属与状态校验后占用键，避免无权请求影响真实用户。
+        String reminderKey = "order:reminder:" + orderId;
+        Boolean acquired;
+        try {
+            acquired = redisTemplate.opsForValue().setIfAbsent(reminderKey, "SENT", 60, TimeUnit.SECONDS);
+        } catch (RuntimeException ex) {
+            log.warn("催单防重复服务不可用 orderId={}", orderId, ex);
+            throw new OrderBusinessException("催单暂时不可用，请稍后再试");
+        }
+        if (acquired == null) {
+            throw new OrderBusinessException("催单暂时不可用，请稍后再试");
+        }
+        if (!acquired) {
+            throw new OrderBusinessException("已催单，请60秒后再试");
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("type",2);//1表示来单，2表示催单
         map.put("orderId", orderId);

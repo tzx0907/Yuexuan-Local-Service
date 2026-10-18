@@ -444,7 +444,11 @@ var _index = __webpack_require__(/*! @/utils/index.js */ 29);function _interopRe
           _this3.textTip = '您的催单信息已发出！';
           _this3.$refs.commonPopup.open(type);
           _this3.getList(_this3.status);
+          return;
         }
+        uni.showToast({ title: res && res.msg || '催单失败，请稍后重试', icon: 'none' });
+      }).catch(function (err) {
+        uni.showToast({ title: err && err.msg || '催单失败，请稍后重试', icon: 'none' });
       });
     },
     // 仅待接单订单可由用户取消；成功后重置分页并重新请求，确保列表状态立即同步。
