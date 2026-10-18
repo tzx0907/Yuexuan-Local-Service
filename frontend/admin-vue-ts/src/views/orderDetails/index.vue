@@ -268,7 +268,7 @@
                 <span>{{ diaForm.phone }}</span>
               </div>
               <div
-                v-if="[2, 3, 4, 5].includes(dialogOrderStatus)"
+                v-if="[2, 3, 4, 5].includes(dialogOrderStatus) && !isPickupOrder"
                 class="user-getTime"
               >
                 <label>{{
@@ -281,8 +281,8 @@
                 }}</span>
               </div>
               <div class="user-address">
-                <label>地址：</label>
-                <span>{{ diaForm.address }}</span>
+                <label>{{ isPickupOrder ? '自提服务点：' : '地址：' }}</label>
+                <span>{{ isPickupOrder ? '悦选服务点' : diaForm.address }}</span>
               </div>
             </div>
             <div
@@ -317,11 +317,7 @@
             </div>
             <div class="dish-all-amount">
               <label>商品小计</label>
-              <span
-                >￥{{
-                  (diaForm.amount - 6 - diaForm.packAmount).toFixed(2)
-                }}</span
-              >
+              <span>￥{{ goodsSubtotal.toFixed(2) }}</span>
             </div>
           </div>
         </div>
@@ -332,27 +328,15 @@
             <div class="amount-list">
               <div class="dish-amount">
                 <span class="amount-name">商品小计：</span>
-                <span class="amount-price"
-                  >￥{{
-                    ((diaForm.amount - 6 - diaForm.packAmount).toFixed(2) *
-                      100) /
-                    100
-                  }}</span
-                >
+                <span class="amount-price">￥{{ goodsSubtotal.toFixed(2) }}</span>
               </div>
-              <div class="send-amount">
-                <span class="amount-name">履约服务费：</span>
-                <span class="amount-price">￥{{ 6 }}</span>
+              <div v-if="deliveryFee > 0" class="send-amount">
+                <span class="amount-name">配送费：</span>
+                <span class="amount-price">￥{{ deliveryFee.toFixed(2) }}</span>
               </div>
-              <div class="package-amount">
-                <span class="amount-name">附加服务费：</span>
-                <span class="amount-price"
-                  >￥{{
-                    diaForm.packAmount
-                      ? (diaForm.packAmount.toFixed(2) * 100) / 100
-                      : ''
-                  }}</span
-                >
+              <div v-if="packingFee > 0" class="package-amount">
+                <span class="amount-name">商品打包服务费：</span>
+                <span class="amount-price">￥{{ packingFee.toFixed(2) }}</span>
               </div>
               <div class="all-amount">
                 <span class="amount-name">合计：</span>
@@ -585,6 +569,29 @@ export default class extends Vue {
     },
   ]
 
+  /** 订单明细中的 amount 是单价；商品小计必须由明细计算，不能从总价反推。 */
+  get goodsSubtotal(): number {
+    const details = (this.diaForm as any).orderDetailList || []
+    return details.reduce((total, item) => {
+      return total + Number(item.amount || 0) * Number(item.number || 0)
+    }, 0)
+  }
+
+  get packingFee(): number {
+    return Number((this.diaForm as any).packAmount || 0)
+  }
+
+  /** 到店自提和上门服务不收配送费；配送费只从服务端订单总额中计算。 */
+  get deliveryFee(): number {
+    const order = this.diaForm as any
+    if (!order || Number(order.deliveryStatus) === 2) return 0
+    return Math.max(0, Number(order.amount || 0) - this.goodsSubtotal - this.packingFee)
+  }
+
+  get isPickupOrder(): boolean {
+    return Number((this.diaForm as any).deliveryStatus) === 2
+  }
+
   created() {
     this.init(Number(this.$route.query.status) || 0)
   }
@@ -706,14 +713,17 @@ export default class extends Vue {
     this.orderId = id
     const { data } = await queryOrderDetailById({ orderId: id })
     this.diaForm = data.data
-    this.row = row || { id: this.$route.query.orderId, status: status }
+    // 列表可能在弹窗打开后被超时关单任务更新；详情以服务端最新状态为准。
+    this.dialogOrderStatus = data.data.status
+    this.row = { ...(row || { id }), id, status: data.data.status }
     if (this.$route.query.orderId) {
       this.$router.push('/order')
     }
   }
 
   //打开拒单弹窗
-  orderReject(row: any) {
+  async orderReject(row: any) {
+    if (!(await this.ensureCurrentStatus(row, [2]))) return
     this.cancelDialogVisible = true
     this.orderId = row.id
     this.dialogOrderStatus = row.status
@@ -723,7 +733,8 @@ export default class extends Vue {
   }
 
   //接单
-  orderAccept(row: any) {
+  async orderAccept(row: any) {
+    if (!(await this.ensureCurrentStatus(row, [2]))) return
     this.orderId = row.id
     this.dialogOrderStatus = row.status
     orderAccept({ id: this.orderId })
@@ -744,7 +755,8 @@ export default class extends Vue {
   }
 
   //打开取消订单弹窗
-  cancelOrder(row: any) {
+  async cancelOrder(row: any) {
+    if (!(await this.ensureCurrentStatus(row, [1, 3, 4, 5]))) return
     this.cancelDialogVisible = true
     this.orderId = row.id
     this.dialogOrderStatus = row.status
@@ -753,12 +765,37 @@ export default class extends Vue {
     this.cancelReason = ''
   }
 
+  /** 在发起运营动作前重新读取订单，避免对已超时取消的旧列表行继续操作。 */
+  async ensureCurrentStatus(row: any, allowedStatuses: number[]): Promise<boolean> {
+    try {
+      const { data } = await queryOrderDetailById({ orderId: row.id })
+      const currentStatus = Number(data.data.status)
+      if (!allowedStatuses.includes(currentStatus)) {
+        this.$message.warning('订单状态已更新，不能继续此操作，列表已刷新')
+        this.dialogVisible = false
+        this.init(this.orderStatus)
+        return false
+      }
+      row.status = currentStatus
+      this.dialogOrderStatus = currentStatus
+      return true
+    } catch (err) {
+      this.$message.error('读取订单最新状态失败，请刷新后重试')
+      return false
+    }
+  }
+
   //确认取消或拒绝订单并填写原因
-  confirmCancel(type) {
+  async confirmCancel(type) {
     if (!this.cancelReason) {
       return this.$message.error(`请选择${this.cancelDialogTitle}原因`)
     } else if (this.cancelReason === '自定义原因' && !this.remark) {
       return this.$message.error(`请输入${this.cancelDialogTitle}原因`)
+    }
+    const allowedStatuses = this.cancelDialogTitle === '取消' ? [1, 3, 4, 5] : [2]
+    if (!(await this.ensureCurrentStatus(this.row, allowedStatuses))) {
+      this.cancelDialogVisible = false
+      return
     }
 
     ;(this.cancelDialogTitle === '取消' ? orderCancel : orderReject)({
@@ -784,7 +821,9 @@ export default class extends Vue {
   }
 
   // 派送，完成
-  cancelOrDeliveryOrComplete(status: number, id: string) {
+  async cancelOrDeliveryOrComplete(status: number, id: string) {
+    const expectedStatus = status === 3 ? 3 : 4
+    if (!(await this.ensureCurrentStatus({ id }, [expectedStatus]))) return
     const params = {
       status,
       id,
