@@ -39,10 +39,26 @@
    ```
 
 2. 确认应用 profile 为 `dev`，重启后端，创建并模拟支付一笔新的演示订单。
-3. 查看应用日志：同一条消息会在该次消费者投递中最多尝试 3 次，退避为 500ms、1s、2s（由监听容器配置决定）；耗尽后 `RejectAndDontRequeueRecoverer` 使其进入 `yuexuan.order.paid.dlq`。
+3. 查看应用日志：同一条消息会在该次消费者投递中最多尝试 3 次，退避为 500ms、1s；第 3 次仍失败时消费者显式执行 `basicNack(deliveryTag, false, false)`，由队列 DLX 路由到 `yuexuan.order.paid.dlq`。
 4. 在 RabbitMQ 管理台 `http://localhost:15672` 查看 `yuexuan.order.paid.dlq` 的 Ready 数量。此时订单已经支付、其 `ORDER_PAID` Outbox 事件仍为 `SENT`——因为生产端确认已经成功，失败发生在消费端。
-5. 关闭上面的故障开关，重启后端；在管理台把该 DLQ 中的消息 requeue 到 `yuexuan.order.paid.queue`，或用管理台的 Shovel/重新发布能力回放。预期 WebSocket 通知成功，`processed_message` 新增一条 `(event_id, admin-order-notifier)`；再次回放同一 eventId 只 ACK，不再重复通知。
-6. 演示结束后保持开关为 `false` 或删除该本机配置项，重启后端。该开关不应出现在任何生产 profile 或提交文件中。
+5. 关闭上面的故障开关，并在本机 `application-dev.yml` 显式开启受控重放入口：
+
+   ```yaml
+   sky:
+     messaging:
+       replay:
+         enabled: true
+   ```
+
+   重启后端后，从对应 `outbox_event` 读取 `event_id`，调用：
+
+   ```powershell
+   Invoke-RestMethod -Method Post `
+     -Uri "http://localhost:8080/_dev/messaging/replay/order-paid/<eventId>"
+   ```
+
+   该入口仅在 `dev` profile 且显式开关开启时注册；它会按原始 `eventId` 从 Outbox payload 重发到正常 `order.paid` 路由，不修改 `outbox_event` 的 `SENT` 状态，也不会自动删除 DLQ 原消息。预期 WebSocket 通知成功，`processed_message` 新增一条 `(event_id, admin-order-notifier)`；再次重放同一 eventId 时消费者只 ACK，不再重复通知。确认恢复成功后，再在 RabbitMQ 管理台删除对应的 DLQ 原消息。
+6. 演示结束后将 `fault-injection.order-paid-consumer-fail` 与 `replay.enabled` 保持为 `false` 或删除这两段本机配置，重启后端。它们不应出现在任何生产 profile 或提交文件中。
 
 ## 三、排查 SQL（只读）
 
