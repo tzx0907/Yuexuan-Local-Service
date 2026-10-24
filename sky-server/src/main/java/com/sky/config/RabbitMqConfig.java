@@ -17,12 +17,14 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /** RabbitMQ 拓扑与消费确认策略。 */
 @Configuration
+@Slf4j
 public class RabbitMqConfig {
     public static final String ORDER_EVENT_EXCHANGE = "yuexuan.order.event.exchange";// 业务主题交换机
     public static final String ORDER_PAID_QUEUE = "yuexuan.order.paid.queue";// 订单支付队列
@@ -37,6 +39,12 @@ public class RabbitMqConfig {
     public static final String ORDER_CLOSE_DLQ = "yuexuan.order.close.dlq";// 死信队列
     public static final String ORDER_CLOSE_DLQ_ROUTING_KEY = "order.close.dead";// 死信路由键
     public static final int ORDER_CLOSE_DELAY_MILLIS = 15 * 60 * 1000;
+
+    /** 订单事件消费的最大尝试次数（含首次），ORDER_PAID 与 ORDER_CLOSE 共用。 */
+    public static final int ORDER_EVENT_MAX_ATTEMPTS = 3;
+    public static final long ORDER_EVENT_RETRY_INITIAL_MILLIS = 500L;
+    public static final double ORDER_EVENT_RETRY_MULTIPLIER = 2.0;
+    public static final long ORDER_EVENT_RETRY_MAX_MILLIS = 5000L;
 
     //交换机
     @Bean
@@ -128,8 +136,11 @@ public class RabbitMqConfig {
     //消费确认策略
 
     /**
-     * 业务抛异常时在同一次投递内最多尝试三次；仍失败则 reject，RabbitMQ 自动路由至 DLQ。
-     * 手动 ACK 保证只有业务完成后才确认该条消息。
+     * 消费确认策略：手动 ACK，业务抛异常时在同一投递内最多尝试 {@link #ORDER_EVENT_MAX_ATTEMPTS} 次，
+     * 仍失败则 reject，由 RabbitMQ 路由至 DLQ。
+     *
+     * <p>重试与死信策略只在这里定义一次。消费者禁止再自建重试循环，
+     * 否则会出现两套不联动的次数配置，且容器无法感知失败。</p>
      */
     @Bean("orderEventRabbitListenerContainerFactory")
     public SimpleRabbitListenerContainerFactory orderEventRabbitListenerContainerFactory(
@@ -143,9 +154,15 @@ public class RabbitMqConfig {
         // 可能使消息永久停留在 Unacked。这里显式标记 rejectManual=true，
         // 使重试耗尽后容器执行 basicNack(requeue=false)，由 RabbitMQ 路由至 DLQ。
         MethodInterceptor retryInterceptor = RetryInterceptorBuilder.stateless()
-                .maxAttempts(3) // 最大重试次数
-                .backOffOptions(500, 2.0, 5000) //退避策略：初始等待500ms，每次*2倍，上限5000ms
+                .maxAttempts(ORDER_EVENT_MAX_ATTEMPTS) // 最大重试次数
+                .backOffOptions(ORDER_EVENT_RETRY_INITIAL_MILLIS,
+                        ORDER_EVENT_RETRY_MULTIPLIER,
+                        ORDER_EVENT_RETRY_MAX_MILLIS) //退避策略：初始等待500ms，每次*2倍，上限5000ms
                 .recoverer((message, cause) -> {
+                    log.error("订单事件消费 {} 次均失败，NACK 后进入死信队列 queue={}, routingKey={}",
+                            ORDER_EVENT_MAX_ATTEMPTS,
+                            message.getMessageProperties().getConsumerQueue(),
+                            message.getMessageProperties().getReceivedRoutingKey(), cause);
                     throw new ListenerExecutionFailedException(
                             "订单事件消费重试耗尽，拒绝消息并路由至死信队列",
                             new AmqpRejectAndDontRequeueException(

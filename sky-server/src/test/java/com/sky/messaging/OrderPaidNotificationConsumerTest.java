@@ -15,9 +15,9 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class OrderPaidNotificationConsumerTest {
 
@@ -53,7 +53,7 @@ class OrderPaidNotificationConsumerTest {
     }
 
     @Test
-    void shouldNackToDlqAfterThreeFailedWebSocketAttempts() throws Exception {
+    void shouldPropagateFailureSoContainerRetriesAndRoutesToDlq() throws Exception {
         ProcessedMessageMapper mapper = mock(ProcessedMessageMapper.class);
         WebSocketServer webSocket = mock(WebSocketServer.class);
         Channel channel = mock(Channel.class);
@@ -62,12 +62,13 @@ class OrderPaidNotificationConsumerTest {
 
         OrderPaidNotificationConsumer consumer = new OrderPaidNotificationConsumer(mapper, webSocket);
 
-        consumer.onOrderPaid(event("evt-3"), channel, 9L);
+        assertThrows(IllegalStateException.class,
+                () -> consumer.onOrderPaid(event("evt-3"), channel, 9L));
 
+        verify(webSocket).sendToAllAndCountFailures(any());
         verify(mapper, never()).insertIgnore(any(), any(), any());
-        verify(webSocket, times(3)).sendToAllAndCountFailures(any());
         verify(channel, never()).basicAck(anyLong(), anyBoolean());
-        verify(channel).basicNack(9L, false, false);
+        verify(channel, never()).basicNack(anyLong(), anyBoolean(), anyBoolean());
     }
 
     private OrderPaidEvent event(String eventId) {

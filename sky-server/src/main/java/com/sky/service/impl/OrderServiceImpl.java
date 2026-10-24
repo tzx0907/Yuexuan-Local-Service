@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -64,6 +65,10 @@ public class OrderServiceImpl implements OrderService {
     private FlashSaleActivityMapper flashSaleActivityMapper;
     @Autowired
     private FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
+
+    @Autowired
+    private RedisFlashSaleStockGuard flashSaleStockGuard;
+
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -105,9 +110,11 @@ public class OrderServiceImpl implements OrderService {
         }
 
         try {
+            // 可拦截非并发的重复提交 (并发一前一后查询都是空拦不住)，对于并发提交一定有一个先行提交 后者会报错进入catch重新查询
             Orders existingOrder = orderMapper.getByUserIdAndSubmitRequestId(userId, idempotencyKey);
             if (existingOrder != null) {
-                markSubmitSuccessAfterCommit(redisKey, existingOrder.getId());
+                //若订单已经存在 直接注册事务钩子函数
+                markSubmitSuccessAfterCommit(redisKey,existingOrder.getId());
                 return buildSubmitVO(existingOrder);
             }
 
@@ -137,7 +144,10 @@ public class OrderServiceImpl implements OrderService {
             }
             // 限时购价格只能由活动服务端重新确认。购物车只是用户选择的暂存，
             // 不能作为活动仍有效或金额正确的依据。
-            Map<Long, Integer> flashSaleQuantities = new HashMap<>();
+            // 用 TreeMap 保证多活动按 activityId 升序加锁：不同事务以相同顺序竞争
+            // flash_sale_activity 行锁，避免 A→B 与 B→A 交叉等待造成死锁。
+            Map<Long, Integer> flashSaleQuantities = new TreeMap<>();
+            Map<Long, FlashSaleActivity> flashSaleActivities = new HashMap<>();
             for (ShoppingCart cart : list) {
                 if (cart.getFlashSaleActivityId() != null) {
                     FlashSaleActivity activity = flashSaleActivityMapper.getById(cart.getFlashSaleActivityId());
@@ -146,19 +156,47 @@ public class OrderServiceImpl implements OrderService {
                     }
                     int quantity = flashSaleQuantities.getOrDefault(activity.getId(), 0) + cart.getNumber();
                     if (quantity > activity.getPerUserLimit()) {
-                        throw new OrderBusinessException("已超过购买上限，本次活动每人最多购买" + activity.getPerUserLimit() + "件");
+                        throw new OrderBusinessException("已超过购买上限，本次活动每人最多购买"
+                                + activity.getPerUserLimit() + "件");
                     }
                     flashSaleQuantities.put(activity.getId(), quantity);
+                    flashSaleActivities.put(activity.getId(), activity);
                     cart.setAmount(activity.getSalePrice());
                 }
             }
-            for (Map.Entry<Long, Integer> entry : flashSaleQuantities.entrySet()) {
-                FlashSaleActivity activity = flashSaleActivityMapper.getById(entry.getKey());
-                int quotaResult = flashSaleUserQuotaMapper.tryReserve(entry.getKey(), userId, entry.getValue(), activity.getPerUserLimit());
-                if (quotaResult == 0) {
-                    throw new OrderBusinessException("已超过购买上限，本次活动每人最多购买" + activity.getPerUserLimit() + "件");
+
+            // ── Redis 预扣：削峰真正生效的地方 ──
+            // 返回 NOT_WARMED 表示未启用、未预热或 Redis 异常，不做处理，降级为下面的纯 MySQL 判定。
+            if (flashSaleStockGuard.isEnabled()) {
+                for (Long activityId : flashSaleQuantities.keySet()) {
+                    int quantity = flashSaleQuantities.get(activityId);
+                    int perUserLimit = flashSaleActivities.get(activityId).getPerUserLimit();
+                    int deduct = flashSaleStockGuard.tryDeduct(activityId, userId, quantity, perUserLimit);
+                    if (deduct == RedisFlashSaleStockGuard.SOLD_OUT) {
+                        throw new OrderBusinessException("限时购活动已结束或库存不足");
+                    }
+                    if (deduct == RedisFlashSaleStockGuard.OVER_QUOTA) {
+                        throw new OrderBusinessException("已超过购买上限，本次活动每人最多购买"
+                                + perUserLimit + "件");
+                    }
+                    if (deduct == RedisFlashSaleStockGuard.DEDUCTED) {
+                        // 事务回滚时归还预扣额度（afterCompletion）
+                        flashSaleStockGuard.registerRollbackOnFailure(activityId, userId, quantity);
+                    }
                 }
-                if (flashSaleActivityMapper.decrementStock(entry.getKey(), entry.getValue()) != 1) {
+            }
+
+            for (Long activityId : flashSaleQuantities.keySet()) {
+                FlashSaleActivity activity = flashSaleActivities.get(activityId);
+                int quantity = flashSaleQuantities.get(activityId);
+                // MySQL 仍是最终裁决：预扣成功也可能因为 Redis 与 DB 短暂不一致而失败。
+                int quotaResult = flashSaleUserQuotaMapper.tryReserve(
+                        activityId, userId, quantity, activity.getPerUserLimit());
+                if (quotaResult == 0) {
+                    throw new OrderBusinessException("已超过购买上限，本次活动每人最多购买"
+                            + activity.getPerUserLimit() + "件");
+                }
+                if (flashSaleActivityMapper.decrementStock(activityId, quantity) != 1) {
                     throw new OrderBusinessException("限时购活动已结束或库存不足");
                 }
             }
@@ -248,7 +286,9 @@ public class OrderServiceImpl implements OrderService {
                     .build();
             //提交订单后清空购物车
             shoppingCartMapper.cleanByUserId(userId);
+            //注册事务钩子函数
             markSubmitSuccessAfterCommit(redisKey, orders.getId());
+            //outboxCloseEvent和订单写入数据库在同一事务里
             scheduleOrderClose(orders);
             return orderSubmitVO;
         } catch (DuplicateKeyException e) {
@@ -257,6 +297,7 @@ public class OrderServiceImpl implements OrderService {
                 markSubmitSuccessAfterCommit(redisKey, existingOrder.getId());
                 return buildSubmitVO(existingOrder);
             }
+            //A B 线程并发插入，B线程回滚了 删除缓存 (A B线程都没有创建成功)
             redisTemplate.delete(redisKey);
             throw e;
         } catch (RuntimeException e) {
@@ -293,16 +334,20 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
         }
 
+        // 订单已支付，直接静默返回
         if (Orders.PAID.equals(ordersDB.getPayStatus())) {
             return;
         }
 
+        // 创建订单对象并更新订单状态和支付时间
         Orders orders = Orders.builder()
                 .id(ordersDB.getId())
                 .status(Orders.TO_BE_CONFIRMED)
                 .payStatus(Orders.PAID)
                 .checkoutTime(LocalDateTime.now())
                 .build();
+        // 更新订单状态和支付时间
+        //订单状态机 支付天然幂等
         if (!markPaid(orders)) {
             Orders currentOrder = getOrder(ordersDB.getId());
             if (Orders.PAID.equals(currentOrder.getPayStatus())) {
@@ -313,6 +358,7 @@ public class OrderServiceImpl implements OrderService {
 
         // 订单状态是支付的同步核心结果；运营提醒改由事务提交后异步消费。
         // 这样 MQ 或 WebSocket 短暂故障不会影响用户本次支付结果。
+        // 保存支付成功事件，供后续消费处理 写入数据库
         saveOrderPaidEvent(OrderPaidEvent.builder()
                 .eventId(UUID.randomUUID().toString())
                 .orderId(ordersDB.getId())
@@ -364,6 +410,12 @@ public class OrderServiceImpl implements OrderService {
         BeanUtils.copyProperties(orders, orderVO);
         return orderVO;
     }
+    /**
+     * 用户取消订单。已支付订单取消会回补库存与限时购配额，
+     * 因此必须与状态变更处于同一个事务，避免“订单已取消但资源没还”。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void cancel(Long id){
         Orders order = getOrder(id);
         Long userId = BaseContext.getCurrentId();
@@ -390,6 +442,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void reject(Long id, String rejectionReason) {
         String reason = rejectionReason == null || rejectionReason.trim().isEmpty()
                 ? "商家暂时无法接单" : rejectionReason.trim();
@@ -400,6 +453,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void cancelByAdmin(Long id, String cancelReason) {
         Orders order = getOrder(id);
         String reason = cancelReason == null || cancelReason.trim().isEmpty()
@@ -531,6 +585,18 @@ public class OrderServiceImpl implements OrderService {
                 syncDishStockForSku(detail.getSkuId());
             } else if (detail.getDishId() != null) {
                 dishMapper.incrementStock(detail.getDishId(), detail.getNumber());
+            }
+            // 已支付订单取消、商家拒单、管理端取消同样要归还活动配额与用户限购名额，
+            // 否则 sold_stock 与 reserved_quantity 会永久泄漏：活动少卖、用户再也买不了。
+            if (detail.getFlashSaleActivityId() != null) {
+                flashSaleActivityMapper.incrementStock(detail.getFlashSaleActivityId(), detail.getNumber());
+                if (flashSaleUserQuotaMapper.release(detail.getFlashSaleActivityId(),
+                        userId, detail.getNumber()) != 1) {
+                    throw new OrderBusinessException("取消订单时限购名额回补失败");
+                }
+                // MySQL 提交后再归还 Redis 额度，否则事务回滚会让 Redis 白补一次。
+                flashSaleStockGuard.registerReleaseAfterCommit(
+                        detail.getFlashSaleActivityId(), userId, detail.getNumber());
             }
         }
     }

@@ -22,7 +22,6 @@ import java.util.Map;
 @Slf4j
 public class OrderPaidNotificationConsumer {
     private static final String CONSUMER_NAME = "admin-order-notifier";
-    private static final int MAX_CONSUME_ATTEMPTS = 3;
 
     private final ProcessedMessageMapper processedMessageMapper;
     private final WebSocketServer webSocketServer;
@@ -43,43 +42,23 @@ public class OrderPaidNotificationConsumer {
 
     // 监听订单支付事件
     /**
-     * 监听订单支付事件
+     * 消费失败直接向上抛，由 {@code orderEventRabbitListenerContainerFactory} 统一完成
+     * 3 次退避重试与 {@code basicNack(requeue=false)} 转 DLQ。
      *
-     * @param event          订单支付事件
-     * @param channel        RabbitMQ 通道
-     * @param deliveryTag    消息投递标签
-     * @throws IOException   IO 异常
+     * <p>本方法刻意不吞异常：一旦吞掉，容器就感知不到失败，消息会被静默 ACK，
+     * 容量与死信统计也会失真。</p>
      */
-    //指定队列和监听器容器
     @RabbitListener(queues = RabbitMqConfig.ORDER_PAID_QUEUE,
             containerFactory = "orderEventRabbitListenerContainerFactory")
     public void onOrderPaid(OrderPaidEvent event, Channel channel,
                             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
-        RuntimeException lastFailure = null;
-        for (int attempt = 1; attempt <= MAX_CONSUME_ATTEMPTS; attempt++) {
-            try {
-                consumeOnce(event);
-                channel.basicAck(deliveryTag, false);
-                log.info("ORDER_PAID 事件消费完成并 ACK eventId={}, orderId={}, attempt={}",
-                        event.getEventId(), event.getOrderId(), attempt);
-                return;
-            } catch (RuntimeException ex) {
-                lastFailure = ex;
-                if (attempt == MAX_CONSUME_ATTEMPTS) {
-                    // 手动 ACK 模式下显式 NACK，不能只抛异常后依赖容器猜测如何处理；
-                    // requeue=false 会让 RabbitMQ 使用 paid.queue 的 DLX 路由到 paid.dlq。
-                    log.error("ORDER_PAID 消费 {} 次均失败，NACK 后进入 DLQ eventId={}, orderId={}",
-                            MAX_CONSUME_ATTEMPTS, event.getEventId(), event.getOrderId(), ex);
-                    channel.basicNack(deliveryTag, false, false);
-                    return;
-                }
-                sleepBeforeRetry(attempt, event.getEventId());
-            }
-        }
-        // 理论上循环会在成功 ACK 或最终 NACK 后返回；保留此分支便于发现代码被意外修改。
-        throw lastFailure == null ? new IllegalStateException("ORDER_PAID 消费未执行") : lastFailure;
+        consumeOnce(event);
+        channel.basicAck(deliveryTag, false);
+        log.info("ORDER_PAID 事件消费完成并 ACK eventId={}, orderId={}",
+                event.getEventId(), event.getOrderId());
     }
 
+    /** 每次容器重试都会重新进入本方法；幂等标记只在副作用成功之后才写。 */
     private void consumeOnce(OrderPaidEvent event) {
         if (forceConsumerFailure && activeProfiles.contains("dev")) {
             throw new IllegalStateException("dev 故障注入：强制 ORDER_PAID 消费失败 eventId=" + event.getEventId());
@@ -96,23 +75,13 @@ public class OrderPaidNotificationConsumer {
         message.put("content", "新订单：" + event.getOrderNumber());
         int failed = webSocketServer.sendToAllAndCountFailures(com.alibaba.fastjson.JSON.toJSONString(message));
         if (failed > 0) {
-            // 不落幂等标记；由本类有限重试，耗尽后显式 NACK 进入 DLQ 供人工重放。
+            // 不落幂等标记；由容器重试，耗尽后进入 DLQ 供人工重放。
+            log.warn("ORDER_PAID 广播失败待容器重试 eventId={}, orderId={}, failedSessions={}",
+                    event.getEventId(), event.getOrderId(), failed);
             throw new IllegalStateException("WebSocket 广播失败 " + failed + " 个会话，等待重试 eventId="
                     + event.getEventId());
         }
-        // 推送成功后才写完成标记，避免“标记已写但提醒没发出去”
+        // 推送成功后才写完成标记，避免"标记已写但提醒没发出去"
         processedMessageMapper.insertIgnore(event.getEventId(), CONSUMER_NAME, LocalDateTime.now());
-    }
-
-    private void sleepBeforeRetry(int failedAttempt, String eventId) {
-        long delayMillis = 500L * (1L << (failedAttempt - 1));
-        log.warn("ORDER_PAID 消费失败，准备第 {} 次尝试 eventId={}, delay={}ms",
-                failedAttempt + 1, eventId, delayMillis);
-        try {
-            Thread.sleep(delayMillis);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("ORDER_PAID 重试等待被中断 eventId=" + eventId, ex);
-        }
     }
 }

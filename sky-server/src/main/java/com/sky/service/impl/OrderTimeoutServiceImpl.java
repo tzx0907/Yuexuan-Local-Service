@@ -29,11 +29,13 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
     private final FlashSaleActivityMapper flashSaleActivityMapper;
     private final FlashSaleUserQuotaMapper flashSaleUserQuotaMapper;
     private final SetmealDishMapper setmealDishMapper;
+    private final RedisFlashSaleStockGuard flashSaleStockGuard;
 
     public OrderTimeoutServiceImpl(OrderMapper orderMapper, OrderDetailMapper orderDetailMapper,
                                    DishMapper dishMapper, ProductSkuMapper productSkuMapper,
                                    FlashSaleActivityMapper flashSaleActivityMapper, FlashSaleUserQuotaMapper flashSaleUserQuotaMapper,
-                                   SetmealDishMapper setmealDishMapper) {
+                                   SetmealDishMapper setmealDishMapper,
+                                   RedisFlashSaleStockGuard flashSaleStockGuard) {
         this.orderMapper = orderMapper;
         this.orderDetailMapper = orderDetailMapper;
         this.dishMapper = dishMapper;
@@ -41,6 +43,7 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
         this.flashSaleActivityMapper = flashSaleActivityMapper;
         this.flashSaleUserQuotaMapper = flashSaleUserQuotaMapper;
         this.setmealDishMapper = setmealDishMapper;
+        this.flashSaleStockGuard = flashSaleStockGuard;
     }
 
     @Override
@@ -66,6 +69,7 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
                 .cancelReason(cancelReason)
                 .build();
         // MQ、定时任务或重复消息并发时，只有一个线程能从待支付状态更新成功。
+        // 状态机 CAS(outbox 定时任务  用户自己取消 三种情况只能有一个线程更新成功)自带幂等性
         if (orderMapper.updateIfStatus(cancellation, Orders.PENDING_PAYMENT) != 1) {
             log.info("订单超时关闭被其他流程抢先处理 orderId={}, source={}", orderId, triggerSource);
             return false;
@@ -91,6 +95,9 @@ public class OrderTimeoutServiceImpl implements OrderTimeoutService {
                 if (flashSaleUserQuotaMapper.release(detail.getFlashSaleActivityId(), current.getUserId(), detail.getNumber()) != 1) {
                     throw new OrderBusinessException("订单超时限购名额回补失败");
                 }
+                // MySQL 提交后再归还 Redis 额度：事务若回滚，不能让 Redis 提前加回库存。
+                flashSaleStockGuard.registerReleaseAfterCommit(
+                        detail.getFlashSaleActivityId(), current.getUserId(), detail.getNumber());
             }
             if (updated != 1) {
                 throw new OrderBusinessException("订单超时库存回补失败");

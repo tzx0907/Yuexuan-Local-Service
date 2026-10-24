@@ -23,6 +23,7 @@ final class RabbitPublishConfirmAwaiter {
         CorrelationData correlationData = new CorrelationData(eventId);
         rabbitTemplate.convertAndSend(exchange, routingKey, event, correlationData);
         try {
+            // 既ACK又没有被return才能代表真正成功  后续才能标记sent
             CorrelationData.Confirm confirm = correlationData.getFuture()
                     .get(CONFIRM_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             if (confirm == null || !confirm.isAck()) {
